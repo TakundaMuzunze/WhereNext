@@ -15,14 +15,11 @@ export function HomeHero() {
         </p>
 
         <div className="flex flex-wrap gap-4">
-          <a
-            href="#how-it-works"
-            className="rounded-xl border border-slate-300 bg-secondary px-6 py-3 text-lg text-text transition hover:border-slate-950"
-          >
+          <a href="#how-it-works" className="rounded-xl bg-secondary/50 px-6 py-3 text-lg text-text transition">
             How it works
           </a>
 
-          <a href="/planner" className="f rounded-xl bg-primary px-6 py-3 text-lg text-white transition hover:bg-slate-800">
+          <a href="/planner" className="rounded-xl bg-primary px-6 py-3 text-lg text-white transition dark:text-[#101214]">
             Start planning
           </a>
         </div>
