@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WhereNext
 
-## Getting Started
+A full-stack travel recommendation platform that helps users discover personalised destination matches based on their dates, budget, trip style and activity preferences.
 
-First, run the development server:
+WhereNext is designed as a product-led travel planner. Users answer a short multi-step questionnaire, receive ranked destination recommendations, and can explore why each destination fits their trip.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Tech Stack
+
+- Next.js
+- TypeScript
+- Tailwind CSS
+
+## Planned Stack
+
+- PostgreSQL
+- Prisma
+- Clerk / Auth.js
+- Playwright
+- Vitest
+- GitHub Actions
+- Vercel
+
+## Core MVP
+
+- Multi-step trip planner
+- Dynamic activity questions based on trip type
+- Destination matching algorithm
+- Ranked recommendation results
+- Destination detail pages
+- Saved trips dashboard
+
+## Project Structure
+
+The application uses a lightweight Feature-Sliced Design structure inside `src`:
+
+```text
+src/
+├── app/       # Next.js routes, layouts, global styles and app-wide setup
+├── features/  # User-facing actions and product functionality
+├── entities/  # Business entities and their related UI, types and logic
+├── widgets/   # Larger composed sections made from features and entities
+└── shared/    # Reusable UI, utilities, configuration and common types
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
