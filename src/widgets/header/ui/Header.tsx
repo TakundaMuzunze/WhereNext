@@ -1,3 +1,4 @@
+import { ThemeToggle } from "@/features/theme-toggle";
 import Link from "next/link";
 
 export function Header() {
@@ -14,6 +15,8 @@ export function Header() {
         >
           Sign in
         </Link> */}
+
+        <ThemeToggle />
       </div>
     </header>
   );
