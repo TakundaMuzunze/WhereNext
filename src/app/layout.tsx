@@ -1,3 +1,4 @@
+import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
 import "./globals.css";
 
@@ -11,6 +12,7 @@ export default function RootLayout({
       <body>
         <Header />
         <div className="pt-20">{children}</div>
+        <Footer />
       </body>
     </html>
   );
