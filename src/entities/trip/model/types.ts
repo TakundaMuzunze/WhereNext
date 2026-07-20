@@ -4,8 +4,8 @@ export type PlannerAnswers = {
   departure: string;
   travelMonth: string;
   duration: string;
-  budget: string;
-  travellers: string;
+  budget: number | "";
+  travellers: number | "";
   tripType: TripType | "";
   activities: string[];
 };

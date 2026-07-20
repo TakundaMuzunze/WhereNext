@@ -2,13 +2,14 @@
 import type { PlannerAnswers, TripType } from "@/entities/trip/model/types";
 import { tripTypes } from "@/shared/data/TripTypes";
 import { useState } from "react";
+import { PlannerProgress } from "./PlannerProgress";
 
 const initialAnswers: PlannerAnswers = {
   departure: "",
   travelMonth: "",
   duration: "",
   budget: "",
-  travellers: "2",
+  travellers: 2,
   tripType: "",
   activities: [],
 };
@@ -26,7 +27,7 @@ export function TripPlannerForm() {
     }));
   }
 
-  function toggleActivity(activity: string) {
+  function toggleActivity(activity: string): void {
     setAnswers((currentAnswers) => {
       const alreadySelected = currentAnswers.activities.includes(activity);
 
@@ -49,7 +50,11 @@ export function TripPlannerForm() {
     <section className="mx-auto flex min-h-screen w-full max-w-4xl items-center px-6 py-24">
       <div className="w-full rounded-3xl border border-primary/20 bg-background p-6 shadow-sm md:p-8">
         <div className="mb-8">
-          <p className="text-sm tracking-widest text-text/60 uppercase">Step {step} of 3</p>
+          <div className="flex w-full flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="shrink-0 text-sm tracking-widest text-text/60 uppercase">Step {step} of 3</p>
+
+            <PlannerProgress currentStep={step} totalSteps={3} />
+          </div>
 
           <h1 className="mt-3 text-3xl font-bold text-text">Plan your next trip</h1>
 
@@ -68,17 +73,17 @@ export function TripPlannerForm() {
               />
             </div>
 
-            <div>
-              <label className="mb-2 block text-sm font-medium text-text">When do you want to travel?</label>
-              <input
-                value={answers.travelMonth}
-                onChange={(event) => updateAnswer("travelMonth", event.target.value)}
-                placeholder="June, September, December..."
-                className="w-full rounded-xl border border-primary/20 bg-background px-4 py-3 text-text outline-none focus:border-primary"
-              />
-            </div>
+            <div className="grid gap-5 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-text">When do you want to travel?</label>
+                <input
+                  value={answers.travelMonth}
+                  onChange={(event) => updateAnswer("travelMonth", event.target.value)}
+                  placeholder="June, September, December..."
+                  className="w-full rounded-xl border border-primary/20 bg-background px-4 py-3 text-text outline-none focus:border-primary"
+                />
+              </div>
 
-            <div className="grid gap-5 md:grid-cols-3">
               <div>
                 <label className="mb-2 block text-sm font-medium text-text">Duration</label>
                 <input
@@ -92,9 +97,11 @@ export function TripPlannerForm() {
               <div>
                 <label className="mb-2 block text-sm font-medium text-text">Budget</label>
                 <input
+                  type="number"
+                  min="0"
                   value={answers.budget}
-                  onChange={(event) => updateAnswer("budget", event.target.value)}
-                  placeholder="£800"
+                  onChange={(event) => updateAnswer("budget", event.target.value === "" ? "" : event.target.valueAsNumber)}
+                  placeholder="800"
                   className="w-full rounded-xl border border-primary/20 bg-background px-4 py-3 text-text outline-none focus:border-primary"
                 />
               </div>
@@ -102,8 +109,10 @@ export function TripPlannerForm() {
               <div>
                 <label className="mb-2 block text-sm font-medium text-text">Travellers</label>
                 <input
+                  type="number"
+                  min="1"
                   value={answers.travellers}
-                  onChange={(event) => updateAnswer("travellers", event.target.value)}
+                  onChange={(event) => updateAnswer("travellers", event.target.value === "" ? "" : event.target.valueAsNumber)}
                   placeholder="2"
                   className="w-full rounded-xl border border-primary/20 bg-background px-4 py-3 text-text outline-none focus:border-primary"
                 />
