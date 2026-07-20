@@ -1,4 +1,5 @@
 import { Sparkles } from "lucide-react";
+import Link from "next/link";
 
 export function HomeHero() {
   return (
@@ -15,13 +16,13 @@ export function HomeHero() {
         </p>
 
         <div className="flex flex-wrap gap-4">
-          <a href="#how-it-works" className="rounded-xl bg-secondary/50 px-6 py-3 text-lg text-text transition">
+          <Link href="#how-it-works" className="rounded-xl bg-secondary/50 px-6 py-3 text-lg text-text transition">
             How it works
-          </a>
+          </Link>
 
-          <a href="/planner" className="rounded-xl bg-primary px-6 py-3 text-lg text-white transition dark:text-[#101214]">
+          <Link href="/planner" className="rounded-xl bg-primary px-6 py-3 text-lg text-white transition dark:text-[#101214]">
             Start planning
-          </a>
+          </Link>
         </div>
 
         <div className="mt-2 flex flex-row items-center justify-center gap-2">
