@@ -3,7 +3,7 @@ export type TripType = "baecation" | "city-break" | "beach-holiday" | "adventure
 export type PlannerAnswers = {
   departure: string;
   travelMonth: string;
-  duration: string;
+  duration: number | "";
   budget: number | "";
   travellers: number | "";
   tripType: TripType | "";

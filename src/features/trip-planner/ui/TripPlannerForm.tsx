@@ -1,8 +1,8 @@
 "use client";
 import type { PlannerAnswers, TripType } from "@/entities/trip/model/types";
-import { tripTypes } from "@/shared/data/TripTypes";
 import { useState } from "react";
 import { PlannerProgress } from "./PlannerProgress";
+import { tripTypes } from "@/shared/data/tripTypes";
 
 const initialAnswers: PlannerAnswers = {
   departure: "",
@@ -23,7 +23,8 @@ export function TripPlannerForm() {
       ? Boolean(
           answers.departure.trim() &&
           answers.travelMonth.trim() &&
-          answers.duration.trim() &&
+          answers.duration !== "" &&
+          answers.duration > 0 &&
           answers.budget !== "" &&
           answers.budget > 0 &&
           answers.travellers !== "" &&
@@ -34,6 +35,20 @@ export function TripPlannerForm() {
         : answers.activities.length > 0;
 
   const selectedTripType = tripTypes.find((tripType) => tripType.value === answers.tripType);
+
+  function selectTripType(tripType: TripType): void {
+    setAnswers((currentAnswers) => {
+      if (currentAnswers.tripType === tripType) {
+        return currentAnswers;
+      }
+
+      return {
+        ...currentAnswers,
+        tripType,
+        activities: [],
+      };
+    });
+  }
 
   function updateAnswer<Field extends keyof PlannerAnswers>(field: Field, value: PlannerAnswers[Field]) {
     setAnswers((currentAnswers) => ({
@@ -102,8 +117,10 @@ export function TripPlannerForm() {
               <div>
                 <label className="mb-2 block text-sm font-medium text-text">Duration</label>
                 <input
+                  type="number"
+                  min="1"
                   value={answers.duration}
-                  onChange={(event) => updateAnswer("duration", event.target.value)}
+                  onChange={(event) => updateAnswer("duration", event.target.value === "" ? "" : event.target.valueAsNumber)}
                   placeholder="7 days"
                   className="w-full rounded-xl border border-primary/20 bg-background px-4 py-3 text-text outline-none focus:border-primary"
                 />
@@ -145,7 +162,7 @@ export function TripPlannerForm() {
                 <button
                   key={tripType.value}
                   type="button"
-                  onClick={() => updateAnswer("tripType", tripType.value as TripType)}
+                  onClick={() => selectTripType(tripType.value)}
                   className={`rounded-2xl border p-5 text-left transition ${
                     isSelected
                       ? "border-primary bg-primary text-white dark:text-[#101214]"
@@ -194,7 +211,7 @@ export function TripPlannerForm() {
             type="button"
             onClick={goBack}
             disabled={step === 1}
-            className="rounded-xl border border-primary/20 px-5 py-3 text-text transition disabled:cursor-not-allowed disabled:opacity-40"
+            className="cursor-pointer rounded-xl border border-primary/20 px-5 py-3 text-text transition disabled:cursor-not-allowed disabled:opacity-40"
           >
             Back
           </button>
@@ -212,7 +229,7 @@ export function TripPlannerForm() {
             <button
               type="button"
               disabled={!canContinue}
-              className="rounded-xl bg-primary px-5 py-3 text-white transition hover:opacity-90 dark:text-[#101214]"
+              className="cursor-pointer rounded-xl bg-primary px-5 py-3 text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#101214]"
             >
               See matches
             </button>
