@@ -18,6 +18,21 @@ export function TripPlannerForm() {
   const [step, setStep] = useState(1);
   const [answers, setAnswers] = useState<PlannerAnswers>(initialAnswers);
 
+  const canContinue =
+    step === 1
+      ? Boolean(
+          answers.departure.trim() &&
+          answers.travelMonth.trim() &&
+          answers.duration.trim() &&
+          answers.budget !== "" &&
+          answers.budget > 0 &&
+          answers.travellers !== "" &&
+          answers.travellers > 0,
+        )
+      : step === 2
+        ? answers.tripType !== ""
+        : answers.activities.length > 0;
+
   const selectedTripType = tripTypes.find((tripType) => tripType.value === answers.tripType);
 
   function updateAnswer<Field extends keyof PlannerAnswers>(field: Field, value: PlannerAnswers[Field]) {
@@ -188,12 +203,17 @@ export function TripPlannerForm() {
             <button
               type="button"
               onClick={goNext}
-              className="rounded-xl bg-primary px-5 py-3 text-white transition hover:opacity-90 dark:text-[#101214]"
+              disabled={!canContinue}
+              className="cursor-pointer rounded-xl bg-primary px-5 py-3 text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#101214]"
             >
               Continue
             </button>
           ) : (
-            <button type="button" className="rounded-xl bg-primary px-5 py-3 text-white transition hover:opacity-90 dark:text-[#101214]">
+            <button
+              type="button"
+              disabled={!canContinue}
+              className="rounded-xl bg-primary px-5 py-3 text-white transition hover:opacity-90 dark:text-[#101214]"
+            >
               See matches
             </button>
           )}
