@@ -3,7 +3,7 @@ import type { PlannerAnswers, TripType } from "@/entities/trip/model/types";
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { PlannerProgress } from "./PlannerProgress";
-import { tripTypes } from "@/shared/data/tripTypes";
+import { tripTypes } from "@/shared/data/TripTypes";
 import { canContinueFromStep, getNextStep, getPreviousStep, plannerSteps, totalPlannerSteps, type PlannerStep } from "../model/plannerFlow";
 import { ActivitiesStep } from "./steps/ActivitiesStep";
 import { TripDetailsStep } from "./steps/TripDetailsStep";
