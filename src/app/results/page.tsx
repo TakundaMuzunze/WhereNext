@@ -37,7 +37,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
 
       <div className="grid gap-8">
         <ResultsSummary answers={answers} />
-        <ResultsList recommendations={recommendations} />
+        <ResultsList recommendations={recommendations} answers={answers} />
       </div>
     </main>
   );
