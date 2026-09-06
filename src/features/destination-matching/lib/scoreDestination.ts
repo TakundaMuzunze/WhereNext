@@ -59,13 +59,13 @@ function buildReasons(destination: Destination, answers: PlannerAnswers, breakdo
   const reasons: string[] = [];
   const matchingActivities = getMatchingActivities(destination, answers);
 
-  if (breakdown.budget === scoreWeights.budget) reasons.push("Fits within your total trip budget");
+  if (breakdown.budget === scoreWeights.budget) reasons.push("Fits your budget");
   else if (breakdown.budget > 0) reasons.push("Close to your preferred budget");
 
-  if (breakdown.travelMonth > 0) reasons.push(`${answers.travelMonth} is one of the best months to visit`);
+  if (breakdown.travelMonth > 0) reasons.push(`Great in ${answers.travelMonth}`);
   if (breakdown.tripType > 0) reasons.push("Matches your chosen trip style");
   if (matchingActivities.length > 0) reasons.push(`Includes ${matchingActivities.slice(0, 3).join(", ")}`);
-  if (breakdown.duration === scoreWeights.duration) reasons.push("Well suited to your trip length");
+  if (breakdown.duration === scoreWeights.duration) reasons.push("Suits your trip length");
   else if (breakdown.duration > 0) reasons.push("Works with a small adjustment to your trip length");
 
   return reasons;
