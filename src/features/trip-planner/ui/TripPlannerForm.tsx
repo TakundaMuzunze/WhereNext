@@ -1,15 +1,17 @@
 "use client";
 import type { PlannerAnswers, TripType } from "@/entities/trip/model/types";
+import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { PlannerProgress } from "./PlannerProgress";
 import { tripTypes } from "@/shared/data/TripTypes";
 import { canContinueFromStep, getNextStep, getPreviousStep, plannerSteps, totalPlannerSteps, type PlannerStep } from "../model/plannerFlow";
+import { serializePlannerAnswers } from "../lib/plannerSearchParams";
 import { ActivitiesStep } from "./steps/ActivitiesStep";
 import { TripDetailsStep } from "./steps/TripDetailsStep";
 import { TripTypeStep } from "./steps/TripTypeStep";
 
-const initialAnswers: PlannerAnswers = {
+const defaultAnswers: PlannerAnswers = {
   departure: "",
   travelMonth: "",
   duration: "",
@@ -19,7 +21,12 @@ const initialAnswers: PlannerAnswers = {
   activities: [],
 };
 
-export function TripPlannerForm() {
+type TripPlannerFormProps = {
+  initialAnswers?: PlannerAnswers;
+};
+
+export function TripPlannerForm({ initialAnswers = defaultAnswers }: TripPlannerFormProps) {
+  const router = useRouter();
   const [step, setStep] = useState<PlannerStep>(plannerSteps.tripDetails);
   const [answers, setAnswers] = useState<PlannerAnswers>(initialAnswers);
 
@@ -70,7 +77,13 @@ export function TripPlannerForm() {
   function handleSubmit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
 
-    if (!canContinue || step === plannerSteps.activities) return;
+    if (!canContinue) return;
+
+    if (step === plannerSteps.activities) {
+      router.push(`/results?${serializePlannerAnswers(answers)}`);
+      return;
+    }
+
     goNext();
   }
 
