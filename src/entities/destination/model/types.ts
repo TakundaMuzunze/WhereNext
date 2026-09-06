@@ -7,6 +7,10 @@ export type Destination = {
   name: string;
   country: string;
   description: string;
+  image: {
+    src: string;
+    alt: string;
+  };
   estimatedCostPerPerson: number;
   costLevel: DestinationCostLevel;
   bestMonths: string[];
