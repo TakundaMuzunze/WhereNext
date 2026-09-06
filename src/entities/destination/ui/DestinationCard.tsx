@@ -1,17 +1,19 @@
 import type { DestinationRecommendation } from "@/entities/destination";
-import { CircleCheck } from "lucide-react";
+import { ArrowRight, CircleCheck } from "lucide-react";
+import Link from "next/link";
 
 type DestinationCardProps = {
   recommendation: DestinationRecommendation;
   rank: number;
   matchLabel: string;
+  detailsHref: string;
 };
 
 type CardProps = DestinationCardProps & {
   description?: string;
 };
 
-export function DestinationCard({ recommendation, rank, matchLabel, description = recommendation.destination.description }: CardProps) {
+export function DestinationCard({ recommendation, rank, matchLabel, detailsHref, description = recommendation.destination.description }: CardProps) {
   const isBestMatch = rank === 1;
 
   return (
@@ -61,6 +63,14 @@ export function DestinationCard({ recommendation, rank, matchLabel, description 
             </span>
           ))}
         </div>
+
+        <Link
+          href={detailsHref}
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 dark:text-[#101214]"
+        >
+          View destination
+          <ArrowRight className="size-4" aria-hidden="true" />
+        </Link>
       </div>
     </article>
   );
