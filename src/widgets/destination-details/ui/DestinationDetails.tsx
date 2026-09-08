@@ -1,5 +1,6 @@
 import type { DestinationRecommendation } from "@/entities/destination";
 import type { PlannerAnswers } from "@/entities/trip/model/types";
+import { SaveDestinationButton } from "@/features/saved-destinations";
 import { ArrowLeft, CalendarDays, CircleCheck, Footprints, Pencil, WalletCards } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -45,6 +46,9 @@ export function DestinationDetails({ recommendation, answers, matchLabel, backHr
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <span className="rounded-xl bg-primary px-3 py-2 text-sm font-medium text-white dark:text-[#101214]">{score}% match</span>
             <span className="text-sm font-medium text-accent">Built around your trip answers</span>
+          </div>
+          <div className="mt-4">
+            <SaveDestinationButton destinationId={destination.id} />
           </div>
         </div>
 
