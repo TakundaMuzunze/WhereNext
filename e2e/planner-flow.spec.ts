@@ -55,3 +55,20 @@ test("edit answers returns to a populated planner", async ({ page }) => {
   await expect(page.getByLabel("Budget")).toHaveValue("2200");
   await expect(page.getByLabel("Travellers")).toHaveValue("2");
 });
+
+test("saves a result and removes it from the saved destinations page", async ({ page }) => {
+  await page.goto("/planner");
+  await completePlanner(page);
+  await page.getByRole("button", { name: "See matches" }).click();
+
+  const firstResult = page.getByLabel("Destination matches").getByRole("article").first();
+  await firstResult.getByRole("button", { name: "Save destination" }).click();
+  await expect(firstResult.getByRole("button", { name: "Saved" })).toBeVisible();
+
+  await page.getByRole("link", { name: /^Saved/ }).click();
+  await expect(page).toHaveURL("/saved");
+  await expect(page.getByLabel("Saved destinations").getByRole("article")).toHaveCount(1);
+
+  await page.getByRole("button", { name: /^Remove .+ from saved destinations$/ }).click();
+  await expect(page.getByRole("heading", { name: "No saved destinations yet" })).toBeVisible();
+});
