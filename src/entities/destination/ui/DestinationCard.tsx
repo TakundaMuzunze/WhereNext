@@ -1,4 +1,5 @@
 import type { DestinationRecommendation } from "@/entities/destination";
+import { SaveDestinationButton } from "@/features/saved-destinations";
 import { ArrowRight, CircleCheck } from "lucide-react";
 import Link from "next/link";
 
@@ -64,13 +65,16 @@ export function DestinationCard({ recommendation, rank, matchLabel, detailsHref,
           ))}
         </div>
 
-        <Link
-          href={detailsHref}
-          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 dark:text-[#101214]"
-        >
-          View destination
-          <ArrowRight className="size-4" aria-hidden="true" />
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href={detailsHref}
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 dark:text-[#101214]"
+          >
+            View destination
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+          <SaveDestinationButton destinationId={recommendation.destination.id} />
+        </div>
       </div>
     </article>
   );

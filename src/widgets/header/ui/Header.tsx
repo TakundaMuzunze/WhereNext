@@ -1,3 +1,4 @@
+import { SavedDestinationsLink } from "@/features/saved-destinations";
 import { ThemeToggle } from "@/features/theme-toggle";
 import Link from "next/link";
 
@@ -16,7 +17,10 @@ export function Header() {
           Sign in
         </Link> */}
 
-        <ThemeToggle />
+        <div className="flex items-center gap-1">
+          <SavedDestinationsLink />
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );
