@@ -1,4 +1,4 @@
-import { Filter, MapPin, Pin, SlidersHorizontal, Sparkle, Sparkles } from "lucide-react";
+import { MapPin, SlidersHorizontal, Sparkles } from "lucide-react";
 
 const steps = [
   {
