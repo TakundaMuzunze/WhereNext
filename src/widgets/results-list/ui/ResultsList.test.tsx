@@ -1,6 +1,6 @@
 import type { PlannerAnswers } from "@/entities/trip/model/types";
 import { getRecommendations } from "@/features/destination-matching";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { ResultsList } from "./ResultsList";
 
 const answers: PlannerAnswers = {
@@ -32,5 +32,28 @@ describe("ResultsList", () => {
     render(<ResultsList recommendations={[]} answers={answers} />);
 
     expect(screen.getByText(/no destination matches were found/i)).toBeInTheDocument();
+  });
+
+  it("shows the top match's real scoring breakdown", () => {
+    const recommendations = getRecommendations(answers, 1);
+
+    render(<ResultsList recommendations={recommendations} answers={answers} />);
+
+    expect(screen.getByText("Why this match?")).toBeInTheDocument();
+    expect(within(screen.getByText("Budget").parentElement!).getByText(`${recommendations[0].breakdown.budget}/25`)).toBeInTheDocument();
+    expect(within(screen.getByText("Travel month").parentElement!).getByText(`${recommendations[0].breakdown.travelMonth}/20`)).toBeInTheDocument();
+  });
+
+  it("does not call a weak top recommendation a best match", () => {
+    const recommendations = getRecommendations(answers, 1).map((recommendation) => ({
+      ...recommendation,
+      score: 40,
+    }));
+
+    render(<ResultsList recommendations={recommendations} answers={answers} />);
+
+    expect(screen.getByText("Closest match")).toBeInTheDocument();
+    expect(screen.getByText(/these are the closest matches we found/i)).toBeInTheDocument();
+    expect(screen.queryByText("Best match")).not.toBeInTheDocument();
   });
 });

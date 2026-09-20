@@ -1,6 +1,6 @@
 import { DestinationCard, type DestinationRecommendation } from "@/entities/destination";
 import type { PlannerAnswers } from "@/entities/trip/model/types";
-import { getMatchLabel } from "@/features/destination-matching";
+import { getMatchLabel, MatchBreakdown } from "@/features/destination-matching";
 import { serializePlannerAnswers } from "@/features/trip-planner";
 
 type ResultsListProps = {
@@ -14,9 +14,16 @@ export function ResultsList({ recommendations, answers }: ResultsListProps) {
   }
 
   const plannerQuery = serializePlannerAnswers(answers);
+  const hasStrongMatch = recommendations[0].score >= 60;
 
   return (
     <section aria-label="Destination matches" className="grid gap-6">
+      {!hasStrongMatch && (
+        <p className="rounded-2xl bg-secondary/20 p-5 text-sm leading-relaxed text-text">
+          Nothing fits all your preferences closely right now. These are the closest matches we found. Try editing your budget, dates or activities to
+          explore more options.
+        </p>
+      )}
       {recommendations.map((recommendation, index) => {
         const rank = index + 1;
 
@@ -27,6 +34,7 @@ export function ResultsList({ recommendations, answers }: ResultsListProps) {
             rank={rank}
             matchLabel={getMatchLabel(recommendation.score, rank)}
             detailsHref={`/destinations/${recommendation.destination.id}?${plannerQuery}`}
+            explanation={<MatchBreakdown breakdown={recommendation.breakdown} initiallyOpen={index === 0} />}
           />
         );
       })}
