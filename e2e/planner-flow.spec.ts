@@ -69,6 +69,12 @@ test("saves a result and removes it from the saved destinations page", async ({ 
   await expect(page).toHaveURL("/saved");
   await expect(page.getByLabel("Saved destinations").getByRole("article")).toHaveCount(1);
 
+  await page.getByRole("link", { name: "View destination" }).click();
+  await expect(page).toHaveURL(/\/destinations\/[^?]+$/);
+  await expect(page.getByRole("link", { name: "Back to saved destinations" })).toBeVisible();
+  await expect(page.getByText(/% match/)).toHaveCount(0);
+  await page.getByRole("link", { name: "Back to saved destinations" }).click();
+
   await page.getByRole("button", { name: /^Remove .+ from saved destinations$/ }).click();
   await expect(page.getByRole("heading", { name: "No saved destinations yet" })).toBeVisible();
 });

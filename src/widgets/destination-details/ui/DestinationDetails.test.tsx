@@ -21,6 +21,7 @@ describe("DestinationDetails", () => {
   it("renders personalised destination information and its real image", () => {
     render(
       <DestinationDetails
+        destination={recommendation.destination}
         recommendation={recommendation}
         answers={answers}
         matchLabel="Best match"
@@ -39,6 +40,7 @@ describe("DestinationDetails", () => {
   it("provides routes back to the results and planner answers", () => {
     render(
       <DestinationDetails
+        destination={recommendation.destination}
         recommendation={recommendation}
         answers={answers}
         matchLabel="Best match"
@@ -51,5 +53,16 @@ describe("DestinationDetails", () => {
       expect(link).toHaveAttribute("href", "/results?trip=answers");
     });
     expect(screen.getByRole("link", { name: /edit trip answers/i })).toHaveAttribute("href", "/planner?trip=answers");
+  });
+
+  it("shows destination facts without presenting a personalised match", () => {
+    render(<DestinationDetails destination={recommendation.destination} />);
+
+    expect(screen.getByRole("heading", { level: 1, name: /lisbon portugal/i })).toBeInTheDocument();
+    expect(screen.getByText("£850 per person")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Back to saved destinations" })).toHaveAttribute("href", "/saved");
+    expect(screen.queryByText(/% match/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: /why lisbon fits your trip/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /edit trip answers/i })).not.toBeInTheDocument();
   });
 });
