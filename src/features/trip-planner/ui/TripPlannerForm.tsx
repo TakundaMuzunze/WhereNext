@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { PlannerProgress } from "./PlannerProgress";
-import { tripTypes } from "@/shared/data/TripTypes";
+import { tripTypes } from "@/shared/data/tripTypes";
 import { canContinueFromStep, getNextStep, getPreviousStep, plannerSteps, totalPlannerSteps, type PlannerStep } from "../model/plannerFlow";
 import { serializePlannerAnswers } from "../lib/plannerSearchParams";
 import { ActivitiesStep } from "./steps/ActivitiesStep";

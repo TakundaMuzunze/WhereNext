@@ -22,6 +22,7 @@ describe("SavedDestinations", () => {
 
     expect(await screen.findByRole("heading", { name: /lisbon portugal/i })).toBeInTheDocument();
     expect(screen.getAllByRole("article")).toHaveLength(1);
+    expect(screen.getByRole("link", { name: "View destination" })).toHaveAttribute("href", "/destinations/lisbon-portugal");
 
     fireEvent.click(screen.getByRole("button", { name: "Remove Lisbon from saved destinations" }));
 

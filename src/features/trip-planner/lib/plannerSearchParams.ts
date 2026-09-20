@@ -1,5 +1,5 @@
 import type { PlannerAnswers, TripType } from "@/entities/trip/model/types";
-import { tripTypes } from "@/shared/data/TripTypes";
+import { tripTypes } from "@/shared/data/tripTypes";
 
 export type PlannerSearchParams = Record<string, string | string[] | undefined>;
 

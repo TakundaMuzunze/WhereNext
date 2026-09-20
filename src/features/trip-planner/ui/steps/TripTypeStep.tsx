@@ -1,5 +1,5 @@
 import type { TripType } from "@/entities/trip/model/types";
-import { tripTypes } from "@/shared/data/TripTypes";
+import { tripTypes } from "@/shared/data/tripTypes";
 
 type TripTypeStepProps = {
   selectedTripType: TripType | "";

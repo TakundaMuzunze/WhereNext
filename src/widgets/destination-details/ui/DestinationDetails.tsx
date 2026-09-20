@@ -1,4 +1,4 @@
-import type { DestinationRecommendation } from "@/entities/destination";
+import type { Destination, DestinationRecommendation } from "@/entities/destination";
 import type { PlannerAnswers } from "@/entities/trip/model/types";
 import { SaveDestinationButton } from "@/features/saved-destinations";
 import { ArrowLeft, CalendarDays, CircleCheck, Footprints, Pencil, WalletCards } from "lucide-react";
@@ -6,11 +6,12 @@ import Image from "next/image";
 import Link from "next/link";
 
 type DestinationDetailsProps = {
-  recommendation: DestinationRecommendation;
-  answers: PlannerAnswers;
-  matchLabel: string;
-  backHref: string;
-  editHref: string;
+  destination: Destination;
+  recommendation?: DestinationRecommendation;
+  answers?: PlannerAnswers;
+  matchLabel?: string;
+  backHref?: string;
+  editHref?: string;
 };
 
 const costLevelLabels = {
@@ -23,30 +24,34 @@ function formatMonths(months: string[]) {
   return months.map((month) => month.slice(0, 3)).join(" · ");
 }
 
-export function DestinationDetails({ recommendation, answers, matchLabel, backHref, editHref }: DestinationDetailsProps) {
-  const { destination, reasons, score } = recommendation;
-  const travellerCount = Number(answers.travellers);
+export function DestinationDetails({ destination, recommendation, answers, matchLabel, backHref, editHref }: DestinationDetailsProps) {
+  const travellerCount = Number(answers?.travellers ?? 0);
   const estimatedTotal = destination.estimatedCostPerPerson * travellerCount;
+  const isPersonalised = Boolean(recommendation && answers);
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-5xl px-6 pt-28 pb-20">
-      <Link href={backHref} className="mb-6 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary">
+      <Link href={backHref ?? "/saved"} className="mb-6 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary">
         <ArrowLeft className="size-4" aria-hidden="true" />
-        Back to your matches
+        {isPersonalised ? "Back to your matches" : "Back to saved destinations"}
       </Link>
 
       <section className="grid gap-8 md:grid-cols-[1.15fr_0.85fr]" aria-labelledby="destination-title">
         <div className="flex min-h-80 flex-col justify-center rounded-3xl border border-primary/20 bg-background p-8 shadow-sm sm:p-10">
-          <p className="text-xs font-medium tracking-[0.14em] text-accent uppercase">{matchLabel}</p>
+          {isPersonalised && <p className="text-xs font-medium tracking-[0.14em] text-accent uppercase">{matchLabel}</p>}
           <h1 id="destination-title" className="mt-4 text-5xl font-semibold tracking-[-0.055em] text-text sm:text-6xl">
             {destination.name}
             <span className="block font-normal text-text/50">{destination.country}</span>
           </h1>
           <p className="mt-5 max-w-xl leading-7 text-text/70">{destination.description}</p>
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <span className="rounded-xl bg-primary px-3 py-2 text-sm font-medium text-white dark:text-[#101214]">{score}% match</span>
-            <span className="text-sm font-medium text-accent">Built around your trip answers</span>
-          </div>
+          {isPersonalised && (
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <span className="rounded-xl bg-primary px-3 py-2 text-sm font-medium text-white dark:text-[#101214]">
+                {recommendation?.score}% match
+              </span>
+              <span className="text-sm font-medium text-accent">Built around your trip answers</span>
+            </div>
+          )}
           <div className="mt-4">
             <SaveDestinationButton destinationId={destination.id} />
           </div>
@@ -66,7 +71,7 @@ export function DestinationDetails({ recommendation, answers, matchLabel, backHr
             <span>
               {destination.name}, {destination.country}
             </span>
-            <span>{answers.tripType.replaceAll("-", " ")}</span>
+            {answers && <span>{answers.tripType.replaceAll("-", " ")}</span>}
           </div>
         </div>
       </section>
@@ -83,17 +88,19 @@ export function DestinationDetails({ recommendation, answers, matchLabel, backHr
 
       <div className="mt-10 grid gap-10 md:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-10">
-          <section>
-            <h2 className="text-2xl font-semibold tracking-tight text-text">Why {destination.name} fits your trip</h2>
-            <ul className="mt-5 grid gap-3">
-              {reasons.map((reason) => (
-                <li key={reason} className="flex items-start gap-3 leading-6 text-text/75">
-                  <CircleCheck className="mt-0.5 size-5 shrink-0 text-accent" aria-hidden="true" />
-                  {reason}
-                </li>
-              ))}
-            </ul>
-          </section>
+          {isPersonalised && (
+            <section>
+              <h2 className="text-2xl font-semibold tracking-tight text-text">Why {destination.name} fits your trip</h2>
+              <ul className="mt-5 grid gap-3">
+                {recommendation?.reasons.map((reason) => (
+                  <li key={reason} className="flex items-start gap-3 leading-6 text-text/75">
+                    <CircleCheck className="mt-0.5 size-5 shrink-0 text-accent" aria-hidden="true" />
+                    {reason}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <section>
             <h2 className="text-2xl font-semibold tracking-tight text-text">Things you’ll enjoy</h2>
@@ -109,8 +116,10 @@ export function DestinationDetails({ recommendation, answers, matchLabel, backHr
           <section>
             <h2 className="text-2xl font-semibold tracking-tight text-text">What makes it worth the trip</h2>
             <p className="mt-4 max-w-2xl leading-7 text-text/70">
-              {destination.description} With {answers.duration} days to explore, you can settle into the destination without needing to rush every
-              experience.
+              {destination.description}{" "}
+              {answers
+                ? `With ${answers.duration} days to explore, you can settle into the destination without needing to rush every experience.`
+                : `Its activities and recommended ${destination.recommendedDuration.min}–${destination.recommendedDuration.max} day stay make it worth exploring in more detail.`}
             </p>
           </section>
         </div>
@@ -120,15 +129,27 @@ export function DestinationDetails({ recommendation, answers, matchLabel, backHr
           <ul className="mt-6 grid gap-5">
             <TravelTip
               icon={<Footprints className="size-4" aria-hidden="true" />}
-              text={`The ideal stay is ${destination.recommendedDuration.min}-${destination.recommendedDuration.max} days, so your ${answers.duration}-day plan is easy to compare.`}
+              text={
+                answers
+                  ? `The ideal stay is ${destination.recommendedDuration.min}-${destination.recommendedDuration.max} days, so your ${answers.duration}-day plan is easy to compare.`
+                  : `The recommended stay is ${destination.recommendedDuration.min}–${destination.recommendedDuration.max} days.`
+              }
             />
             <TravelTip
               icon={<CalendarDays className="size-4" aria-hidden="true" />}
-              text={`${answers.travelMonth} is ${destination.bestMonths.includes(answers.travelMonth) ? "one of the recommended months to visit" : "outside the usual best-month window, so check seasonal conditions"}.`}
+              text={
+                answers
+                  ? `${answers.travelMonth} is ${destination.bestMonths.includes(answers.travelMonth) ? "one of the recommended months to visit" : "outside the usual best-month window, so check seasonal conditions"}.`
+                  : `Recommended months: ${destination.bestMonths.join(", ")}.`
+              }
             />
             <TravelTip
               icon={<WalletCards className="size-4" aria-hidden="true" />}
-              text={`Allow around £${estimatedTotal.toLocaleString()} for ${travellerCount} ${travellerCount === 1 ? "traveller" : "travellers"}, before any extra flexibility.`}
+              text={
+                answers
+                  ? `Allow around £${estimatedTotal.toLocaleString()} for ${travellerCount} ${travellerCount === 1 ? "traveller" : "travellers"}, before any extra flexibility.`
+                  : `The estimated cost is £${destination.estimatedCostPerPerson.toLocaleString()} per person.`
+              }
             />
           </ul>
         </aside>
@@ -136,19 +157,21 @@ export function DestinationDetails({ recommendation, answers, matchLabel, backHr
 
       <div className="mt-12 flex flex-wrap gap-3 border-t border-primary/15 pt-7">
         <Link
-          href={backHref}
+          href={backHref ?? "/saved"}
           className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white dark:text-[#101214]"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
-          Back to matches
+          {isPersonalised ? "Back to matches" : "Back to saved"}
         </Link>
-        <Link
-          href={editHref}
-          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-primary/40 px-4 py-2 text-sm font-medium text-text"
-        >
-          <Pencil className="size-4" aria-hidden="true" />
-          Edit trip answers
-        </Link>
+        {isPersonalised && editHref && (
+          <Link
+            href={editHref}
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-primary/40 px-4 py-2 text-sm font-medium text-text"
+          >
+            <Pencil className="size-4" aria-hidden="true" />
+            Edit trip answers
+          </Link>
+        )}
       </div>
     </main>
   );
