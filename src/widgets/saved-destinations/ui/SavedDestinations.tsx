@@ -77,8 +77,11 @@ export function SavedDestinations() {
                 </dd>
               </div>
             </dl>
-            <Link href="/planner" className="mt-6 inline-flex min-h-11 items-center justify-between gap-2 text-sm font-medium text-primary">
-              Plan a trip here
+            <Link
+              href={`/destinations/${destination.id}`}
+              className="mt-6 inline-flex min-h-11 items-center justify-between gap-2 text-sm font-medium text-primary"
+            >
+              View destination
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </div>
