@@ -1,7 +1,7 @@
 import type { Destination, DestinationRecommendation } from "@/entities/destination";
 import type { PlannerAnswers } from "@/entities/trip/model/types";
 import { SaveDestinationButton } from "@/features/saved-destinations";
-import { ArrowLeft, CalendarDays, CircleCheck, Footprints, Pencil, WalletCards } from "lucide-react";
+import { ArrowLeft, CircleCheck, Pencil } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -66,7 +66,7 @@ export function DestinationDetails({ destination, recommendation, answers, match
             sizes="(max-width: 767px) 100vw, 40vw"
             className="object-cover transition-transform duration-500 hover:scale-[1.02]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/5 to-transparent" aria-hidden="true" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/65 via-black/5 to-transparent" aria-hidden="true" />
           <div className="absolute right-5 bottom-5 left-5 z-10 flex justify-between gap-3 text-xs text-white">
             <span>
               {destination.name}, {destination.country}
@@ -103,55 +103,68 @@ export function DestinationDetails({ destination, recommendation, answers, match
           )}
 
           <section>
-            <h2 className="text-2xl font-semibold tracking-tight text-text">Things you’ll enjoy</h2>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {destination.activities.map((activity) => (
-                <span key={activity} className="rounded-full bg-secondary/20 px-3 py-2 text-sm text-text/75">
-                  {activity}
-                </span>
-              ))}
+            <h2 className="text-2xl font-semibold tracking-tight text-text">Who this trip is for</h2>
+            <p className="mt-2 text-sm leading-6 text-text/65">A few honest signals to help you decide whether this destination feels right.</p>
+
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl bg-secondary/25 p-5 sm:p-6">
+                <h3 className="text-base font-semibold text-accent">Best for</h3>
+                <ul className="mt-4 list-disc space-y-3 pl-5 text-sm leading-6 text-text/80 marker:text-accent">
+                  {destination.guide.bestFor.map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="rounded-2xl bg-primary/25 p-5 sm:p-6 dark:bg-white/5">
+                <h3 className="text-base font-semibold text-text/75">Think twice if…</h3>
+                <ul className="mt-4 list-disc space-y-3 pl-5 text-sm leading-6 text-text/80 marker:text-text/50">
+                  {destination.guide.watchOutFor.map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold tracking-tight text-text">What makes it worth the trip</h2>
-            <p className="mt-4 max-w-2xl leading-7 text-text/70">
-              {destination.description}{" "}
-              {answers
-                ? `With ${answers.duration} days to explore, you can settle into the destination without needing to rush every experience.`
-                : `Its activities and recommended ${destination.recommendedDuration.min}–${destination.recommendedDuration.max} day stay make it worth exploring in more detail.`}
-            </p>
+            <h2 className="text-2xl font-semibold tracking-tight text-text">A way to spend a few days</h2>
+            <p className="mt-2 text-sm leading-6 text-text/65">Ideas to borrow from, not a booked or personalised day-by-day schedule.</p>
+            <ol className="mt-5 border-t border-primary/15">
+              {destination.guide.itineraryIdeas.map(({ title, description }, index) => (
+                <li key={title} className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 border-b border-primary/15 py-5">
+                  <span className="grid size-9 place-items-center rounded-full bg-secondary/25 text-xs font-medium text-accent" aria-hidden="true">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div>
+                    <h3 className="font-semibold text-text">{title}</h3>
+                    <p className="mt-1 text-sm leading-6 text-text/70">{description}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </section>
         </div>
 
         <aside className="self-start rounded-3xl bg-secondary/20 p-7" aria-label="Useful travel notes">
           <h2 className="text-2xl font-semibold tracking-tight text-text">Good to know</h2>
-          <ul className="mt-6 grid gap-5">
-            <TravelTip
-              icon={<Footprints className="size-4" aria-hidden="true" />}
-              text={
-                answers
-                  ? `The ideal stay is ${destination.recommendedDuration.min}-${destination.recommendedDuration.max} days, so your ${answers.duration}-day plan is easy to compare.`
-                  : `The recommended stay is ${destination.recommendedDuration.min}–${destination.recommendedDuration.max} days.`
-              }
-            />
-            <TravelTip
-              icon={<CalendarDays className="size-4" aria-hidden="true" />}
-              text={
-                answers
-                  ? `${answers.travelMonth} is ${destination.bestMonths.includes(answers.travelMonth) ? "one of the recommended months to visit" : "outside the usual best-month window, so check seasonal conditions"}.`
-                  : `Recommended months: ${destination.bestMonths.join(", ")}.`
-              }
-            />
-            <TravelTip
-              icon={<WalletCards className="size-4" aria-hidden="true" />}
-              text={
-                answers
-                  ? `Allow around £${estimatedTotal.toLocaleString()} for ${travellerCount} ${travellerCount === 1 ? "traveller" : "travellers"}, before any extra flexibility.`
-                  : `The estimated cost is £${destination.estimatedCostPerPerson.toLocaleString()} per person.`
-              }
-            />
+          <ul className="mt-5">
+            {destination.guide.travelTips.map(({ title, description }) => (
+              <li key={title} className="border-t border-primary/15 py-4">
+                <h3 className="text-sm font-semibold text-primary">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-text/75">{description}</p>
+              </li>
+            ))}
+            {answers && (
+              <li className="border-t border-primary/15 py-4">
+                <h3 className="text-sm font-semibold text-primary">Budget</h3>
+                <p className="mt-2 text-sm leading-6 text-text/75">
+                  Allow around £{estimatedTotal.toLocaleString()} for {travellerCount} {travellerCount === 1 ? "traveller" : "travellers"}, before any
+                  extra flexibility.
+                </p>
+              </li>
+            )}
           </ul>
+          <p className="mt-2 text-xs leading-5 text-text/60">Costs are broad planning estimates, not live quotes or itemised prices.</p>
         </aside>
       </div>
 
@@ -183,14 +196,5 @@ function Fact({ label, value }: { label: string; value: string }) {
       <span className="block text-xs tracking-wider text-text/50 uppercase">{label}</span>
       <span className="mt-2 block text-sm font-medium text-text">{value}</span>
     </div>
-  );
-}
-
-function TravelTip({ icon, text }: { icon: React.ReactNode; text: string }) {
-  return (
-    <li className="grid grid-cols-[2.25rem_1fr] items-start gap-3 text-sm leading-6 text-text/75">
-      <span className="grid size-9 place-items-center rounded-xl bg-background text-primary">{icon}</span>
-      <span>{text}</span>
-    </li>
   );
 }

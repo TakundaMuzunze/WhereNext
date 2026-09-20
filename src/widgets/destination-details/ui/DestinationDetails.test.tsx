@@ -34,6 +34,11 @@ describe("DestinationDetails", () => {
     expect(screen.getByText(`${recommendation.score}% match`)).toBeInTheDocument();
     expect(screen.getByText("£850 per person")).toBeInTheDocument();
     expect(screen.getByText(/allow around £1,700 for 2 travellers/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Who this trip is for" })).toBeInTheDocument();
+    expect(screen.getByText(recommendation.destination.guide.bestFor[0])).toBeInTheDocument();
+    expect(screen.getByText(recommendation.destination.guide.watchOutFor[0])).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "A way to spend a few days" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: recommendation.destination.guide.itineraryIdeas[0].title })).toBeInTheDocument();
     expect(screen.getByRole("img", { name: recommendation.destination.image.alt })).toHaveAttribute("src", expect.stringContaining("lisbon.jpg"));
   });
 
@@ -63,6 +68,8 @@ describe("DestinationDetails", () => {
     expect(screen.getByRole("link", { name: "Back to saved destinations" })).toHaveAttribute("href", "/saved");
     expect(screen.queryByText(/% match/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: /why lisbon fits your trip/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "A way to spend a few days" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: recommendation.destination.guide.travelTips[0].title })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /edit trip answers/i })).not.toBeInTheDocument();
   });
 });

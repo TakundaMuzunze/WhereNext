@@ -45,7 +45,7 @@ export function SavedDestinations() {
               sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
               className="object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-black/15" aria-hidden="true" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/65 via-transparent to-black/15" aria-hidden="true" />
             <button
               type="button"
               onClick={() => unsave(destination.id)}
