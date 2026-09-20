@@ -19,7 +19,7 @@ const matchStrengths: MatchLabel[] = [
 ] as const;
 
 export function getMatchLabel(score: number, rank: number): string {
-  if (rank === 1) return "Best match";
+  if (rank === 1) return score >= 60 ? "Best match" : "Closest match";
 
   const strength = matchStrengths.find(({ minimumScore }) => score >= minimumScore);
 
