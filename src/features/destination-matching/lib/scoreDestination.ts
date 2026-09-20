@@ -1,7 +1,7 @@
 import type { Destination, DestinationRecommendation, DestinationScoreBreakdown } from "@/entities/destination";
 import type { PlannerAnswers } from "@/entities/trip/model/types";
 
-const scoreWeights: DestinationScoreBreakdown = {
+export const scoreWeights: DestinationScoreBreakdown = {
   budget: 25,
   travelMonth: 20,
   tripType: 25,

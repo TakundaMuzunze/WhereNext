@@ -31,8 +31,8 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
     <main className="mx-auto min-h-screen w-full max-w-4xl px-6 py-24">
       <header className="mb-8">
         <p className="text-sm tracking-widest text-accent uppercase">Your focused shortlist</p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-text">Three places that fit your trip.</h1>
-        <p className="mt-3 max-w-2xl text-text/70">Ranked around your budget, dates and travel style, with a clear reason behind every match.</p>
+        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-text">Places worth considering.</h1>
+        <p className="mt-3 max-w-2xl text-text/70">See how each destination fits your budget, travel month, trip style, activities and duration.</p>
       </header>
 
       <div className="grid gap-8">

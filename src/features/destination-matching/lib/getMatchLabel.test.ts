@@ -3,6 +3,7 @@ import { getMatchLabel } from "./getMatchLabel";
 describe("getMatchLabel", () => {
   it.each([
     [100, 1, "Best match"],
+    [59, 1, "Closest match"],
     [90, 2, "Excellent alternative"],
     [75, 2, "Strong alternative"],
     [60, 3, "Good alternative"],

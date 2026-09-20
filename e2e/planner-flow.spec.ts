@@ -23,10 +23,13 @@ test("completes the planner and shows ranked destination matches", async ({ page
   await page.getByRole("button", { name: "See matches" }).click();
 
   await expect(page).toHaveURL(/\/results\?/);
-  await expect(page.getByRole("heading", { level: 1, name: "Three places that fit your trip." })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Places worth considering." })).toBeVisible();
   await expect(page.getByLabel("Your trip details")).toContainText("London");
   await expect(page.getByLabel("Destination matches").getByRole("article")).toHaveCount(5);
   await expect(page.getByText("Best match", { exact: true })).toBeVisible();
+  const firstResult = page.getByLabel("Destination matches").getByRole("article").first();
+  await expect(firstResult.getByText("Why this match?")).toBeVisible();
+  await expect(firstResult.getByText("Travel month")).toBeVisible();
 });
 
 test("changing trip type clears activities from the previous choice", async ({ page }) => {
