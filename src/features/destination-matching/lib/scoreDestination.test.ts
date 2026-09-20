@@ -7,12 +7,14 @@ const destination: Destination = {
   name: "Test City",
   country: "Testland",
   description: "Test destination",
+  image: { src: "/images/destination/test.jpg", alt: "Test destination" },
   estimatedCostPerPerson: 500,
   costLevel: "mid-range",
   bestMonths: ["June"],
   tripTypes: ["city-break"],
   activities: ["Museums", "Food markets"],
   recommendedDuration: { min: 4, max: 7 },
+  guide: { bestFor: [], watchOutFor: [], itineraryIdeas: [], travelTips: [] },
 };
 
 const answers: PlannerAnswers = {

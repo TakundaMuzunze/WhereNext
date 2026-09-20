@@ -16,6 +16,23 @@ export const destinations: Destination[] = [
     tripTypes: ["city-break", "foodie", "nightlife", "culture"],
     activities: ["Architecture", "Food markets", "Cocktail bars", "Local restaurants", "Walking tours", "Old towns"],
     recommendedDuration: { min: 3, max: 6 },
+    guide: {
+      bestFor: [
+        "Food-led city breaks with time to linger",
+        "Viewpoints, historic streets and neighbourhood walks",
+        "Travellers happy to mix walking with public transport",
+      ],
+      watchOutFor: ["Steep streets and cobbles can make long walking days tiring", "This is a city trip, not a beach-first escape"],
+      itineraryIdeas: [
+        { title: "Explore old Lisbon", description: "Wander Alfama's lanes, stop at a viewpoint and leave time for a relaxed dinner." },
+        { title: "Follow the river west", description: "Spend an afternoon around Belém and enjoy the waterfront at your own pace." },
+        { title: "Make it a food day", description: "Browse a market, try local cafés and explore a neighbourhood beyond the main sights." },
+      ],
+      travelTips: [
+        { title: "Getting around", description: "Plan for hills and cobbled streets; comfortable shoes and public transport help." },
+        { title: "Pace", description: "Group nearby neighbourhoods together rather than crossing the city repeatedly." },
+      ],
+    },
   },
   {
     id: "krakow-poland",
@@ -32,6 +49,19 @@ export const destinations: Destination[] = [
     tripTypes: ["city-break", "foodie", "culture"],
     activities: ["Museums", "Architecture", "Local restaurants", "Historic sites", "Walking tours", "Old towns"],
     recommendedDuration: { min: 3, max: 5 },
+    guide: {
+      bestFor: ["History-rich city breaks", "Museum days followed by local food", "A compact base for walking between major sights"],
+      watchOutFor: ["This is not a sun-and-sea trip", "Cold-weather visits call for more indoor time"],
+      itineraryIdeas: [
+        { title: "Start in the old town", description: "Explore the Main Market Square and surrounding historic streets." },
+        { title: "Trace the city's history", description: "Make time for Wawel and a museum that matches your interests." },
+        { title: "Slow down in Kazimierz", description: "Wander the neighbourhood and leave the evening open for dinner." },
+      ],
+      travelTips: [
+        { title: "Culture", description: "Choose a couple of museums rather than trying to fit every exhibition into one day." },
+        { title: "Planning", description: "Check opening days and book any must-see attractions before you travel." },
+      ],
+    },
   },
   {
     id: "barcelona-spain",
@@ -48,6 +78,23 @@ export const destinations: Destination[] = [
     tripTypes: ["city-break", "baecation", "foodie", "nightlife", "culture"],
     activities: ["Architecture", "Beaches", "Food markets", "Cocktail bars", "Clubs", "Museums"],
     recommendedDuration: { min: 3, max: 6 },
+    guide: {
+      bestFor: [
+        "Architecture and food in the same city break",
+        "Travellers who want urban energy with a beach option",
+        "A varied trip of neighbourhoods, museums and late dinners",
+      ],
+      watchOutFor: ["Popular landmarks can need advance planning", "The city beach is a bonus, not a secluded resort experience"],
+      itineraryIdeas: [
+        { title: "Walk the old city", description: "Explore the Gothic Quarter's streets and squares before settling in for dinner." },
+        { title: "Follow the architecture", description: "Spend time around Passeig de Gràcia and choose one modernist site to explore properly." },
+        { title: "Leave room for the sea", description: "Pair a market or museum visit with an unhurried waterfront afternoon." },
+      ],
+      travelTips: [
+        { title: "Tickets", description: "Check booking requirements for the landmarks you care about most." },
+        { title: "Pace", description: "Barcelona is spread out; keep each day's stops in nearby areas." },
+      ],
+    },
   },
   {
     id: "split-croatia",
@@ -64,6 +111,23 @@ export const destinations: Destination[] = [
     tripTypes: ["beach-holiday", "baecation", "adventure", "culture"],
     activities: ["Beaches", "Boat trips", "Swimming", "Island hopping", "Historic sites", "Old towns"],
     recommendedDuration: { min: 5, max: 9 },
+    guide: {
+      bestFor: [
+        "History and swimming in one coastal base",
+        "Island excursions with room for slower days",
+        "Travellers who enjoy lively waterfront evenings",
+      ],
+      watchOutFor: ["The old town can feel busy in peak summer", "Boat plans depend on weather and availability"],
+      itineraryIdeas: [
+        { title: "Meet the old town", description: "Explore Diocletian's Palace and wander out towards the Riva." },
+        { title: "See the city from above", description: "Walk in Marjan and leave the afternoon free for a swim." },
+        { title: "Take to the water", description: "Consider an island or boat day, keeping a flexible alternative if conditions change." },
+      ],
+      travelTips: [
+        { title: "Summer pace", description: "Start old-town walks earlier if you prefer quieter streets." },
+        { title: "Excursions", description: "Check boat schedules and conditions before building a day around an island trip." },
+      ],
+    },
   },
   {
     id: "algarve-portugal",
@@ -80,6 +144,29 @@ export const destinations: Destination[] = [
     tripTypes: ["beach-holiday", "relaxing", "baecation", "adventure"],
     activities: ["Beaches", "Boat trips", "Swimming", "Quiet beaches", "Scenic views", "Hiking"],
     recommendedDuration: { min: 5, max: 10 },
+    guide: {
+      bestFor: [
+        "Beach time with optional coastal walks",
+        "A slower trip based in one town",
+        "Travellers who like choosing between quiet coves and livelier beaches",
+      ],
+      watchOutFor: [
+        "The region is spread out, so a single base will not put every beach nearby",
+        "Cliff-backed coves may involve steps or uneven paths",
+      ],
+      itineraryIdeas: [
+        { title: "Settle into a base", description: "Explore the town you are staying in and keep the first beach day simple." },
+        { title: "Walk the coast", description: "Choose a signed coastal route that suits your energy and conditions." },
+        { title: "Try a different shoreline", description: "Visit a second beach area or take a boat trip if the weather allows." },
+      ],
+      travelTips: [
+        {
+          title: "Choosing where to stay",
+          description: "Pick your base around the beaches and pace you want; the Algarve is a region, not one resort.",
+        },
+        { title: "Beach conditions", description: "Check local flags, tides and access before swimming or visiting a cove." },
+      ],
+    },
   },
   {
     id: "santorini-greece",
@@ -96,6 +183,23 @@ export const destinations: Destination[] = [
     tripTypes: ["baecation", "relaxing", "beach-holiday"],
     activities: ["Romantic dinners", "Sunset views", "Luxury stays", "Boat trips", "Scenic views", "Quiet beaches"],
     recommendedDuration: { min: 4, max: 7 },
+    guide: {
+      bestFor: [
+        "A scenic, slower-paced couples' trip",
+        "Volcanic landscapes and caldera views",
+        "Travellers who want memorable dinners and village walks",
+      ],
+      watchOutFor: ["Clifftop villages involve steps and steep paths", "It is less suited to a low-cost, sandy-beach-first holiday"],
+      itineraryIdeas: [
+        { title: "Take in the caldera", description: "Explore a clifftop village and give yourself time to enjoy the view." },
+        { title: "See another side", description: "Visit a volcanic beach or a quieter inland village." },
+        { title: "Choose a sea day", description: "Consider a boat excursion if conditions and your budget suit it." },
+      ],
+      travelTips: [
+        { title: "Accommodation", description: "Decide whether a caldera view matters more to you than space or value." },
+        { title: "Walking", description: "Check the access to your stay if carrying luggage up steps would be difficult." },
+      ],
+    },
   },
   {
     id: "marrakech-morocco",
@@ -112,6 +216,23 @@ export const destinations: Destination[] = [
     tripTypes: ["culture", "foodie", "baecation", "adventure"],
     activities: ["Markets", "Local restaurants", "Cooking classes", "Local culture", "Architecture", "Road trips"],
     recommendedDuration: { min: 4, max: 7 },
+    guide: {
+      bestFor: [
+        "Markets, architecture and local food",
+        "A city stay with a possible Atlas Mountains outing",
+        "Travellers who enjoy a lively, sensory city",
+      ],
+      watchOutFor: ["The medina can feel intense if you want a very quiet break", "A mountain excursion takes more planning than a casual city walk"],
+      itineraryIdeas: [
+        { title: "Find your bearings", description: "Explore the medina in short stretches and pause in a courtyard or café." },
+        { title: "Make it a food day", description: "Browse markets, try local dishes and consider a cooking class." },
+        { title: "Go beyond the city", description: "Set aside a separate day for an organised outing towards the Atlas foothills." },
+      ],
+      travelTips: [
+        { title: "Medina navigation", description: "Save your accommodation location offline; the old city's lanes can be intricate." },
+        { title: "Day trips", description: "Check travel time and what is included before booking a mountain outing." },
+      ],
+    },
   },
   {
     id: "reykjavik-iceland",
@@ -128,6 +249,23 @@ export const destinations: Destination[] = [
     tripTypes: ["adventure", "relaxing"],
     activities: ["Waterfalls", "Road trips", "Nature parks", "Hidden gems", "Scenic views", "Spa days"],
     recommendedDuration: { min: 5, max: 10 },
+    guide: {
+      bestFor: [
+        "Nature-focused trips with Reykjavík as a base",
+        "Waterfalls, geothermal bathing and scenic drives",
+        "Travellers comfortable with changeable outdoor plans",
+      ],
+      watchOutFor: ["Major nature stops need travel beyond the city", "Weather and daylight can reshape an itinerary"],
+      itineraryIdeas: [
+        { title: "Explore the capital", description: "Use a relaxed city day for cafés, the waterfront and a geothermal bath." },
+        { title: "Try the Golden Circle", description: "Plan a full day for Þingvellir, the Geysir area and Gullfoss." },
+        { title: "Follow a nature route", description: "Choose a waterfall or scenic-drive day that fits current conditions." },
+      ],
+      travelTips: [
+        { title: "Conditions", description: "Check road, weather and daylight information before setting out." },
+        { title: "Transport", description: "Decide early whether to hire a car or use organised day tours." },
+      ],
+    },
   },
   {
     id: "budapest-hungary",
@@ -144,6 +282,23 @@ export const destinations: Destination[] = [
     tripTypes: ["city-break", "nightlife", "culture", "relaxing"],
     activities: ["Architecture", "Cocktail bars", "Bars", "Live music", "Museums", "Spa days"],
     recommendedDuration: { min: 3, max: 5 },
+    guide: {
+      bestFor: [
+        "Architecture and thermal-bath city breaks",
+        "Days of sightseeing followed by relaxed evenings",
+        "A mix of river views, museums and nightlife",
+      ],
+      watchOutFor: ["Baths and popular sights can need advance planning", "The city is not a substitute for a quiet spa retreat"],
+      itineraryIdeas: [
+        { title: "Follow the Danube", description: "Walk a stretch of the riverfront and take in the city views." },
+        { title: "Explore Buda", description: "Spend time around the Castle District and nearby viewpoints." },
+        { title: "Slow down at the baths", description: "Choose a thermal bath and keep the rest of the day flexible." },
+      ],
+      travelTips: [
+        { title: "Bath visits", description: "Check entry rules and opening arrangements for the bath you choose." },
+        { title: "Getting around", description: "Plan around the river crossing; sights on the Buda and Pest sides are best grouped." },
+      ],
+    },
   },
   {
     id: "amalfi-coast-italy",
@@ -160,6 +315,23 @@ export const destinations: Destination[] = [
     tripTypes: ["baecation", "foodie", "relaxing", "beach-holiday"],
     activities: ["Romantic dinners", "Sunset views", "Luxury stays", "Local restaurants", "Boat trips", "Scenic views"],
     recommendedDuration: { min: 5, max: 8 },
+    guide: {
+      bestFor: [
+        "Scenic coastal stays and slower dinners",
+        "Couples who value views over a packed itinerary",
+        "Exploring several towns from one carefully chosen base",
+      ],
+      watchOutFor: ["Steep streets and steps are part of many town visits", "Moving between towns can take longer than distances suggest"],
+      itineraryIdeas: [
+        { title: "Get to know your base", description: "Explore your nearest town on foot and leave time for the view." },
+        { title: "Visit another town", description: "Consider Amalfi, Positano or Ravello without trying to fit all three into one rushed day." },
+        { title: "See the coastline", description: "Choose a boat outing or a scenic walk according to conditions and your pace." },
+      ],
+      travelTips: [
+        { title: "Choosing a base", description: "Check how you will reach your accommodation with luggage before booking." },
+        { title: "Moving around", description: "Allow flexibility for transport between towns, especially during busy periods." },
+      ],
+    },
   },
   {
     id: "tenerife-spain",
@@ -176,6 +348,23 @@ export const destinations: Destination[] = [
     tripTypes: ["beach-holiday", "relaxing", "adventure"],
     activities: ["Beaches", "Swimming", "Hiking", "Nature parks", "Resorts", "Pool days"],
     recommendedDuration: { min: 6, max: 10 },
+    guide: {
+      bestFor: [
+        "A beach break with optional volcanic hikes",
+        "Travellers who want both resort downtime and active days",
+        "A longer trip with room to see different landscapes",
+      ],
+      watchOutFor: ["Staying by the beach does not put mountain trails on your doorstep", "Conditions at Teide can differ sharply from the coast"],
+      itineraryIdeas: [
+        { title: "Settle by the sea", description: "Start with a beach or pool day close to your base." },
+        { title: "Explore volcanic scenery", description: "Plan a separate outing to Teide National Park and choose a suitable route." },
+        { title: "See a greener side", description: "Consider an Anaga walk or a town visit if you want a change of pace." },
+      ],
+      travelTips: [
+        { title: "Different climates", description: "Take an extra layer for higher elevations, even when the coast feels warm." },
+        { title: "Hiking", description: "Check trail access, weather and any permit requirements before heading out." },
+      ],
+    },
   },
   {
     id: "berlin-germany",
@@ -192,5 +381,22 @@ export const destinations: Destination[] = [
     tripTypes: ["city-break", "nightlife", "culture", "foodie"],
     activities: ["Museums", "Architecture", "Bars", "Clubs", "Live music", "Street food"],
     recommendedDuration: { min: 3, max: 6 },
+    guide: {
+      bestFor: [
+        "History, museums and creative neighbourhoods",
+        "Travellers who want flexible days and lively nights",
+        "Food and culture without a rigid sightseeing route",
+      ],
+      watchOutFor: ["Major sights are spread across a large city", "A quiet, picturesque old-town break is not Berlin's main appeal"],
+      itineraryIdeas: [
+        { title: "Start with the history", description: "Choose a museum or memorial and give it proper time rather than rushing through several." },
+        { title: "Follow a neighbourhood", description: "Explore local food, independent spaces and the surrounding streets." },
+        { title: "Mix art with the river", description: "Visit Museum Island or the East Side Gallery, then leave the evening open." },
+      ],
+      travelTips: [
+        { title: "Distances", description: "Group stops by area and use public transport between neighbourhoods." },
+        { title: "Nightlife", description: "Check venues and events on the dates you travel rather than relying on a fixed plan." },
+      ],
+    },
   },
 ];
