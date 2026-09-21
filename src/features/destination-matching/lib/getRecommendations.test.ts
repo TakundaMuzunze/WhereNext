@@ -27,4 +27,11 @@ describe("getRecommendations", () => {
     expect(getRecommendations(answers, Number.NaN)).toEqual([]);
     expect(getRecommendations(answers, destinations.length + 1)).toHaveLength(destinations.length);
   });
+
+  it("does not use the departure field in the current ranking", () => {
+    const fromLondon = getRecommendations({ ...answers, departure: "London" });
+    const fromTokyo = getRecommendations({ ...answers, departure: "Tokyo" });
+
+    expect(fromTokyo).toEqual(fromLondon);
+  });
 });
