@@ -56,4 +56,22 @@ describe("ResultsList", () => {
     expect(screen.getByText(/these are the closest matches we found/i)).toBeInTheDocument();
     expect(screen.queryByText("Best match")).not.toBeInTheDocument();
   });
+
+  it("shows the weak-match state for genuinely unsuitable answers", () => {
+    const unsuitableAnswers: PlannerAnswers = {
+      ...answers,
+      travelMonth: "January",
+      duration: 1,
+      budget: 1,
+      tripType: "city-break",
+      activities: ["An unavailable activity"],
+    };
+    const recommendations = getRecommendations(unsuitableAnswers);
+
+    render(<ResultsList recommendations={recommendations} answers={unsuitableAnswers} />);
+
+    expect(recommendations[0].score).toBeLessThan(60);
+    expect(screen.getByText("Closest match")).toBeInTheDocument();
+    expect(screen.getByText(/nothing fits all your preferences closely/i)).toBeInTheDocument();
+  });
 });
