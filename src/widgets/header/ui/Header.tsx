@@ -1,6 +1,8 @@
+import { SignInToast, SigninBtn } from "@/features/auth";
 import { SavedDestinationsLink } from "@/features/saved-destinations";
 import { ThemeToggle } from "@/features/theme-toggle";
 import Link from "next/link";
+import { Suspense } from "react";
 
 export function Header() {
   return (
@@ -10,15 +12,12 @@ export function Header() {
           WhereNext
         </Link>
 
-        {/* <Link
-          href="/planner"
-          className="rounded-xl border-2 border-secondary bg-secondary px-4 py-2 text-sm font-normal text-text transition hover:bg-accent"
-        >
-          Sign in
-        </Link> */}
-
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-4">
           <SavedDestinationsLink />
+          <SigninBtn />
+          <Suspense fallback={null}>
+            <SignInToast />
+          </Suspense>
           <ThemeToggle />
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
 import "./globals.css";
+import { Toaster } from "sonner";
 
 const initiliaseTheme = `
   (() => {
@@ -31,6 +32,7 @@ export default function RootLayout({
         <Header />
         <div>{children}</div>
         <Footer />
+        <Toaster position="bottom-right" richColors />
       </body>
     </html>
   );
