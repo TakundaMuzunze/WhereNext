@@ -7,5 +7,5 @@ export const { signOut, useSession } = authClient;
 export const signInWithGoogle = () =>
   authClient.signIn.social({
     provider: "google",
-    callbackURL: "/",
+    callbackURL: "/?signedIn=true",
   });
