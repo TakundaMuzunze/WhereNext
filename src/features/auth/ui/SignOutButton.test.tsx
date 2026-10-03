@@ -29,7 +29,8 @@ describe("SignOutButton", () => {
     jest.clearAllMocks();
   });
 
-  it("signs the user out and confirms success", async () => {
+  it("signs out without navigating away from the current destination", async () => {
+    window.history.replaceState({}, "", "/destinations/lisbon-portugal?month=June#overview");
     mockedSignOut.mockResolvedValue({ data: { success: true }, error: null });
 
     render(<SignOutButton />);
@@ -37,7 +38,8 @@ describe("SignOutButton", () => {
 
     expect(screen.getByRole("button", { name: "Signing out…" })).toBeDisabled();
     await waitFor(() => expect(mockedToast.success).toHaveBeenCalledWith("You've been signed out."));
-    expect(mockPush).toHaveBeenCalledWith("/");
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(window.location.pathname + window.location.search + window.location.hash).toBe("/destinations/lisbon-portugal?month=June#overview");
     expect(mockRefresh).toHaveBeenCalledTimes(1);
   });
 
