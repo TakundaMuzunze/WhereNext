@@ -1,19 +1,16 @@
 import { GoogleSigninBtn } from "@/features/auth";
 import { ArrowLeft, Heart, LockKeyhole, UserRound, Sparkles } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { CancelSignInLink } from "@/features/auth/ui/CancelSignInLink";
 
 export default function SignInPage() {
   return (
     <main className="grid min-h-screen bg-background pt-16 lg:grid-cols-[1.05fr_0.95fr]">
       <section aria-label="Why sign in" className="relative hidden overflow-hidden bg-secondary/20 px-8 py-12 lg:flex lg:flex-col xl:px-14">
-        <Link
-          href="/"
-          className="inline-flex min-h-11 w-fit items-center gap-2 rounded-lg px-2 text-sm text-text/70 transition hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-        >
+        <CancelSignInLink className="inline-flex min-h-11 w-fit items-center gap-2 rounded-lg px-2 text-sm text-text/70 transition hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
           <ArrowLeft aria-hidden="true" className="h-4 w-4" />
           Back to exploring
-        </Link>
+        </CancelSignInLink>
 
         <div className="flex flex-1 flex-col items-center justify-center py-8">
           <Image
@@ -45,13 +42,10 @@ export default function SignInPage() {
 
       <section aria-labelledby="sign-in-heading" className="relative flex items-center justify-center px-6 py-12 sm:px-10 lg:py-16">
         <div className="w-full max-w-md">
-          <Link
-            href="/"
-            className="mb-6 inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm text-text/70 transition hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden"
-          >
+          <CancelSignInLink className="mb-6 inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm text-text/70 transition hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden">
             <ArrowLeft aria-hidden="true" className="h-4 w-4" />
             Back to exploring
-          </Link>
+          </CancelSignInLink>
 
           <div className="rounded-3xl border border-primary/20 bg-background p-6 shadow-xl shadow-primary/10 sm:p-8">
             <span className="mb-8 block text-lg font-semibold tracking-tight text-text">WhereNext</span>

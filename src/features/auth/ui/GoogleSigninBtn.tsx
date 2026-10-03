@@ -1,21 +1,34 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { signInWithGoogle } from "@/shared/lib/auth/auth-client";
 
+import { clearPendingSave } from "@/shared/lib/auth/signInJourney";
+
 export function GoogleSigninBtn() {
   const [isSigningIn, setIsSigningIn] = useState(false);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).has("authError")) {
+      clearPendingSave();
+      toast.error("Sign-in was cancelled or unsuccessful. Please try again.");
+    }
+  }, []);
 
   async function handleSignIn() {
     if (isSigningIn) return;
     setIsSigningIn(true);
     try {
-      const result = await signInWithGoogle();
+      const returnTo = new URLSearchParams(window.location.search).get("returnTo");
+      const journeyId = new URLSearchParams(window.location.search).get("saveJourney");
+      const result = await signInWithGoogle(returnTo, journeyId);
       if (result.error) {
+        clearPendingSave();
         toast.error("We couldn't start Google sign-in. Please try again.");
         setIsSigningIn(false);
       }
     } catch {
+      clearPendingSave();
       toast.error("We couldn't start Google sign-in. Please try again.");
       setIsSigningIn(false);
     }

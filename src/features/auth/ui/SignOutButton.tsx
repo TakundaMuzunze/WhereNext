@@ -28,7 +28,6 @@ export function SignOutButton({ variant = "menu" }: SignOutButtonProps) {
       }
 
       toast.success("You've been signed out.");
-      router.push("/");
       router.refresh();
     } catch {
       toast.error("We couldn't sign you out. Please try again.");

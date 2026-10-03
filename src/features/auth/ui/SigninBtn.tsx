@@ -3,11 +3,14 @@
 import { useSession } from "@/shared/lib/auth/auth-client";
 import { ChevronDown, Heart, UserRound } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signInHref } from "@/shared/lib/auth/signInJourney";
 import { useId, useRef, useState } from "react";
 import { SignOutButton } from "./SignOutButton";
 import { UserAvatar } from "./UserAvatar";
 
 export function SigninBtn() {
+  const router = useRouter();
   const { data: session, isPending } = useSession();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -19,7 +22,19 @@ export function SigninBtn() {
 
   if (!session?.user) {
     return (
-      <Link href="/sign-in" className="px-4 py-2 text-sm font-normal text-text transition hover:text-accent">
+      <Link
+        href="/sign-in"
+        onClick={(event) => {
+          const href = signInHref(window.location.pathname + window.location.search + window.location.hash);
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+            event.currentTarget.href = href;
+            return;
+          }
+          event.preventDefault();
+          router.push(href);
+        }}
+        className="px-4 py-2 text-sm font-normal text-text transition hover:text-accent"
+      >
         Sign in
       </Link>
     );
