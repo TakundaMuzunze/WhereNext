@@ -10,8 +10,9 @@ jest.mock("@/shared/lib/auth/auth-client", () => ({
 const mockedUseSession = jest.mocked(useSession);
 const mockedSignOut = jest.mocked(signOut);
 
+const mockPush = jest.fn();
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: jest.fn(), refresh: jest.fn() }),
+  useRouter: () => ({ push: mockPush, refresh: jest.fn() }),
 }));
 
 describe("SigninBtn", () => {
@@ -68,4 +69,13 @@ describe("SigninBtn", () => {
     fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
     await waitFor(() => expect(mockedSignOut).toHaveBeenCalledTimes(1));
   });
+});
+
+it("returns header sign-in to the current destination including query and hash", () => {
+  mockedUseSession.mockReturnValue({ data: null, isPending: false } as ReturnType<typeof useSession>);
+  window.history.replaceState({}, "", "/destinations/lisbon-portugal?month=June#overview");
+  render(<SigninBtn />);
+  fireEvent.click(screen.getByRole("link", { name: "Sign in" }));
+  expect(mockPush).toHaveBeenCalledWith("/sign-in?returnTo=%2Fdestinations%2Flisbon-portugal%3Fmonth%3DJune%23overview");
+  expect(sessionStorage.length).toBe(0);
 });
