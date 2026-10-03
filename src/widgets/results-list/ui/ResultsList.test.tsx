@@ -75,3 +75,11 @@ describe("ResultsList", () => {
     expect(screen.getByText(/nothing fits all your preferences closely/i)).toBeInTheDocument();
   });
 });
+
+// These widget tests exercise content; authentication behaviour is tested with the save button.
+jest.mock("@/shared/lib/auth/auth-client", () => ({ useSession: () => ({ data: null, isPending: false }) }));
+jest.mock("next/navigation", () => ({ useRouter: () => ({ push: jest.fn() }) }));
+
+jest.mock("@/features/saved-destinations/model/useSavedDestinations", () => ({
+  useSavedDestinations: () => ({ isSaved: () => false, isUpdating: () => false, isLoading: false, error: null, save: jest.fn(), unsave: jest.fn() }),
+}));

@@ -59,25 +59,32 @@ test("edit answers returns to a populated planner", async ({ page }) => {
   await expect(page.getByLabel("Travellers")).toHaveValue("2");
 });
 
-test("saves a result and removes it from the saved destinations page", async ({ page }) => {
+test("asks guests to sign in before saving and preserves their results URL", async ({ page }) => {
   await page.goto("/planner");
   await completePlanner(page);
   await page.getByRole("button", { name: "See matches" }).click();
-
+  await expect(page).toHaveURL(/\/results\?/);
+  const resultsUrl = new URL(page.url());
   const firstResult = page.getByLabel("Destination matches").getByRole("article").first();
   await firstResult.getByRole("button", { name: "Save destination" }).click();
-  await expect(firstResult.getByRole("button", { name: "Saved" })).toBeVisible();
+  await expect(page).toHaveURL(/\/sign-in\?returnTo=/);
+  expect(new URL(page.url()).searchParams.get("returnTo")).toBe(resultsUrl.pathname + resultsUrl.search);
+  await expect(page.getByRole("button", { name: "Continue with Google" })).toBeVisible();
+});
 
-  await page.getByRole("link", { name: /^Saved/ }).click();
-  await expect(page).toHaveURL("/saved");
-  await expect(page.getByLabel("Saved destinations").getByRole("article")).toHaveCount(1);
+test("shows the signed-out Saved page without private destinations", async ({ page }) => {
+  await page.goto("/saved");
+  await expect(page).toHaveURL(/\/saved$/);
+  await expect(page.getByRole("heading", { name: "Sign in to view your saved destinations" })).toBeVisible();
+  await expect(page.getByRole("article")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Explore destinations" })).toHaveAttribute("href", "/planner");
+});
 
-  await page.getByRole("link", { name: "View destination" }).click();
-  await expect(page).toHaveURL(/\/destinations\/[^?]+$/);
-  await expect(page.getByRole("link", { name: "Back to saved destinations" })).toBeVisible();
-  await expect(page.getByText(/% match/)).toHaveCount(0);
-  await page.getByRole("link", { name: "Back to saved destinations" }).click();
-
-  await page.getByRole("button", { name: /^Remove .+ from saved destinations$/ }).click();
-  await expect(page.getByRole("heading", { name: "No saved destinations yet" })).toBeVisible();
+test("header sign-in preserves the page and cancellation returns there", async ({ page }) => {
+  await page.goto("/planner?month=June#trip");
+  await page.getByRole("link", { name: "Sign in", exact: true }).click();
+  await expect(page).toHaveURL(/\/sign-in\?returnTo=/);
+  expect(new URL(page.url()).searchParams.get("returnTo")).toBe("/planner?month=June#trip");
+  await page.getByRole("link", { name: "Back to exploring" }).filter({ visible: true }).click();
+  await expect(page).toHaveURL(/\/planner\?month=June#trip$/);
 });

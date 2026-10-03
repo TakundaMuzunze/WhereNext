@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "@/shared/lib/auth/auth-client";
 import { useSavedDestinations } from "@/features/saved-destinations";
 import { destinations } from "@/shared/data/destinations";
 import { ArrowRight, Bookmark, BookmarkCheck } from "lucide-react";
@@ -7,11 +8,55 @@ import Image from "next/image";
 import Link from "next/link";
 
 export function SavedDestinations() {
-  const { destinationIds, unsave } = useSavedDestinations();
+  const { data: session, isPending: authPending } = useSession();
+  const { destinationIds, unsave, isLoading, isUpdating, error, retry } = useSavedDestinations();
   const savedDestinations = destinationIds.flatMap((id) => {
     const destination = destinations.find((item) => item.id === id);
     return destination ? [destination] : [];
   });
+
+  if (authPending || isLoading)
+    return (
+      <p role="status" className="py-12">
+        Loading saved destinations…
+      </p>
+    );
+  if (!session?.user) {
+    return (
+      <section className="py-20 text-center" aria-labelledby="signed-out-saved-title">
+        <span className="mx-auto grid size-16 place-items-center rounded-2xl bg-secondary/20 text-primary">
+          <Bookmark className="size-6" aria-hidden="true" />
+        </span>
+        <h2 id="signed-out-saved-title" className="mt-5 text-2xl font-semibold text-text">
+          Sign in to view your saved destinations
+        </h2>
+        <p className="mx-auto mt-3 max-w-md text-text/70">Your saved places will be here when you return.</p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link
+            href="/sign-in?returnTo=%2Fsaved"
+            className="inline-flex min-h-11 items-center rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white dark:text-[#101214]"
+          >
+            Sign in
+          </Link>
+          <Link
+            href="/planner"
+            className="inline-flex min-h-11 items-center rounded-xl border border-primary/40 px-5 py-3 text-sm font-medium text-text"
+          >
+            Explore destinations
+          </Link>
+        </div>
+      </section>
+    );
+  }
+  if (error)
+    return (
+      <div role="alert" className="py-12">
+        <p>{error}</p>
+        <button type="button" onClick={retry} className="mt-4 underline">
+          Try again
+        </button>
+      </div>
+    );
 
   if (savedDestinations.length === 0) {
     return (
@@ -49,8 +94,9 @@ export function SavedDestinations() {
             <button
               type="button"
               onClick={() => unsave(destination.id)}
-              aria-label={`Remove ${destination.name} from saved destinations`}
-              className="absolute top-3 right-3 grid size-11 place-items-center rounded-xl bg-black/55 text-white backdrop-blur-sm"
+              disabled={isUpdating(destination.id)}
+              aria-label={isUpdating(destination.id) ? `Removing ${destination.name}…` : `Remove ${destination.name} from saved destinations`}
+              className="absolute top-3 right-3 grid size-11 cursor-pointer place-items-center rounded-xl bg-black/55 text-white backdrop-blur-sm"
             >
               <BookmarkCheck className="size-5" aria-hidden="true" />
             </button>

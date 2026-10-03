@@ -1,3 +1,4 @@
+import { SavedDestinationsProvider } from "@/features/saved-destinations";
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
 import "./globals.css";
@@ -29,9 +30,11 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: initiliaseTheme }} />
       </head>
       <body>
-        <Header />
-        <div>{children}</div>
-        <Footer />
+        <SavedDestinationsProvider>
+          <Header />
+          <div>{children}</div>
+          <Footer />
+        </SavedDestinationsProvider>
         <Toaster position="bottom-right" richColors />
       </body>
     </html>
