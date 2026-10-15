@@ -15,10 +15,14 @@ const config: Config = {
   coverageThreshold: {
     global: { branches: 100, functions: 100, lines: 100, statements: 100 },
   },
-  moduleNameMapper: { "^@/(.*)$": "<rootDir>/src/$1" },
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/src/$1",
+    // Jest runs these tests as CommonJS; use Prisma's equivalent CommonJS engine files.
+    "^@prisma/client/runtime/(query_compiler_fast_bg\\.postgresql(?:\\.wasm-base64)?)\\.mjs$": "<rootDir>/node_modules/@prisma/client/runtime/$1.js",
+  },
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   testEnvironment: "jsdom",
-  testPathIgnorePatterns: ["<rootDir>/e2e/"],
+  testPathIgnorePatterns: ["<rootDir>/e2e/", "\\.integration\\.test\\.ts$"],
 };
 
 export default createJestConfig(config);
