@@ -19,6 +19,8 @@ model User {
   savedDestinations SavedDestination[]
   sessions          Session[]
   accounts          Account[]
+
+  shortlists Shortlist[]
 }
 
 model SavedDestination {
@@ -79,4 +81,23 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model ShortlistItem {
+  id  String @id @default(cuid())
+  shortlistId String
+  shortlist   Shortlist @relation(fields: [shortlistId], references: [id], onDelete: Cascade)
+  destinationId String
+  @@unique([shortlistId, destinationId])
+}
+
+model Shortlist {
+  id  String @id @default(cuid())
+  userId String
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  shortlistName  String @db.VarChar(80)
+  shortlistItems  ShortlistItem[] 
+
+  createdAt DateTime @default(now())
 }
