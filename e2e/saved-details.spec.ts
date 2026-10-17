@@ -1,46 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+import { mockShortlists } from "./fixtures/shortlists";
+
 test.beforeEach(async ({ page }) => {
-  let signedIn = true;
-  await page.route("**/api/auth/sign-out", (route) => {
-    signedIn = false;
-    return route.fulfill({ json: { success: true } });
-  });
-  await page.route("**/api/auth/get-session**", (route) =>
-    route.fulfill({
-      json: signedIn
-        ? {
-            user: {
-              id: "test-user",
-              name: "Traveller",
-              email: "test@example.com",
-              emailVerified: true,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-            session: {
-              id: "test-session",
-              userId: "test-user",
-              token: "test",
-              expiresAt: new Date(Date.now() + 86400000).toISOString(),
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-          }
-        : null,
-    }),
-  );
-  let saved = true;
-  let destinationId = "lisbon-portugal";
-  await page.route("**/api/saved-destinations", (route) => {
-    const method = route.request().method();
-    if (method === "POST") {
-      saved = true;
-      destinationId = route.request().postDataJSON().destinationId;
-    }
-    if (method === "DELETE") saved = false;
-    return route.fulfill({ json: method === "GET" ? { savedUserDestinations: saved ? [{ destinationId }] : [] } : { destinationId } });
-  });
+  await mockShortlists(page);
 });
 
 test("signing out from personalised details keeps the destination and planner answers", async ({ page }) => {
@@ -62,13 +25,19 @@ test("signing out from personalised details keeps the destination and planner an
   const first = page.getByLabel("Destination matches").getByRole("article").first();
   const saveButton = first.getByRole("button", { name: /^(Save destination|Saved)$/ });
   await expect(saveButton).toBeEnabled();
-  if ((await saveButton.getAttribute("aria-pressed")) === "false") await saveButton.click();
+  if ((await saveButton.getAttribute("aria-pressed")) === "false") {
+    await saveButton.click();
+    await page.getByRole("checkbox", { name: /Summer/ }).check();
+    await page.getByRole("button", { name: "Save changes" }).click();
+  }
   await expect(first.getByRole("button", { name: "Saved", exact: true })).toBeVisible();
   await first.getByRole("link", { name: "View destination" }).click();
   await expect(page).toHaveURL(/\/destinations\//);
   const detailsUrl = page.url();
   await page.getByRole("button", { name: "Saved", exact: true }).click();
   await expect(page).toHaveURL(detailsUrl);
+  await page.getByRole("checkbox", { name: /Summer/ }).uncheck();
+  await page.getByRole("button", { name: "Save changes" }).click();
   await expect(page.getByRole("button", { name: "Save destination", exact: true })).toBeVisible();
   await expect(page).toHaveURL(detailsUrl);
   await page.getByRole("button", { name: "Open account menu for Traveller" }).click();
@@ -83,7 +52,7 @@ test("signing out from Saved hides private data and stays on Saved", async ({ pa
   await expect(page.getByRole("article")).toHaveCount(1);
   await page.getByRole("button", { name: "Open account menu for Traveller" }).click();
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Sign in to view your saved destinations" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign in to view your shortlists" })).toBeVisible();
   await expect(page.getByRole("article")).toHaveCount(0);
   await expect(page).toHaveURL(/\/saved$/);
   await page.getByRole("link", { name: "Explore destinations" }).click();

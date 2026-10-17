@@ -1,6 +1,6 @@
 # Shortlists
 
-Product, architecture, implementation order, and testing approach confirmed. Published as GitHub issue #23 with ordered sub-issues #24–#29; implementation has not started.
+Product, architecture, implementation order, and testing approach confirmed. Published as GitHub issue #23 with ordered sub-issues #24–#29. The frontend integration in #28 uses the shortlist API and shared membership state; final migration and journey verification remain tracked in #29.
 
 ## Purpose
 
