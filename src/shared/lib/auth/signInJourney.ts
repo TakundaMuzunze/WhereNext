@@ -34,7 +34,7 @@ function readPendingSave(): PendingSave | null {
       return { id: value.id, destinationId: value.destinationId, returnTo: value.returnTo, expiresAt: value.expiresAt };
     }
   } catch {
-    /* Invalid or unavailable storage cannot authorize a save. */
+    /* Invalid or unavailable storage cannot resume a picker. */
   }
   clearPendingSave();
   return null;
@@ -49,7 +49,7 @@ export function signInHref(returnTo: string, destinationId?: string): string {
       sessionStorage.setItem(storageKey, JSON.stringify(intent));
       params.set("saveJourney", intent.id);
     } catch {
-      /* Sign-in still works; saving will require a second click. */
+      /* Sign-in still works; opening the picker will require a second click. */
     }
   }
   return `/sign-in?${params}`;
@@ -68,7 +68,7 @@ export function googleCallbacks(returnTo: string | null, journeyId: string | nul
   return { callbackURL: callback.pathname + callback.search + callback.hash, errorCallbackURL: error.pathname + error.search };
 }
 
-// Consume before making the request: refreshes and repeated effects cannot replay it.
+// Consume before opening the picker: refreshes and repeated effects cannot replay it.
 export function consumePendingSave(): PendingSave | null {
   const url = new URL(window.location.href);
   const journeyId = url.searchParams.get("resumeSave");
