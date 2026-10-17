@@ -79,5 +79,5 @@ jest.mock("@/shared/lib/auth/auth-client", () => ({ useSession: () => ({ data: n
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push: jest.fn() }) }));
 
 jest.mock("@/features/saved-destinations/model/useSavedDestinations", () => ({
-  useSavedDestinations: () => ({ isSaved: () => false, isUpdating: () => false, isLoading: false, error: null, save: jest.fn(), unsave: jest.fn() }),
+  useSavedDestinations: () => ({ isSaved: () => false, isLoading: false, error: null, openPicker: jest.fn() }),
 }));

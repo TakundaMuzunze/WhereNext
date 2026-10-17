@@ -33,3 +33,11 @@ Transactions use Serializable isolation: successful operations behave as though 
 PostgreSQL can reject an overlapping transaction to maintain that guarantee. Prisma reports this as P2034; the endpoint retries the entire transaction, including ownership checks, up to three total attempts. If all attempts conflict, it returns 409 and applies none of that request's changes. Unexpected database failures propagate rather than being presented as successful saves.
 
 This endpoint changes existing-list memberships. Creating a shortlist with its first destination remains the atomic POST operation at `/api/shortlists`.
+
+## Picker confirmation
+
+The same PATCH endpoint accepts an optional `createName` (trimmed, 1–80 characters). It creates one new shortlist with this destination inside the same transaction as `addTo` and `removeFrom`. A duplicate name returns 409; stale references or any other failure roll back the new list as well as the membership changes. The response additionally includes `createdShortlist: { id, shortlistName }` when creation succeeds, so clients can identify it without guessing from membership IDs.
+
+The frontend keeps the name and checkbox selections in a local draft until **Save changes**. Cancel, Escape, close, and clicking the backdrop discard that draft without requests. Failed submissions retain it. After a stale-reference error, refresh discards references to deleted lists, preserves pending changes for surviving lists, and adopts unrelated membership changes from the latest response.
+
+`GET /api/shortlists` now includes each owned list's destination IDs alongside its count. The shared client provider uses that snapshot for browsing, counts, membership checkboxes and Saved indicators. It resets on session changes. Returning from guest sign-in consumes the existing continuation token to open the picker, without writing a save.

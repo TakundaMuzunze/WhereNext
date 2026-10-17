@@ -75,7 +75,7 @@ test("asks guests to sign in before saving and preserves their results URL", asy
 test("shows the signed-out Saved page without private destinations", async ({ page }) => {
   await page.goto("/saved");
   await expect(page).toHaveURL(/\/saved$/);
-  await expect(page.getByRole("heading", { name: "Sign in to view your saved destinations" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign in to view your shortlists" })).toBeVisible();
   await expect(page.getByRole("article")).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Explore destinations" })).toHaveAttribute("href", "/planner");
 });

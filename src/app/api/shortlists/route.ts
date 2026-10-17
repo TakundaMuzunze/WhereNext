@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ shortlist }, { status: 201 });
   } catch (error: unknown) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      return NextResponse.json({ error: "A conflicting shortlist record already exists" }, { status: 409 });
+      return NextResponse.json({ error: "A shortlist with that name already exists" }, { status: 409 });
     }
 
     throw error;
@@ -71,7 +71,8 @@ export async function GET(request: Request) {
 
   const userShortlists = await prisma.shortlist.findMany({
     where: { userId: session.user.id },
-    include: { _count: { select: { shortlistItems: true } } },
+    include: { _count: { select: { shortlistItems: true } }, shortlistItems: { select: { destinationId: true } } },
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
   });
 
   return NextResponse.json({ userShortlists }, { status: 200, headers: { "Cache-Control": "private, no-store" } });
@@ -161,7 +162,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ updatedShortlist }, { status: 200 });
   } catch (error: unknown) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      return NextResponse.json({ error: "A conflicting shortlist record already exists" }, { status: 409 });
+      return NextResponse.json({ error: "A shortlist with that name already exists" }, { status: 409 });
     }
 
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
