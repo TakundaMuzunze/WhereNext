@@ -2,9 +2,10 @@ import { expect, test } from "@playwright/test";
 import { mockShortlists } from "./fixtures/shortlists";
 
 const destinationId = "lisbon-portugal";
+// Destination journeys wait for the document, then assert UI readiness without waiting for the hero image.
 test("first save requires confirmation; Escape, close and Cancel write nothing", async ({ page }) => {
   const state = await mockShortlists(page, []);
-  await page.goto(`/destinations/${destinationId}`);
+  await page.goto(`/destinations/${destinationId}`, { waitUntil: "domcontentloaded" });
   const save = page.getByRole("button", { name: "Save destination", exact: true });
   await save.click();
   await page.getByLabel("Shortlist name").fill("Portugal");
@@ -32,7 +33,7 @@ test("multiple memberships, failed retry, last removal, and reusable empty lists
     { id: "a", name: "Summer", destinationIds: [destinationId] },
     { id: "b", name: "Winter", destinationIds: [] },
   ]);
-  await page.goto(`/destinations/${destinationId}`);
+  await page.goto(`/destinations/${destinationId}`, { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Saved", exact: true }).click();
   await expect(page.getByRole("checkbox", { name: /Summer/ })).toBeChecked();
   await page.getByRole("checkbox", { name: /Winter/ }).check();
@@ -45,7 +46,7 @@ test("multiple memberships, failed retry, last removal, and reusable empty lists
   await page.goto("/saved/a");
   await page.getByRole("button", { name: "Remove Lisbon from this shortlist" }).click();
   await expect(page.getByText("This shortlist is ready for your ideas")).toBeVisible();
-  await page.goto(`/destinations/${destinationId}`);
+  await page.goto(`/destinations/${destinationId}`, { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Saved", exact: true }).click();
   await page.getByRole("checkbox", { name: /Winter/ }).uncheck();
   await page.getByRole("button", { name: "Save changes" }).click();
@@ -91,7 +92,7 @@ test("stale picker refresh retains surviving choices and can create a list with 
     { id: "a", name: "Summer", destinationIds: [destinationId] },
     { id: "b", name: "Winter", destinationIds: [] },
   ]);
-  await page.goto(`/destinations/${destinationId}`);
+  await page.goto(`/destinations/${destinationId}`, { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Saved", exact: true }).click();
   await page.getByRole("checkbox", { name: /Summer/ }).uncheck();
   await page.getByRole("checkbox", { name: /Winter/ }).check();
@@ -111,7 +112,7 @@ test("stale picker refresh retains surviving choices and can create a list with 
 test("guest continuation opens the picker without saving and cancellation keeps it unsaved", async ({ page }) => {
   const state = await mockShortlists(page, []);
   state.signedIn = false;
-  await page.goto(`/destinations/${destinationId}?month=June`);
+  await page.goto(`/destinations/${destinationId}?month=June`, { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Save destination", exact: true }).click();
   await expect(page).toHaveURL(/\/sign-in\?/);
   const intent = await page.evaluate(
@@ -120,11 +121,11 @@ test("guest continuation opens the picker without saving and cancellation keeps 
   state.signedIn = true;
   const callback = new URL(intent.returnTo, page.url());
   callback.searchParams.set("resumeSave", intent.id);
-  await page.goto(callback.toString());
+  await page.goto(callback.toString(), { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("dialog")).toBeVisible();
   expect(state.writes).toBe(0);
   await page.getByRole("button", { name: "Cancel", exact: true }).click();
-  await page.reload();
+  await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.getByRole("button", { name: "Save destination", exact: true })).toBeVisible();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   expect(state.writes).toBe(0);
@@ -145,4 +146,27 @@ test("mobile shortlist browsing and picker fit the viewport", async ({ page }) =
   expect(await page.getByRole("dialog").evaluate((dialog) => dialog.scrollWidth <= dialog.clientWidth)).toBe(true);
   await page.screenshot({ path: "test-results/shortlist-picker-mobile.png" });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test("shortlist picker remains usable while the destination image is loading", async ({ page }) => {
+  await mockShortlists(page, []);
+  let imageRequested = false;
+  let releaseImage = () => {};
+  const imagePending = new Promise<void>((resolve) => {
+    releaseImage = resolve;
+  });
+  await page.route("**/_next/image**", async (route) => {
+    imageRequested = true;
+    await imagePending;
+    await route.abort();
+  });
+  try {
+    await page.goto(`/destinations/${destinationId}`, { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "Save destination", exact: true }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect.poll(() => imageRequested).toBe(true);
+    expect(await page.evaluate(() => document.readyState)).not.toBe("complete");
+  } finally {
+    releaseImage();
+  }
 });
