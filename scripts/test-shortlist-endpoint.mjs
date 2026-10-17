@@ -59,6 +59,7 @@ try {
       "--runInBand",
       "--runTestsByPath",
       "src/app/api/shortlists/route.integration.test.ts",
+      "src/app/api/shortlists/memberships/route.integration.test.ts",
       "--testPathIgnorePatterns=/e2e/",
     ],
     {

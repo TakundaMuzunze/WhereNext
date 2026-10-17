@@ -2,7 +2,8 @@
 
 import { auth } from "@/shared/lib/auth/auth";
 import { prisma } from "@/shared/lib/db/prisma";
-import { POST } from "./route";
+import { DELETE, GET, PATCH, POST } from "./route";
+import { GET as getShortlist } from "./[shortlistid]/route";
 
 // Only authentication is stubbed: the route uses the real generated Prisma client.
 jest.mock("@/shared/lib/auth/auth", () => ({ auth: { api: { getSession: jest.fn() } } }));
@@ -89,4 +90,130 @@ it("rejects invalid input and guests without persisted records", async () => {
   expect((await create("Summer")).status).toBe(401);
   expect(await prisma.shortlist.count()).toBe(0);
   expect(await prisma.shortlistItem.count()).toBe(0);
+});
+
+it("reads only the owner's lists, including empty lists and accurate counts", async () => {
+  await create("Summer");
+  await prisma.shortlist.create({ data: { userId: "alice", shortlistName: "Empty" } });
+  signIn("bob");
+  await create("Private Bob list");
+  signIn();
+  const response = await GET(new Request("http://localhost/api/shortlists"));
+  expect(response.status).toBe(200);
+  const body = await response.json();
+  expect(body.userShortlists).toHaveLength(2);
+  expect(body.userShortlists).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ userId: "alice", shortlistName: "Summer", _count: { shortlistItems: 1 } }),
+      expect.objectContaining({ userId: "alice", shortlistName: "Empty", _count: { shortlistItems: 0 } }),
+    ]),
+  );
+});
+
+function deleteShortlist(shortlistId: string) {
+  return DELETE(new Request("http://localhost/api/shortlists", { method: "DELETE", body: JSON.stringify({ shortlistId }) }));
+}
+
+it("cannot delete another owner's shortlist or a missing shortlist", async () => {
+  await create("Summer");
+  const shortlist = await prisma.shortlist.findFirstOrThrow();
+  signIn("bob");
+  expect((await deleteShortlist(shortlist.id)).status).toBe(404);
+  expect((await deleteShortlist("missing")).status).toBe(404);
+  expect(await prisma.shortlist.count()).toBe(1);
+  expect(await prisma.shortlistItem.count()).toBe(1);
+});
+
+it("deletes only the selected list and its memberships, preserving shared destinations elsewhere", async () => {
+  await create("Summer");
+  const selected = await prisma.shortlist.findFirstOrThrow();
+  await create("Winter");
+  signIn("bob");
+  await create("Summer");
+  signIn();
+  expect((await deleteShortlist(selected.id)).status).toBe(200);
+  expect(await prisma.shortlist.findUnique({ where: { id: selected.id } })).toBeNull();
+  expect(await prisma.shortlistItem.count({ where: { shortlistId: selected.id } })).toBe(0);
+  expect(await prisma.shortlist.count()).toBe(2);
+  expect(await prisma.shortlistItem.count({ where: { destinationId: "lisbon-portugal" } })).toBe(2);
+});
+
+it("allows deletion of an empty shortlist", async () => {
+  const shortlist = await prisma.shortlist.create({ data: { userId: "alice", shortlistName: "Empty" } });
+  expect((await deleteShortlist(shortlist.id)).status).toBe(200);
+  expect(await prisma.shortlist.count()).toBe(0);
+});
+
+it("renames only an owned list and handles missing lists and case-insensitive conflicts", async () => {
+  await create("Summer");
+  const shortlist = await prisma.shortlist.findFirstOrThrow();
+  await create("Winter");
+  function rename(name: string, shortlistId = shortlist.id) {
+    return PATCH(new Request("http://localhost/api/shortlists", { method: "PATCH", body: JSON.stringify({ shortlistId, name }) }));
+  }
+  signIn("bob");
+  expect((await rename("Changed by Bob")).status).toBe(404);
+  signIn();
+  expect((await rename("Changed", "missing")).status).toBe(404);
+  expect((await rename(" WINTER ")).status).toBe(409);
+  expect(await prisma.shortlist.findUniqueOrThrow({ where: { id: shortlist.id } })).toMatchObject({ shortlistName: "Summer" });
+  expect((await rename("  Autumn  ")).status).toBe(200);
+  expect(await prisma.shortlist.findUniqueOrThrow({ where: { id: shortlist.id } })).toMatchObject({ shortlistName: "Autumn" });
+  expect(await prisma.shortlistItem.count({ where: { shortlistId: shortlist.id } })).toBe(1);
+});
+
+it("creates an empty shortlist through POST and rejects case-insensitive duplicates", async () => {
+  function empty(name: string) {
+    return POST(new Request("http://localhost/api/shortlists", { method: "POST", body: JSON.stringify({ name, userId: "bob" }) }));
+  }
+  expect((await empty("  Ideas  ")).status).toBe(201);
+  expect(await prisma.shortlist.findMany({ include: { shortlistItems: true } })).toEqual([
+    expect.objectContaining({ userId: "alice", shortlistName: "Ideas", shortlistItems: [] }),
+  ]);
+  expect((await empty("IDEAS")).status).toBe(409);
+  expect(await prisma.shortlist.count()).toBe(1);
+  expect(await prisma.shortlistItem.count()).toBe(0);
+});
+
+it.each([null, 123, "", "unknown"])("rejects supplied invalid destinations without creating an empty list: %j", async (destinationId) => {
+  expect((await create("Ideas", { destinationId })).status).toBe(typeof destinationId === "string" ? 404 : 400);
+  expect(await prisma.shortlist.count()).toBe(0);
+  expect(await prisma.shortlistItem.count()).toBe(0);
+});
+
+it("reads an owned shortlist and its destination memberships from the path ID", async () => {
+  await create("Summer");
+  const shortlist = await prisma.shortlist.findFirstOrThrow();
+  const response = await getShortlist(new Request(`http://localhost/api/shortlists/${shortlist.id}?id=ignored`), {
+    params: Promise.resolve({ shortlistid: shortlist.id }),
+  });
+  expect(response.status).toBe(200);
+  await expect(response.json()).resolves.toMatchObject({
+    shortlist: {
+      id: shortlist.id,
+      userId: "alice",
+      shortlistName: "Summer",
+      shortlistItems: [expect.objectContaining({ shortlistId: shortlist.id, destinationId: "lisbon-portugal" })],
+    },
+  });
+});
+
+it("returns an empty membership array for an owned empty shortlist", async () => {
+  const shortlist = await prisma.shortlist.create({ data: { userId: "alice", shortlistName: "Empty" } });
+  const response = await getShortlist(new Request(`http://localhost/api/shortlists/${shortlist.id}`), {
+    params: Promise.resolve({ shortlistid: shortlist.id }),
+  });
+  expect(response.status).toBe(200);
+  await expect(response.json()).resolves.toMatchObject({ shortlist: { id: shortlist.id, shortlistItems: [] } });
+});
+
+it("does not reveal another owner's shortlist or distinguish it from a missing one", async () => {
+  await create("Private");
+  const shortlist = await prisma.shortlist.findFirstOrThrow();
+  signIn("bob");
+  for (const shortlistid of [shortlist.id, "missing"]) {
+    const response = await getShortlist(new Request(`http://localhost/api/shortlists/${shortlistid}`), { params: Promise.resolve({ shortlistid }) });
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toEqual({ error: "Shortlist not found" });
+  }
 });
