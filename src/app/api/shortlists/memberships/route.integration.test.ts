@@ -113,3 +113,47 @@ it("serializes opposing changes to the same membership", async () => {
   await change([], ["a"]);
   expect(await prisma.shortlistItem.count()).toBe(0);
 });
+
+it("creates a shortlist and confirms its membership alongside existing-list changes", async () => {
+  await prisma.shortlistItem.create({ data: { shortlistId: "a", destinationId } });
+  const response = await change(["b"], ["a"], { createName: "  Summer  ", userId: "bob" });
+  expect(response.status).toBe(200);
+  const created = await prisma.shortlist.findFirstOrThrow({ where: { userId: "alice", shortlistName: "Summer" }, include: { shortlistItems: true } });
+  expect(created.shortlistItems).toEqual([expect.objectContaining({ destinationId })]);
+  expect(await prisma.shortlistItem.count({ where: { shortlistId: "a" } })).toBe(0);
+  expect(await prisma.shortlistItem.count({ where: { shortlistId: "b" } })).toBe(1);
+  await expect(response.json()).resolves.toEqual({
+    destinationId,
+    shortlistIds: ["b", created.id].sort(),
+    isSaved: true,
+    createdShortlist: { id: created.id, shortlistName: "Summer" },
+  });
+});
+it("rolls back membership changes on a duplicate picker name", async () => {
+  await prisma.shortlistItem.create({ data: { shortlistId: "a", destinationId } });
+  expect((await change(["b"], ["a"], { createName: "a" })).status).toBe(409);
+  expect(await prisma.shortlist.count()).toBe(4);
+  expect(await prisma.shortlistItem.findMany()).toEqual([expect.objectContaining({ shortlistId: "a", destinationId })]);
+});
+it("does not create a shortlist when another picker reference is unavailable", async () => {
+  expect((await change(["missing"], [], { createName: "Summer" })).status).toBe(404);
+  expect(await prisma.shortlist.count()).toBe(4);
+  expect(await prisma.shortlistItem.count()).toBe(0);
+});
+it("rolls back picker-created shortlist and additions when removal fails", async () => {
+  await prisma.shortlistItem.create({ data: { shortlistId: "a", destinationId } });
+  await prisma.$executeRawUnsafe(
+    `CREATE FUNCTION test_reject_delete() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'forced deletion failure'; END $$`,
+  );
+  await prisma.$executeRawUnsafe(
+    `CREATE TRIGGER test_reject_delete BEFORE DELETE ON "ShortlistItem" FOR EACH ROW EXECUTE FUNCTION test_reject_delete()`,
+  );
+  try {
+    await expect(change(["b"], ["a"], { createName: "Summer" })).rejects.toThrow();
+    expect(await prisma.shortlist.count()).toBe(4);
+    expect(await prisma.shortlistItem.findMany()).toEqual([expect.objectContaining({ shortlistId: "a", destinationId })]);
+  } finally {
+    await prisma.$executeRawUnsafe('DROP TRIGGER test_reject_delete ON "ShortlistItem"');
+    await prisma.$executeRawUnsafe("DROP FUNCTION test_reject_delete()");
+  }
+});

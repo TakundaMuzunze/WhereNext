@@ -39,6 +39,15 @@ export async function PATCH(request: Request) {
     );
   }
 
+  let createName: string | undefined;
+
+  if ("createName" in body) {
+    if (typeof body.createName !== "string" || body.createName.trim().length < 1 || body.createName.trim().length > 80) {
+      return NextResponse.json({ error: "Shortlist name must contain 1–80 characters" }, { status: 400 });
+    }
+    createName = body.createName.trim();
+  }
+
   const destinationId = body.destinationId;
 
   if (!destinations.some((destination) => destination.id === destinationId)) {
@@ -57,10 +66,18 @@ export async function PATCH(request: Request) {
   // Retry the entire transaction, including ownership checks, after a serialization conflict.
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const shortlistIds = await prisma.$transaction(
+      const result = await prisma.$transaction(
         async (tx) => {
           const ownedCount = await tx.shortlist.count({ where: { id: { in: referencedIds }, userId: session.user.id } });
           if (ownedCount !== referencedIds.length) throw new UnavailableShortlistError();
+
+          let createdShortlist: { id: string; shortlistName: string } | undefined;
+          if (createName !== undefined) {
+            createdShortlist = await tx.shortlist.create({
+              data: { userId: session.user.id, shortlistName: createName, shortlistItems: { create: { destinationId } } },
+              select: { id: true, shortlistName: true },
+            });
+          }
 
           if (addTo.length > 0) {
             await tx.shortlistItem.createMany({
@@ -78,15 +95,19 @@ export async function PATCH(request: Request) {
             orderBy: { shortlistId: "asc" },
           });
 
-          return memberships.map((membership) => membership.shortlistId);
+          return { shortlistIds: memberships.map((membership) => membership.shortlistId), ...(createdShortlist ? { createdShortlist } : {}) };
         },
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
 
-      return NextResponse.json({ destinationId, shortlistIds, isSaved: shortlistIds.length > 0 });
+      return NextResponse.json({ destinationId, ...result, isSaved: result.shortlistIds.length > 0 });
     } catch (error: unknown) {
       if (error instanceof UnavailableShortlistError || (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003")) {
         return NextResponse.json({ error: "One or more shortlists are unavailable. Refresh your shortlists and try again." }, { status: 404 });
+      }
+
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        return NextResponse.json({ error: "A shortlist with that name already exists" }, { status: 409 });
       }
 
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {

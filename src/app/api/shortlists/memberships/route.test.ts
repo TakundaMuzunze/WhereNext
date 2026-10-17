@@ -49,7 +49,10 @@ function databaseError(code: string) {
   return new Prisma.PrismaClientKnownRequestError("fixture", { code, clientVersion: "7.10.0" });
 }
 it("retries serialization failures and derives saved state from the result", async () => {
-  jest.mocked(prisma.$transaction).mockRejectedValueOnce(databaseError("P2034")).mockResolvedValueOnce(["list-1"]);
+  jest
+    .mocked(prisma.$transaction)
+    .mockRejectedValueOnce(databaseError("P2034"))
+    .mockResolvedValueOnce({ shortlistIds: ["list-1"] });
   const response = await change(valid);
   expect(response.status).toBe(200);
   await expect(response.json()).resolves.toEqual({ destinationId: valid.destinationId, shortlistIds: ["list-1"], isSaved: true });
@@ -68,4 +71,15 @@ it("rethrows unexpected failures", async () => {
   const error = new Error("Connection unavailable");
   jest.mocked(prisma.$transaction).mockRejectedValue(error);
   await expect(change(valid)).rejects.toBe(error);
+});
+
+it.each([null, 42, "", "  ", "a".repeat(81)])("rejects an invalid picker-created name: %j", async (createName) => {
+  expect((await change({ ...valid, createName })).status).toBe(400);
+  expect(prisma.$transaction).not.toHaveBeenCalled();
+});
+it("returns a name conflict without reporting a successful save", async () => {
+  jest.mocked(prisma.$transaction).mockRejectedValue(databaseError("P2002"));
+  const response = await change({ ...valid, createName: "Summer" });
+  expect(response.status).toBe(409);
+  await expect(response.json()).resolves.toEqual({ error: "A shortlist with that name already exists" });
 });

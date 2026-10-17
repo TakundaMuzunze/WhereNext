@@ -88,7 +88,7 @@ it("returns a conflict for a Prisma uniqueness error", async () => {
     .mockRejectedValue(new Prisma.PrismaClientKnownRequestError("Unique constraint failed", { code: "P2002", clientVersion: "7.10.0" }));
   const response = await POST(request(valid));
   expect(response.status).toBe(409);
-  await expect(response.json()).resolves.toEqual({ error: "A conflicting shortlist record already exists" });
+  await expect(response.json()).resolves.toEqual({ error: "A shortlist with that name already exists" });
 });
 
 it.each([
@@ -115,7 +115,8 @@ describe("GET", () => {
     await expect(response.json()).resolves.toEqual({ userShortlists: [] });
     expect(prisma.shortlist.findMany).toHaveBeenCalledWith({
       where: { userId: "owner" },
-      include: { _count: { select: { shortlistItems: true } } },
+      include: { _count: { select: { shortlistItems: true } }, shortlistItems: { select: { destinationId: true } } },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     });
   });
 });
