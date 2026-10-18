@@ -23,7 +23,7 @@ export function TripDetailsStep({ answers, onUpdate }: TripDetailsStepProps) {
           value={answers.departure}
           onChange={(event) => onUpdate("departure", event.target.value)}
           placeholder="London"
-          className="w-full rounded-xl border border-primary/20 bg-background px-4 py-3 text-text outline-none focus:border-primary"
+          className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-text outline-none focus:border-primary"
         />
       </div>
 
@@ -38,7 +38,7 @@ export function TripDetailsStep({ answers, onUpdate }: TripDetailsStepProps) {
             required
             value={answers.travelMonth}
             onChange={(event) => onUpdate("travelMonth", event.target.value)}
-            className="w-full cursor-pointer rounded-xl border border-primary/20 bg-background px-4 py-3 text-text outline-none focus:border-primary"
+            className="w-full cursor-pointer rounded-xl border border-border bg-surface px-4 py-3 text-text outline-none focus:border-primary"
           >
             <option value="" disabled>
               Select a month
@@ -64,7 +64,7 @@ export function TripDetailsStep({ answers, onUpdate }: TripDetailsStepProps) {
             value={answers.duration}
             onChange={(event) => onUpdate("duration", event.target.value === "" ? "" : event.target.valueAsNumber)}
             placeholder="7"
-            className="w-full rounded-xl border border-primary/20 bg-background px-4 py-3 text-text outline-none focus:border-primary"
+            className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-text outline-none focus:border-primary"
           />
         </div>
 
@@ -81,7 +81,7 @@ export function TripDetailsStep({ answers, onUpdate }: TripDetailsStepProps) {
             value={answers.budget}
             onChange={(event) => onUpdate("budget", event.target.value === "" ? "" : event.target.valueAsNumber)}
             placeholder="£800"
-            className="w-full rounded-xl border border-primary/20 bg-background px-4 py-3 text-text outline-none focus:border-primary"
+            className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-text outline-none focus:border-primary"
           />
         </div>
 
@@ -98,7 +98,7 @@ export function TripDetailsStep({ answers, onUpdate }: TripDetailsStepProps) {
             value={answers.travellers}
             onChange={(event) => onUpdate("travellers", event.target.value === "" ? "" : event.target.valueAsNumber)}
             placeholder="2"
-            className="w-full rounded-xl border border-primary/20 bg-background px-4 py-3 text-text outline-none focus:border-primary"
+            className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-text outline-none focus:border-primary"
           />
         </div>
       </div>

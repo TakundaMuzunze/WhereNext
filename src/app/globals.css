@@ -4,26 +4,40 @@
 
 @layer base {
   :root {
-    --text: #101214;
-    --background: #f3f5f7;
-    --primary: #2f4760;
-    --secondary: #88afd3;
-    --accent: #2b69a6;
+    color-scheme: light;
+    --text: #182f39;
+    --background: #faf8f3;
+    --surface: #ffffff;
+    --muted: #5c6c70;
+    --border: #dbe1dc;
+    --primary: #194f68;
+    --primary-foreground: #ffffff;
+    --secondary: #eaf0ee;
+    --accent: #194f68;
   }
 
   .dark {
-    --text: #ebedef;
-    --background: #080a0c;
-    --primary: #9fb7d0;
-    --secondary: #2c5377;
-    --accent: #5996d4;
+    color-scheme: dark;
+    --text: #edf3ef;
+    --background: #101719;
+    --surface: #192326;
+    --muted: #a6b7b9;
+    --border: #344347;
+    --primary: #a9d0e2;
+    --primary-foreground: #132e3a;
+    --secondary: #243737;
+    --accent: #a9d0e2;
   }
 }
 
 @theme inline {
   --color-text: var(--text);
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
   --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
 }

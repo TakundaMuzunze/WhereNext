@@ -38,18 +38,16 @@ export function DestinationDetails({ destination, recommendation, answers, match
       </Link>
 
       <section className="grid gap-8 md:grid-cols-[1.15fr_0.85fr]" aria-labelledby="destination-title">
-        <div className="flex min-h-80 flex-col justify-center rounded-3xl border border-primary/20 bg-background p-8 shadow-sm sm:p-10">
+        <div className="flex min-h-80 flex-col justify-center rounded-3xl border border-border bg-surface p-8 shadow-sm sm:p-10">
           {isPersonalised && <p className="text-xs font-medium tracking-[0.14em] text-accent uppercase">{matchLabel}</p>}
           <h1 id="destination-title" className="mt-4 text-5xl font-semibold tracking-[-0.055em] text-text sm:text-6xl">
             {destination.name}
             <span className="block font-normal text-text/50">{destination.country}</span>
           </h1>
-          <p className="mt-5 max-w-xl leading-7 text-text/70">{destination.description}</p>
+          <p className="mt-5 max-w-xl leading-7 text-muted">{destination.description}</p>
           {isPersonalised && (
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <span className="rounded-xl bg-primary px-3 py-2 text-sm font-medium text-white dark:text-[#101214]">
-                {recommendation?.score}% match
-              </span>
+              <span className="rounded-xl bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">{recommendation?.score}% match</span>
               <span className="text-sm font-medium text-accent">Built around your trip answers</span>
             </div>
           )}
@@ -94,7 +92,7 @@ export function DestinationDetails({ destination, recommendation, answers, match
               <h2 className="text-2xl font-semibold tracking-tight text-text">Why {destination.name} fits your trip</h2>
               <ul className="mt-5 grid gap-3">
                 {recommendation?.reasons.map((reason) => (
-                  <li key={reason} className="flex items-start gap-3 leading-6 text-text/75">
+                  <li key={reason} className="flex items-start gap-3 leading-6 text-muted">
                     <CircleCheck className="mt-0.5 size-5 shrink-0 text-accent" aria-hidden="true" />
                     {reason}
                   </li>
@@ -105,10 +103,10 @@ export function DestinationDetails({ destination, recommendation, answers, match
 
           <section>
             <h2 className="text-2xl font-semibold tracking-tight text-text">Who this trip is for</h2>
-            <p className="mt-2 text-sm leading-6 text-text/65">A few honest signals to help you decide whether this destination feels right.</p>
+            <p className="mt-2 text-sm leading-6 text-muted">A few honest signals to help you decide whether this destination feels right.</p>
 
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl bg-secondary/25 p-5 sm:p-6">
+              <div className="rounded-2xl bg-secondary p-5 sm:p-6">
                 <h3 className="text-base font-semibold text-accent">Best for</h3>
                 <ul className="mt-4 list-disc space-y-3 pl-5 text-sm leading-6 text-text/80 marker:text-accent">
                   {destination.guide.bestFor.map((reason) => (
@@ -116,8 +114,8 @@ export function DestinationDetails({ destination, recommendation, answers, match
                   ))}
                 </ul>
               </div>
-              <div className="rounded-2xl bg-primary/25 p-5 sm:p-6 dark:bg-white/5">
-                <h3 className="text-base font-semibold text-text/75">Think twice if…</h3>
+              <div className="rounded-2xl bg-surface p-5 sm:p-6">
+                <h3 className="text-base font-semibold text-muted">Think twice if…</h3>
                 <ul className="mt-4 list-disc space-y-3 pl-5 text-sm leading-6 text-text/80 marker:text-text/50">
                   {destination.guide.watchOutFor.map((reason) => (
                     <li key={reason}>{reason}</li>
@@ -129,16 +127,16 @@ export function DestinationDetails({ destination, recommendation, answers, match
 
           <section>
             <h2 className="text-2xl font-semibold tracking-tight text-text">A way to spend a few days</h2>
-            <p className="mt-2 text-sm leading-6 text-text/65">Ideas to borrow from, not a booked or personalised day-by-day schedule.</p>
+            <p className="mt-2 text-sm leading-6 text-muted">Ideas to borrow from, not a booked or personalised day-by-day schedule.</p>
             <ol className="mt-5 border-t border-primary/15">
               {destination.guide.itineraryIdeas.map(({ title, description }, index) => (
                 <li key={title} className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 border-b border-primary/15 py-5">
-                  <span className="grid size-9 place-items-center rounded-full bg-secondary/25 text-xs font-medium text-accent" aria-hidden="true">
+                  <span className="grid size-9 place-items-center rounded-full bg-secondary text-xs font-medium text-accent" aria-hidden="true">
                     {String(index + 1).padStart(2, "0")}
                   </span>
                   <div>
                     <h3 className="font-semibold text-text">{title}</h3>
-                    <p className="mt-1 text-sm leading-6 text-text/70">{description}</p>
+                    <p className="mt-1 text-sm leading-6 text-muted">{description}</p>
                   </div>
                 </li>
               ))}
@@ -146,33 +144,33 @@ export function DestinationDetails({ destination, recommendation, answers, match
           </section>
         </div>
 
-        <aside className="self-start rounded-3xl bg-secondary/20 p-7" aria-label="Useful travel notes">
+        <aside className="self-start rounded-3xl bg-secondary p-7" aria-label="Useful travel notes">
           <h2 className="text-2xl font-semibold tracking-tight text-text">Good to know</h2>
           <ul className="mt-5">
             {destination.guide.travelTips.map(({ title, description }) => (
               <li key={title} className="border-t border-primary/15 py-4">
                 <h3 className="text-sm font-semibold text-primary">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-text/75">{description}</p>
+                <p className="mt-2 text-sm leading-6 text-muted">{description}</p>
               </li>
             ))}
             {answers && (
               <li className="border-t border-primary/15 py-4">
                 <h3 className="text-sm font-semibold text-primary">Budget</h3>
-                <p className="mt-2 text-sm leading-6 text-text/75">
+                <p className="mt-2 text-sm leading-6 text-muted">
                   Allow around £{estimatedTotal.toLocaleString()} for {travellerCount} {travellerCount === 1 ? "traveller" : "travellers"}, before any
                   extra flexibility.
                 </p>
               </li>
             )}
           </ul>
-          <p className="mt-2 text-xs leading-5 text-text/60">Costs are broad planning estimates, not live quotes or itemised prices.</p>
+          <p className="mt-2 text-xs leading-5 text-muted">Costs are broad planning estimates, not live quotes or itemised prices.</p>
         </aside>
       </div>
 
       <div className="mt-12 flex flex-wrap gap-3 border-t border-primary/15 pt-7">
         <Link
           href={backHref ?? "/saved"}
-          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white dark:text-[#101214]"
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           {backLabel ?? (isPersonalised ? "Back to matches" : "Back to saved")}

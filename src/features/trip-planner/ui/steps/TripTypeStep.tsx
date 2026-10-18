@@ -19,13 +19,11 @@ export function TripTypeStep({ selectedTripType, onSelect }: TripTypeStepProps) 
             aria-pressed={isSelected}
             onClick={() => onSelect(tripType.value)}
             className={`rounded-2xl border p-5 text-left transition ${
-              isSelected
-                ? "border-primary bg-primary text-white dark:text-[#101214]"
-                : "border-primary/20 bg-background text-text hover:border-primary"
+              isSelected ? "border-primary bg-primary text-primary-foreground" : "border-border bg-surface text-text hover:border-primary"
             }`}
           >
             <h2 className="text-lg font-semibold">{tripType.label}</h2>
-            <p className={`mt-2 text-sm ${isSelected ? "opacity-80" : "text-text/70"}`}>{tripType.description}</p>
+            <p className={`mt-2 text-sm ${isSelected ? "opacity-80" : "text-muted"}`}>{tripType.description}</p>
           </button>
         );
       })}

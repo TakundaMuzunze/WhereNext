@@ -29,7 +29,7 @@ export function ShortlistBrowser({ shortlistId }: { shortlistId?: string }) {
       <section className="py-20 text-center">
         <Bookmark className="mx-auto size-10 text-primary" aria-hidden="true" />
         <h2 className="mt-5 text-2xl font-semibold">Sign in to view your shortlists</h2>
-        <p className="mt-3 text-text/70">Keep your travel ideas together in private shortlists.</p>
+        <p className="mt-3 text-muted">Keep your travel ideas together in private shortlists.</p>
         <div className="mt-6 flex justify-center gap-3">
           <Link className={shortlistButton} href={`/sign-in?returnTo=${encodeURIComponent(shortlistId ? `/saved/${shortlistId}` : "/saved")}`}>
             Sign in
@@ -58,7 +58,7 @@ export function ShortlistBrowser({ shortlistId }: { shortlistId?: string }) {
             ← All shortlists
           </Link>
         ) : (
-          <p className="text-text/60">
+          <p className="text-muted">
             {state.shortlists.length} {state.shortlists.length === 1 ? "shortlist" : "shortlists"}
           </p>
         )}
@@ -85,8 +85,8 @@ export function ShortlistBrowser({ shortlistId }: { shortlistId?: string }) {
       {shortlistId ? (
         list ? (
           <>
-            <section className="mb-8 rounded-3xl border border-primary/20 bg-secondary/10 p-6">
-              <p className="text-sm text-text/60">Private shortlist · {list.destinationIds.length} destinations</p>
+            <section className="mb-8 rounded-3xl border border-border bg-secondary p-6">
+              <p className="text-sm text-muted">Private shortlist · {list.destinationIds.length} destinations</p>
               <h2 className="mt-2 text-3xl font-semibold break-words">{list.name}</h2>
               <div className="mt-5 flex gap-3">
                 <button className={shortlistButton} disabled={state.busy} onClick={() => setAction({ kind: "rename", id: list.id, name: list.name })}>
@@ -100,7 +100,7 @@ export function ShortlistBrowser({ shortlistId }: { shortlistId?: string }) {
             {!list.destinationIds.length ? (
               <section className="py-16 text-center">
                 <h2 className="text-2xl font-semibold">This shortlist is ready for your ideas</h2>
-                <p className="mt-3 text-text/70">Save a destination and choose this shortlist to add it here.</p>
+                <p className="mt-3 text-muted">Save a destination and choose this shortlist to add it here.</p>
                 <Link className={`${shortlistButton} mt-6`} href="/planner">
                   Explore destinations
                 </Link>
@@ -111,8 +111,8 @@ export function ShortlistBrowser({ shortlistId }: { shortlistId?: string }) {
                   const destination = destinations.find((item) => item.id === id);
                   if (!destination) return [];
                   return [
-                    <article key={id} className="overflow-hidden rounded-3xl border border-primary/20 bg-background shadow-sm">
-                      <div className="relative h-48 bg-secondary/20">
+                    <article key={id} className="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
+                      <div className="relative h-48 bg-secondary">
                         <Image
                           src={destination.image.src}
                           alt={destination.image.alt}
@@ -122,9 +122,9 @@ export function ShortlistBrowser({ shortlistId }: { shortlistId?: string }) {
                         />
                       </div>
                       <div className="p-5">
-                        <p className="text-sm text-text/60">{destination.country}</p>
+                        <p className="text-sm text-muted">{destination.country}</p>
                         <h3 className="mt-1 text-2xl font-semibold">{destination.name}</h3>
-                        <p className="mt-3 text-sm leading-6 text-text/70">{destination.description}</p>
+                        <p className="mt-3 text-sm leading-6 text-muted">{destination.description}</p>
                         <div className="mt-5 flex flex-wrap gap-3">
                           <Link className={shortlistButton} href={`/destinations/${id}`}>
                             View destination <ArrowRight className="ml-2 size-4" aria-hidden="true" />
@@ -150,14 +150,14 @@ export function ShortlistBrowser({ shortlistId }: { shortlistId?: string }) {
       ) : state.shortlists.length ? (
         <section aria-label="Your shortlists" className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {state.shortlists.map((item) => (
-            <article key={item.id} className="rounded-3xl border border-primary/20 bg-secondary/10 p-6">
+            <article key={item.id} className="rounded-3xl border border-border bg-secondary p-6">
               <FolderHeart className="size-8 text-primary" aria-hidden="true" />
               <h2 className="mt-5 text-2xl font-semibold break-words">
                 <Link href={`/saved/${encodeURIComponent(item.id)}`} className="hover:underline">
                   {item.name}
                 </Link>
               </h2>
-              <p className="mt-2 text-text/60">
+              <p className="mt-2 text-muted">
                 {item.destinationIds.length} {item.destinationIds.length === 1 ? "destination" : "destinations"}
               </p>
               <p className="mt-4 text-xs tracking-wider text-text/50 uppercase">Private shortlist</p>
@@ -168,7 +168,7 @@ export function ShortlistBrowser({ shortlistId }: { shortlistId?: string }) {
         <section className="py-16 text-center">
           <FolderHeart className="mx-auto size-12 text-primary" aria-hidden="true" />
           <h2 className="mt-5 text-2xl font-semibold">No shortlists yet</h2>
-          <p className="mt-3 text-text/70">Create a shortlist for your next trip, or save a destination to get started.</p>
+          <p className="mt-3 text-muted">Create a shortlist for your next trip, or save a destination to get started.</p>
         </section>
       )}
       {action && <ManageShortlist key={`${action.kind}-${"id" in action ? action.id : "new"}`} action={action} onClose={() => setAction(null)} />}
@@ -245,7 +245,7 @@ function ManageShortlist({ action, onClose }: { action: Action; onClose: () => v
         {action.kind === "delete" ? (
           <>
             <p className="break-words">Delete “{action.name}”?</p>
-            <p className="mt-3 text-sm leading-6 text-text/70">
+            <p className="mt-3 text-sm leading-6 text-muted">
               Currently, {exclusiveCount} {exclusiveCount === 1 ? "destination is" : "destinations are"} saved only here and will become unsaved.
               Destinations in other shortlists stay saved. This cannot be undone.
             </p>

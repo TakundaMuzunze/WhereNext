@@ -90,10 +90,10 @@ export function TripPlannerForm({ initialAnswers = defaultAnswers }: TripPlanner
 
   return (
     <form aria-labelledby="planner-heading" onSubmit={handleSubmit} className="mx-auto flex min-h-screen w-full max-w-4xl items-center px-6 py-24">
-      <div className="w-full rounded-3xl border border-primary/20 bg-background p-6 shadow-sm md:p-8">
+      <div className="w-full rounded-3xl border border-border bg-surface p-6 shadow-sm md:p-8">
         <div className="mb-8">
           <div className="flex w-full flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="shrink-0 text-sm tracking-widest text-text/60 uppercase">
+            <p className="shrink-0 text-sm tracking-widest text-muted uppercase">
               Step {step} of {totalPlannerSteps}
             </p>
 
@@ -104,7 +104,7 @@ export function TripPlannerForm({ initialAnswers = defaultAnswers }: TripPlanner
             Plan your next trip
           </h1>
 
-          <p className="mt-3 text-text/75">Answer a few questions and WhereNext will build your destination shortlist.</p>
+          <p className="mt-3 text-muted">Answer a few questions and WhereNext will build your destination shortlist.</p>
           <Link href="/planner?kind=dated" className="mt-3 inline-flex min-h-11 items-center text-primary underline">
             Plan with exact dates and a UK airport
           </Link>
@@ -127,7 +127,7 @@ export function TripPlannerForm({ initialAnswers = defaultAnswers }: TripPlanner
             type="button"
             onClick={goBack}
             disabled={step === plannerSteps.tripDetails}
-            className="cursor-pointer rounded-xl border border-primary/20 px-5 py-3 text-text transition disabled:cursor-not-allowed disabled:opacity-40"
+            className="cursor-pointer rounded-xl border border-border px-5 py-3 text-text transition disabled:cursor-not-allowed disabled:opacity-40"
           >
             Back
           </button>
@@ -136,7 +136,7 @@ export function TripPlannerForm({ initialAnswers = defaultAnswers }: TripPlanner
             <button
               type="submit"
               disabled={!canContinue}
-              className="cursor-pointer rounded-xl bg-primary px-5 py-3 text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#101214]"
+              className="cursor-pointer rounded-xl bg-primary px-5 py-3 text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Continue
             </button>
@@ -144,7 +144,7 @@ export function TripPlannerForm({ initialAnswers = defaultAnswers }: TripPlanner
             <button
               type="submit"
               disabled={!canContinue}
-              className="cursor-pointer rounded-xl bg-primary px-5 py-3 text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#101214]"
+              className="cursor-pointer rounded-xl bg-primary px-5 py-3 text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
               See matches
             </button>

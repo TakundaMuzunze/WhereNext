@@ -10,7 +10,7 @@ type ResultsListProps = {
 
 export function ResultsList({ recommendations, answers }: ResultsListProps) {
   if (recommendations.length === 0) {
-    return <p className="rounded-2xl bg-secondary/20 p-6 text-text">No destination matches were found. Try adjusting your answers.</p>;
+    return <p className="rounded-2xl bg-secondary p-6 text-text">No destination matches were found. Try adjusting your answers.</p>;
   }
 
   const plannerQuery = serializePlannerAnswers(answers);
@@ -19,7 +19,7 @@ export function ResultsList({ recommendations, answers }: ResultsListProps) {
   return (
     <section aria-label="Destination matches" className="grid gap-6">
       {!hasStrongMatch && (
-        <p className="rounded-2xl bg-secondary/20 p-5 text-sm leading-relaxed text-text">
+        <p className="rounded-2xl bg-secondary p-5 text-sm leading-relaxed text-text">
           Nothing fits all your preferences closely right now. These are the closest matches we found. Try editing your budget, dates or activities to
           explore more options.
         </p>
