@@ -101,3 +101,50 @@ test("dated sign-in continuation restores context and opens the picker without s
   await expect(page.getByLabel("Trip type", { exact: true })).toHaveValue("city-break");
   await expect(page.getByRole("button", { name: "Museums", exact: true })).toHaveAttribute("aria-pressed", "true");
 });
+
+test("unfinished edits survive reload, navigation and sign-in continuation", async ({ page }) => {
+  const state = await mockShortlists(page, []);
+  state.signedIn = false;
+  await page.goto("/planner?kind=dated");
+  const date = await complete(page);
+  await page.getByLabel("Return date").fill("");
+  await page.getByLabel("Adults", { exact: true }).fill("2.5");
+  await page.getByLabel("Group holiday budget (GBP)").fill("");
+  await expect(page).toHaveURL(/draft=1/);
+  await page.reload();
+  await expect(page.getByLabel("Outbound date")).toHaveValue(date.outbound);
+  await expect(page.getByLabel("Return date")).toHaveValue("");
+  await expect(page.getByLabel("Adults", { exact: true })).toHaveValue("2.5");
+  await expect(page.getByRole("button", { name: "Museums", exact: true })).toHaveAttribute("aria-pressed", "true");
+
+  const draftUrl = page.url();
+  await page.getByRole("link", { name: "Use the month-based planner" }).click();
+  await expect(page).toHaveURL(/\/planner$/);
+  await page.goBack();
+  await expect(page.getByLabel("Adults", { exact: true })).toHaveValue("2.5");
+  await page.getByRole("link", { name: "Sign in", exact: true }).click();
+  await expect(page).toHaveURL(/\/sign-in\?/);
+  const returnTo = new URL(page.url()).searchParams.get("returnTo");
+  expect(returnTo).toBe(new URL(draftUrl).pathname + new URL(draftUrl).search);
+  await page.getByRole("link", { name: "Back to exploring" }).filter({ visible: true }).click();
+  await expect(page.getByLabel("Group holiday budget (GBP)")).toHaveValue("");
+
+  await page.getByRole("link", { name: "Sign in", exact: true }).click();
+  state.signedIn = true;
+  // Simulate the existing OAuth callback to its captured return URL.
+  if (!returnTo) {
+    throw new Error("Sign-in must retain the draft return URL.");
+  }
+  await page.goto(returnTo);
+  await expect(page.getByRole("button", { name: /Open account menu/ })).toBeVisible();
+  await expect(page.getByLabel("Adults", { exact: true })).toHaveValue("2.5");
+  await expect(page.getByLabel("Trip type", { exact: true })).toHaveValue("city-break");
+  await page.getByRole("button", { name: "Review trip request" }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "Please check your request" })).toBeVisible();
+  await page.getByLabel("Return date").fill(date.returning);
+  await page.getByLabel("Adults", { exact: true }).fill("2");
+  await page.getByLabel("Group holiday budget (GBP)").fill("2000");
+  await page.getByRole("button", { name: "Review trip request" }).click();
+  await expect(page).toHaveURL(/\/results\?/);
+  expect(new URL(page.url()).searchParams.has("draft")).toBe(false);
+});

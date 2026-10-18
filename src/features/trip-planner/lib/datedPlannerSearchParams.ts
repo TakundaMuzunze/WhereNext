@@ -55,7 +55,7 @@ function readActivities(value: string | string[] | undefined): string[] {
 }
 
 export function parseDatedTripRequest(params: PlannerSearchParams, today = londonToday()): DatedTripRequest | null {
-  if (params.kind !== "dated") {
+  if (params.kind !== "dated" || params.draft !== undefined) {
     return null;
   }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { DatedTripRequest } from "@/entities/trip/model/types";
 import { createDatedTripRequestSchema } from "@/entities/trip/model/datedTripRequestSchema";
@@ -8,29 +8,46 @@ import { londonToday, poundsToPence, serializeDatedTripRequest } from "../lib/da
 import { tripTypes } from "@/shared/data/tripTypes";
 import { ActivitiesStep } from "./steps/ActivitiesStep";
 import Link from "next/link";
+import { serializeDatedTripDraft, type DatedTripDraft } from "../lib/datedTripDraft";
 
 type DatedTripFormProps = {
   initialRequest?: DatedTripRequest;
+  initialDraft?: DatedTripDraft;
   invalidLink?: boolean;
 };
 
 type TextField = "departureAirportCode" | "outboundDate" | "returnDate" | "adultCount" | "budget" | "allowance";
 
-export function DatedTripForm({ initialRequest, invalidLink = false }: DatedTripFormProps) {
+export function DatedTripForm({ initialRequest, initialDraft, invalidLink = false }: DatedTripFormProps) {
   const router = useRouter();
 
   // Form inputs stay as strings so an empty or unfinished value can be edited.
   // Only a successfully validated submission becomes a DatedTripRequest.
-  const [draft, setDraft] = useState({
-    departureAirportCode: initialRequest?.departureAirportCode ?? "",
-    outboundDate: initialRequest?.outboundDate ?? "",
-    returnDate: initialRequest?.returnDate ?? "",
-    adultCount: String(initialRequest?.adultCount ?? 2),
-    budget: initialRequest ? (initialRequest.groupBudgetPence / 100).toFixed(2) : "",
-    allowance: initialRequest ? (initialRequest.dailyAllowancePerPersonPence / 100).toFixed(2) : "",
-    tripType: initialRequest?.preferences.tripType ?? "",
-    activities: initialRequest?.preferences.activities ?? [],
-  });
+  const [draft, setDraft] = useState<DatedTripDraft>(
+    initialDraft ?? {
+      departureAirportCode: initialRequest?.departureAirportCode ?? "",
+      outboundDate: initialRequest?.outboundDate ?? "",
+      returnDate: initialRequest?.returnDate ?? "",
+      adultCount: String(initialRequest?.adultCount ?? 2),
+      budget: initialRequest ? (initialRequest.groupBudgetPence / 100).toFixed(2) : "",
+      allowance: initialRequest ? (initialRequest.dailyAllowancePerPersonPence / 100).toFixed(2) : "",
+      tripType: initialRequest?.preferences.tripType ?? "",
+      activities: initialRequest?.preferences.activities ?? [],
+    },
+  );
+
+  // Only edits create draft URLs. Opening a completed request should leave its
+  // canonical URL alone until the traveller changes something.
+  const [hasEdited, setHasEdited] = useState(false);
+
+  useEffect(() => {
+    if (!hasEdited) {
+      return;
+    }
+
+    const query = serializeDatedTripDraft(draft);
+    window.history.replaceState(window.history.state, "", `/planner?${query}${window.location.hash}`);
+  }, [draft, hasEdited]);
 
   const errorLabels: Record<string, string> = {
     departureAirportCode: "Departure airport",
@@ -48,6 +65,7 @@ export function DatedTripForm({ initialRequest, invalidLink = false }: DatedTrip
   const selectedTripType = tripTypes.find((tripType) => tripType.value === draft.tripType);
 
   function updateTextField(field: TextField, value: string): void {
+    setHasEdited(true);
     setDraft((currentDraft) => ({
       ...currentDraft,
       [field]: value,
@@ -55,6 +73,7 @@ export function DatedTripForm({ initialRequest, invalidLink = false }: DatedTrip
   }
 
   function selectTripType(value: string): void {
+    setHasEdited(true);
     const selectedOption = tripTypes.find((tripType) => tripType.value === value);
 
     setDraft((currentDraft) => ({
@@ -66,6 +85,7 @@ export function DatedTripForm({ initialRequest, invalidLink = false }: DatedTrip
   }
 
   function toggleActivity(activity: string): void {
+    setHasEdited(true);
     setDraft((currentDraft) => {
       const isAlreadySelected = currentDraft.activities.includes(activity);
       let updatedActivities: string[];
