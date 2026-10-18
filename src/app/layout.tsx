@@ -4,18 +4,16 @@ import { Header } from "@/widgets/header";
 import "./globals.css";
 import { Toaster } from "sonner";
 
-const initiliaseTheme = `
+const initialiseTheme = `
   (() => {
-    const savedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
+    try {
+      const savedTheme = localStorage.getItem("theme");
+      const useDarkTheme = savedTheme !== "light";
 
-    const useDarkTheme =
-      savedTheme === "dark" ||
-      (!savedTheme && prefersDark);
-
-    document.documentElement.classList.toggle("dark", useDarkTheme);
+      document.documentElement.classList.toggle("dark", useDarkTheme);
+    } catch {
+      document.documentElement.classList.add("dark");
+    }
   })();
 `;
 
@@ -25,9 +23,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: initiliaseTheme }} />
+        <script dangerouslySetInnerHTML={{ __html: initialiseTheme }} />
       </head>
       <body>
         <SavedDestinationsProvider>
