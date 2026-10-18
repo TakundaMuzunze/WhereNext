@@ -5,7 +5,7 @@ This is planned work. The application currently uses a local destination catalog
 ## Sources of truth
 
 - [Specification](spec.md): agreed product scope, implementation constraints, testing approach and learning checkpoints.
-- [GitHub delivery issues](https://github.com/TakundaMuzunze/WhereNext/issues?q=is%3Aissue%20label%3Aready-to-build): delivery scope, acceptance criteria, blocking relationships and progress. Ticket bodies are maintained only on GitHub.
+- [GitHub delivery tracker #36](https://github.com/TakundaMuzunze/WhereNext/issues/36): the eight delivery issues, their acceptance criteria, blocking relationships and progress. Ticket bodies are maintained only on GitHub.
 - Research reports below: dated evidence and limitations. They do not override the specification or establish current provider pricing indefinitely.
 
 ## Research evidence
