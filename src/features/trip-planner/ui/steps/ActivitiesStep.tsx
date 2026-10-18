@@ -2,14 +2,22 @@ type ActivitiesStepProps = {
   availableActivities: string[];
   selectedActivities: string[];
   onToggle: (activity: string) => void;
+  title?: string;
+  description?: string;
 };
 
-export function ActivitiesStep({ availableActivities, selectedActivities, onToggle }: ActivitiesStepProps) {
+export function ActivitiesStep({
+  availableActivities,
+  selectedActivities,
+  onToggle,
+  title = "What do you want to do?",
+  description = "Choose the activities that matter most for this trip.",
+}: ActivitiesStepProps) {
   return (
     <div>
-      <h2 className="text-xl font-semibold text-text">What do you want to do?</h2>
+      <h2 className="text-xl font-semibold text-text">{title}</h2>
 
-      <p className="mt-2 text-text/70">Choose the activities that matter most for this trip.</p>
+      <p className="mt-2 text-muted">{description}</p>
 
       <div className="mt-6 flex flex-wrap gap-3">
         {availableActivities.map((activity) => {
@@ -22,7 +30,7 @@ export function ActivitiesStep({ availableActivities, selectedActivities, onTogg
               aria-pressed={isSelected}
               onClick={() => onToggle(activity)}
               className={`rounded-full border px-4 py-2 text-sm transition ${
-                isSelected ? "border-primary bg-primary text-white dark:text-[#101214]" : "border-primary/20 text-text hover:border-primary"
+                isSelected ? "border-primary bg-primary text-primary-foreground" : "border-border text-text hover:border-primary"
               }`}
             >
               {activity}
@@ -31,7 +39,9 @@ export function ActivitiesStep({ availableActivities, selectedActivities, onTogg
         })}
       </div>
 
-      {availableActivities.length === 0 && <p className="mt-6 rounded-xl bg-secondary p-4 text-text">Go back and choose a trip type first.</p>}
+      {availableActivities.length === 0 && (
+        <p className="mt-6 rounded-xl bg-secondary p-4 text-text">Choose a holiday style above to see its activities.</p>
+      )}
     </div>
   );
 }
