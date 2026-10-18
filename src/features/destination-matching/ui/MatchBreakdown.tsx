@@ -27,7 +27,7 @@ export function MatchBreakdown({ breakdown, initiallyOpen = false }: MatchBreakd
         </span>
       </summary>
       <div className="px-6 pb-6">
-        <p className="mb-5 text-sm text-text/70">
+        <p className="mb-5 text-sm text-muted">
           A weighted guide based on your answers, not a guarantee. Each category shows points earned out of the available points.
         </p>
         <dl className="grid gap-3">
@@ -37,7 +37,7 @@ export function MatchBreakdown({ breakdown, initiallyOpen = false }: MatchBreakd
               <dd className="h-2 overflow-hidden rounded-full bg-primary/15">
                 <span className="block h-full rounded-full bg-accent" style={{ width: `${(breakdown[key] / scoreWeights[key]) * 100}%` }} />
               </dd>
-              <dd className="text-right font-mono text-xs text-text/70">
+              <dd className="text-right font-mono text-xs text-muted">
                 {breakdown[key]}/{scoreWeights[key]}
               </dd>
             </div>

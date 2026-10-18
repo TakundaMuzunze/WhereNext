@@ -50,19 +50,18 @@ const datedTripRequestFieldsSchema = z.strictObject({
 });
 
 // Pass today's date into the schema so validation stays current and is easy to test.
-export function createDatedTripRequestSchema(today: string) {
+export function createDatedTripDatesSchema(today: string) {
   const todayDay = calendarDay(z.iso.date().parse(today));
 
-  return datedTripRequestFieldsSchema.superRefine((request, context) => {
+  return datedTripRequestFieldsSchema.pick({ outboundDate: true, returnDate: true }).superRefine((request, context) => {
     const isOutboundValid = z.iso.date().safeParse(request.outboundDate).success;
     const isReturnValid = z.iso.date().safeParse(request.returnDate).success;
 
-    if (!isOutboundValid || !isReturnValid) {
+    if (!isOutboundValid) {
       return;
     }
 
     const outboundDay = calendarDay(request.outboundDate);
-    const nights = calendarDay(request.returnDate) - outboundDay;
 
     if (outboundDay < todayDay || outboundDay > todayDay + 365) {
       context.addIssue({
@@ -72,6 +71,8 @@ export function createDatedTripRequestSchema(today: string) {
       });
     }
 
+    if (!isReturnValid) return;
+    const nights = calendarDay(request.returnDate) - outboundDay;
     if (nights < 1 || nights > 28) {
       context.addIssue({
         code: "custom",
@@ -79,6 +80,16 @@ export function createDatedTripRequestSchema(today: string) {
         message: "Choose a return date between 1 and 28 nights after departure.",
       });
     }
+  });
+}
+
+export function createDatedTripRequestSchema(today: string) {
+  const datesSchema = createDatedTripDatesSchema(today);
+  return datedTripRequestFieldsSchema.superRefine((request, context) => {
+    // The form uses the same date rules even while other inputs are unfinished.
+    if (!z.iso.date().safeParse(request.outboundDate).success || !z.iso.date().safeParse(request.returnDate).success) return;
+    const dates = datesSchema.safeParse({ outboundDate: request.outboundDate, returnDate: request.returnDate });
+    if (!dates.success) dates.error.issues.forEach((issue) => context.addIssue({ code: "custom", path: issue.path, message: issue.message }));
   });
 }
 

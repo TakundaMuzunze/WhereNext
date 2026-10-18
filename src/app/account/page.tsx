@@ -17,7 +17,7 @@ export default async function AccountPage() {
       <header className="mb-9">
         <p className="text-sm tracking-widest text-accent uppercase">Account settings</p>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight text-text sm:text-5xl">Your account.</h1>
-        <p className="mt-3 max-w-2xl text-text/70">Review your profile, sign-in details and the places you’ve saved for later.</p>
+        <p className="mt-3 max-w-2xl text-muted">Review your profile, sign-in details and the places you’ve saved for later.</p>
       </header>
 
       <AccountDetails user={session.user} />

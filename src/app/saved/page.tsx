@@ -8,7 +8,7 @@ export default function SavedPage() {
         <div>
           <p className="text-sm tracking-widest text-accent uppercase">Your travel ideas</p>
           <h1 className="mt-3 text-4xl font-semibold tracking-tight text-text sm:text-5xl">Your shortlists.</h1>
-          <p className="mt-3 max-w-2xl text-text/70">Organise the places that caught your eye into private shortlists for your next trip.</p>
+          <p className="mt-3 max-w-2xl text-muted">Organise the places that caught your eye into private shortlists for your next trip.</p>
         </div>
         <Link href="/planner" className="text-sm font-medium whitespace-nowrap text-primary">
           Find more destinations

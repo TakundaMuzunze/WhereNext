@@ -61,24 +61,24 @@ export function SigninBtn() {
         aria-controls={panelId}
         ref={triggerRef}
         aria-label={`Open account menu for ${user.name ?? user.email}`}
-        className="flex min-h-11 cursor-pointer items-center gap-1.5 rounded-xl px-1.5 text-text transition hover:bg-secondary/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className="flex min-h-11 cursor-pointer items-center gap-1.5 rounded-xl px-1.5 text-text transition hover:bg-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         <UserAvatar image={user.image} name={user.name} email={user.email} size="small" />
 
-        <ChevronDown aria-hidden="true" className={`h-4 w-4 text-text/60 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown aria-hidden="true" className={`h-4 w-4 text-muted transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
         <div
           id={panelId}
-          className="absolute top-full right-0 z-50 mt-3 w-64 rounded-2xl border border-primary/20 bg-background p-2 shadow-2xl shadow-primary/10"
+          className="absolute top-full right-0 z-50 mt-3 w-64 rounded-2xl border border-border bg-surface p-2 shadow-2xl shadow-primary/10"
         >
           <div className="flex items-center gap-3 px-2 py-2.5">
             <UserAvatar image={user.image} name={user.name} email={user.email} size="large" />
 
             <div className="min-w-0">
               <p className="truncate font-semibold text-text">{user.name ?? "WhereNext user"}</p>
-              <p className="truncate text-sm text-text/60">{user.email}</p>
+              <p className="truncate text-sm text-muted">{user.email}</p>
             </div>
           </div>
 
@@ -86,18 +86,18 @@ export function SigninBtn() {
             <Link
               href="/saved"
               onClick={() => setOpen(false)}
-              className="flex min-h-11 items-center gap-3 rounded-xl px-2.5 py-2 text-text transition hover:bg-secondary/20 focus-visible:outline-2 focus-visible:outline-primary"
+              className="flex min-h-11 items-center gap-3 rounded-xl px-2.5 py-2 text-text transition hover:bg-secondary focus-visible:outline-2 focus-visible:outline-primary"
             >
-              <Heart className="h-4 w-4 text-text/70" aria-hidden="true" />
+              <Heart className="h-4 w-4 text-muted" aria-hidden="true" />
               Saved destinations
             </Link>
 
             <Link
               href="/account"
               onClick={() => setOpen(false)}
-              className="flex min-h-11 items-center gap-3 rounded-xl px-2.5 py-2 text-text transition hover:bg-secondary/20 focus-visible:outline-2 focus-visible:outline-primary"
+              className="flex min-h-11 items-center gap-3 rounded-xl px-2.5 py-2 text-text transition hover:bg-secondary focus-visible:outline-2 focus-visible:outline-primary"
             >
-              <UserRound className="h-4 w-4 text-text/70" aria-hidden="true" />
+              <UserRound className="h-4 w-4 text-muted" aria-hidden="true" />
               Account settings
             </Link>
           </div>

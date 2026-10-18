@@ -29,20 +29,20 @@ export function AccountDetails({ user }: AccountDetailsProps) {
             <h2 id="profile-heading" className="mt-2 text-3xl font-semibold tracking-tight text-text">
               {user.name}
             </h2>
-            <p className="mt-2 flex items-center gap-2 text-sm text-text/65">
+            <p className="mt-2 flex items-center gap-2 text-sm text-muted">
               <Mail className="size-4" aria-hidden="true" />
               {user.email}
             </p>
           </div>
 
-          <div className="mt-7 rounded-2xl bg-secondary/15 p-4 sm:flex sm:items-start sm:justify-between sm:gap-6">
+          <div className="mt-7 rounded-2xl bg-secondary p-4 sm:flex sm:items-start sm:justify-between sm:gap-6">
             <div className="flex gap-3">
               <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl bg-background text-primary">
                 <LockKeyhole className="size-4" aria-hidden="true" />
               </span>
               <div>
                 <h3 className="font-medium text-text">Profile managed by Google</h3>
-                <p className="mt-1 max-w-xl text-sm leading-6 text-text/65">
+                <p className="mt-1 max-w-xl text-sm leading-6 text-muted">
                   Your name, email and profile photo come from your Google account. WhereNext never receives your Google password.
                 </p>
               </div>
@@ -62,17 +62,17 @@ export function AccountDetails({ user }: AccountDetailsProps) {
 
       <aside className="grid content-start gap-6" aria-label="Account actions">
         <section className="rounded-3xl border border-primary/15 bg-background p-6 shadow-sm">
-          <span className="grid size-11 place-items-center rounded-2xl bg-secondary/20 text-primary">
+          <span className="grid size-11 place-items-center rounded-2xl bg-secondary text-primary">
             <CheckCircle2 className="size-5" aria-hidden="true" />
           </span>
           <h2 className="mt-5 text-xl font-semibold text-text">Account security</h2>
           <dl className="mt-5 grid gap-4 text-sm">
             <div className="flex items-center justify-between gap-4 border-b border-primary/10 pb-4">
-              <dt className="text-text/60">Sign-in method</dt>
+              <dt className="text-muted">Sign-in method</dt>
               <dd className="font-medium text-text">Google</dd>
             </div>
             <div className="flex items-center justify-between gap-4">
-              <dt className="text-text/60">Email status</dt>
+              <dt className="text-muted">Email status</dt>
               <dd className="font-medium text-text">{user.emailVerified ? "Verified" : "Unverified"}</dd>
             </div>
           </dl>
@@ -81,7 +81,7 @@ export function AccountDetails({ user }: AccountDetailsProps) {
         <section className="rounded-3xl border border-primary/15 bg-background p-6 shadow-sm">
           <Bookmark className="size-5 text-primary" aria-hidden="true" />
           <h2 className="mt-4 text-xl font-semibold text-text">Your shortlist</h2>
-          <p className="mt-2 text-sm leading-6 text-text/65">Return to the destinations you saved while planning your next trip.</p>
+          <p className="mt-2 text-sm leading-6 text-muted">Return to the destinations you saved while planning your next trip.</p>
           <Link href="/saved" className="mt-4 inline-flex min-h-11 items-center text-sm font-medium text-primary">
             View saved destinations
           </Link>
@@ -89,7 +89,7 @@ export function AccountDetails({ user }: AccountDetailsProps) {
 
         <section className="rounded-3xl border border-primary/15 bg-background p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-text">Finished for now?</h2>
-          <p className="mt-2 text-sm leading-6 text-text/65">Sign out securely on this device. Your account and saved data will remain available.</p>
+          <p className="mt-2 text-sm leading-6 text-muted">Sign out securely on this device. Your account and saved data will remain available.</p>
           <div className="mt-4">
             <SignOutButton variant="account" />
           </div>

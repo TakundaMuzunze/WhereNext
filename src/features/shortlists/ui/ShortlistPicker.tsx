@@ -76,11 +76,11 @@ export function ShortlistPicker({ destinationId, onClose }: { destinationId: str
           void save();
         }}
       >
-        <p className="mb-4 text-sm text-text/70">Choose where to keep this destination. Changes take effect when you save.</p>
+        <p className="mb-4 text-sm text-muted">Choose where to keep this destination. Changes take effect when you save.</p>
         <fieldset disabled={pending} className="min-w-0 space-y-3">
           <legend className="sr-only">Shortlists</legend>
           {shortlists.map((list) => (
-            <label key={list.id} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-primary/20 p-3">
+            <label key={list.id} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-border p-3">
               <input
                 type="checkbox"
                 checked={selected.includes(list.id)}
@@ -88,7 +88,7 @@ export function ShortlistPicker({ destinationId, onClose }: { destinationId: str
                 className="size-5 shrink-0 accent-primary"
               />
               <span className="min-w-0 break-words">{list.name}</span>
-              <span className="ml-auto shrink-0 text-sm text-text/60">{list.destinationIds.length}</span>
+              <span className="ml-auto shrink-0 text-sm text-muted">{list.destinationIds.length}</span>
             </label>
           ))}
           {!shortlists.length && <p>Name your first shortlist to get started.</p>}

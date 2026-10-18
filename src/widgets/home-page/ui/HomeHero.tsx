@@ -15,14 +15,14 @@ export function HomeHero() {
             Where should you go next?
           </h1>
 
-          <p className="max-w-xl text-lg leading-8 text-text/75">
+          <p className="max-w-xl text-lg leading-8 text-muted">
             Share the essentials. Get a focused shortlist of destinations that fit your time, budget, and travel style.
           </p>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
               href="/planner"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-lg text-white transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary dark:text-[#101214]"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-lg text-primary-foreground transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
             >
               Start planning
               <ArrowRight aria-hidden="true" className="h-5 w-5" />
@@ -30,7 +30,7 @@ export function HomeHero() {
 
             <Link
               href="#how-it-works"
-              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-secondary/50 px-6 py-3 text-lg text-text transition hover:bg-secondary/70 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-secondary px-6 py-3 text-lg text-text transition hover:bg-secondary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
             >
               How it works
             </Link>

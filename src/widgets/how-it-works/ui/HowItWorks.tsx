@@ -36,7 +36,7 @@ export function HowItWorks() {
             </h2>
           </div>
 
-          <p className="max-w-2xl text-lg leading-8 text-text/70 lg:justify-self-end">
+          <p className="max-w-2xl text-lg leading-8 text-muted lg:justify-self-end">
             WhereNext turns a vague idea into a focused destination shortlist, while keeping you in control of the final decision.
           </p>
         </div>
@@ -47,7 +47,7 @@ export function HowItWorks() {
 
             return (
               <li key={step.title} className="h-full">
-                <article className="flex h-full flex-col rounded-3xl border border-primary/20 bg-background p-6 shadow-sm transition hover:shadow-md motion-safe:hover:-translate-y-1 sm:p-7">
+                <article className="flex h-full flex-col rounded-3xl border border-border bg-surface p-6 shadow-sm transition hover:shadow-md motion-safe:hover:-translate-y-1 sm:p-7">
                   <div className="mb-7 flex items-center justify-between">
                     <div className="rounded-2xl bg-secondary p-3 text-text">
                       <Icon aria-hidden="true" className="h-6 w-6" />
@@ -60,17 +60,17 @@ export function HowItWorks() {
 
                   <h3 className="text-xl font-semibold text-text">{step.title}</h3>
                   <p className="mt-3 leading-7 text-text/80">{step.description}</p>
-                  <p className="mt-5 border-t border-primary/15 pt-5 text-sm leading-6 text-text/60">{step.detail}</p>
+                  <p className="mt-5 border-t border-primary/15 pt-5 text-sm leading-6 text-muted">{step.detail}</p>
                 </article>
               </li>
             );
           })}
         </ol>
 
-        <div className="grid gap-8 rounded-3xl bg-primary p-7 text-white sm:p-9 lg:grid-cols-[1fr_auto] lg:items-center dark:text-[#101214]">
+        <div className="grid gap-8 rounded-3xl bg-primary p-7 text-primary-foreground sm:p-9 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
-            <p className="text-sm font-semibold tracking-widest uppercase opacity-75">What you’ll get</p>
-            <h3 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">A recommendation you can understand—not just a score.</h3>
+            <p className="text-sm font-semibold tracking-widest uppercase opacity-75">What you&apos;ll get</p>
+            <h3 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">A recommendation you can understand - not just a score.</h3>
 
             <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {benefits.map((benefit) => (

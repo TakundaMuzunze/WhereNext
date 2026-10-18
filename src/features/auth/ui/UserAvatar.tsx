@@ -38,7 +38,7 @@ export function UserAvatar({ image, name, email, size = "small" }: UserAvatarPro
   return (
     <span
       aria-hidden="true"
-      className={`grid ${sizeClasses} shrink-0 place-items-center rounded-full bg-primary font-semibold text-white ring-4 ring-secondary/20 dark:text-[#101214]`}
+      className={`grid ${sizeClasses} shrink-0 place-items-center rounded-full bg-primary font-semibold text-primary-foreground ring-4 ring-secondary/20`}
     >
       {getInitials(name, email)}
     </span>

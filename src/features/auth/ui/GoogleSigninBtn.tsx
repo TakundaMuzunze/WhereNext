@@ -37,7 +37,7 @@ export function GoogleSigninBtn() {
   return (
     <button
       type="button"
-      className="mt-8 flex min-h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-primary/20 bg-background px-5 py-3 font-medium text-text transition hover:bg-secondary/20 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+      className="mt-8 flex min-h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-border bg-surface px-5 py-3 font-medium text-text transition hover:bg-secondary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
       onClick={handleSignIn}
       disabled={isSigningIn}
     >
