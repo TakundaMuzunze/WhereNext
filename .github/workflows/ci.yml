@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
+
   pull_request:
     branches: [main]
 
@@ -22,33 +23,69 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check changed files
+        id: changes
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE_SHA="${{ github.event.before }}"
+          fi
+
+          CHANGED_FILES=$(git diff --name-only "$BASE_SHA" "$GITHUB_SHA")
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          if [ -n "$CHANGED_FILES" ] && echo "$CHANGED_FILES" | grep -qv '^docs/'; then
+            echo "code_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "code_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Docs-only change
+        if: steps.changes.outputs.code_changed == 'false'
+        run: echo "Only documentation changed — skipping application quality checks."
 
       - name: Setup Node.js
+        if: steps.changes.outputs.code_changed == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
       - name: Install dependencies
+        if: steps.changes.outputs.code_changed == 'true'
         run: npm ci
 
       - name: Generate Prisma client
+        if: steps.changes.outputs.code_changed == 'true'
         run: npx prisma generate
 
       - name: Check formatting
+        if: steps.changes.outputs.code_changed == 'true'
         run: npm run format:check
 
       - name: Lint
+        if: steps.changes.outputs.code_changed == 'true'
         run: npm run lint
 
       - name: Run tests
+        if: steps.changes.outputs.code_changed == 'true'
         run: npm run test:coverage
 
       - name: Build
+        if: steps.changes.outputs.code_changed == 'true'
         run: npm run build
 
       - name: Install Playwright browser
+        if: steps.changes.outputs.code_changed == 'true'
         run: npx playwright install --with-deps chromium
 
       - name: Run end-to-end tests
+        if: steps.changes.outputs.code_changed == 'true'
         run: npx playwright test
