@@ -1,3 +1,6 @@
+import { DatedTripReview } from "@/features/trip-planner/ui/DatedTripReview";
+import { parseDatedTripRequest, serializeDatedTripRequest } from "@/features/trip-planner/lib/datedPlannerSearchParams";
+import { destinations } from "@/shared/data/destinations";
 import { getRecommendations } from "@/features/destination-matching";
 import { parsePlannerAnswers, type PlannerSearchParams } from "@/features/trip-planner";
 import { ResultsList } from "@/widgets/results-list";
@@ -9,7 +12,45 @@ type ResultsPageProps = {
 };
 
 export default async function ResultsPage({ searchParams }: ResultsPageProps) {
-  const answers = parsePlannerAnswers(await searchParams);
+  const query = await searchParams;
+  if (query.kind !== undefined) {
+    const request = parseDatedTripRequest(query);
+    if (!request)
+      return (
+        <main className="mx-auto min-h-screen max-w-4xl px-6 py-28 text-text">
+          <h1 className="text-3xl">Invalid dated request</h1>
+          <p className="mt-4">Check your dates and trip details before continuing.</p>
+          <Link className="mt-6 inline-flex min-h-11 items-center underline" href="/planner?kind=dated">
+            Start a dated request
+          </Link>
+        </main>
+      );
+    const requestQuery = serializeDatedTripRequest(request);
+    return (
+      <main className="mx-auto min-h-screen max-w-4xl space-y-8 px-6 py-28 text-text">
+        <h1 className="text-3xl font-semibold">Review your dated holiday</h1>
+        <DatedTripReview request={request} />
+        <section aria-label="Destination guides">
+          <h2 className="text-2xl">Explore destination guides</h2>
+          <p className="mt-3">
+            Browse our existing guides while you plan. These places have not been checked for your airport, dates, budget or preferences.
+          </p>
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            {destinations
+              .filter(({ country }) => ["France", "Spain", "Portugal", "Italy", "Greece", "Malta"].includes(country))
+              .map((destination) => (
+                <li key={destination.id}>
+                  <Link className="inline-flex min-h-11 items-center underline" href={`/destinations/${destination.id}?${requestQuery}`}>
+                    {destination.name}, {destination.country}
+                  </Link>
+                </li>
+              ))}
+          </ul>
+        </section>
+      </main>
+    );
+  }
+  const answers = parsePlannerAnswers(query);
 
   if (!answers) {
     return (

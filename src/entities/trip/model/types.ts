@@ -9,3 +9,5 @@ export type PlannerAnswers = {
   tripType: TripType | "";
   activities: string[];
 };
+
+export type { DatedTripRequest, DepartureAirportCode } from "./datedTripRequestSchema";

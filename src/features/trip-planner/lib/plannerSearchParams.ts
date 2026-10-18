@@ -34,6 +34,8 @@ export function serializePlannerAnswers(answers: PlannerAnswers): string {
 }
 
 export function parsePlannerAnswers(params: PlannerSearchParams): PlannerAnswers | null {
+  if (params.kind !== undefined) return null;
+
   const departure = getSingleValue(params.departure).trim();
   const travelMonth = getSingleValue(params.month).trim();
   const duration = getPositiveNumber(params.duration);

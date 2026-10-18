@@ -9,6 +9,8 @@ The project combines a complete planning journey with backend work on authentica
 ## Features
 
 - Multi-step planner covering departure, travel month, duration, budget, travellers, trip type and activities
+- Additive dated planner with supported UK airports, exact dates, adult group budgets and per-person daily allowances
+- Dated request review/edit, with context retained through destination guides and sign-in; no live price search
 - Activity choices that adapt to the selected trip type
 - Ranked recommendations with category-level score breakdowns and clear weak-match states
 - Destination detail pages with suitability guidance, trip ideas and practical notes
@@ -75,7 +77,7 @@ prisma/
 └── migrations/
 ```
 
-The planner validates and serialises answers into URL search parameters. Results and destination pages parse those answers and use the local catalogue to calculate recommendations.
+The planners validate and serialise answers into URL search parameters. The dated flow uses a shared Zod schema; its [input contract](docs/live-travel/dated-request.md) records scope, limits, money units and URL compatibility. Results and destination pages parse those answers and use the local catalogue to calculate recommendations.
 
 Shortlist API routes use Better Auth sessions and Prisma to read and update PostgreSQL. The shortlist feature owns the browser API client, shared state and picker. Existing saved-destination buttons and navigation use that shared state to display consistent Saved indicators and counts.
 
@@ -179,7 +181,7 @@ GitHub Actions runs formatting, linting, Jest coverage, the production build and
 
 - Costs are broad planning estimates, not live quotes or itemised prices.
 - Departure is retained with planner answers but does not affect ranking.
-- Travel suitability uses a month rather than exact dates or live conditions.
+- Legacy recommendation suitability uses a month. Exact dates can be captured and reviewed in the additive dated planner, but do not yet drive live searches or ranking.
 - Destination content remains a curated local catalogue.
 - Planner answers are carried in URLs; trips, itineraries and recommendation snapshots are not persisted.
 - Shortlists are private; sharing, collaboration, notes and manual ordering are outside the current feature.
