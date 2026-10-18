@@ -184,3 +184,5 @@ GitHub Actions runs formatting, linting, Jest coverage, the production build and
 - Planner answers are carried in URLs; trips, itineraries and recommendation snapshots are not persisted.
 - Shortlists are private; sharing, collaboration, notes and manual ordering are outside the current feature.
 - AI-assisted recommendations and live travel integrations are possible future directions; the current matching system is rule-based.
+
+The [live travel recommendation plan](docs/live-travel/README.md) records the agreed next direction, research findings and links to delivery tracking. These integrations are not yet implemented in the application.
