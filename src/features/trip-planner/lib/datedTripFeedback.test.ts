@@ -13,6 +13,17 @@ const draft: DatedTripDraft = {
 };
 const today = "2027-03-01";
 
+it("asks for an activity after choosing a holiday style, then clears the guidance when one is selected", () => {
+  const selectedStyle: DatedTripDraft = { ...draft, departureAirportCode: "MAN", tripType: "city-break", activities: [] };
+  const unfinished = getDatedTripFeedback(selectedStyle, today);
+  expect(unfinished.errors.tripType).toBeUndefined();
+  expect(unfinished.errors.activities).toBe("Choose at least one activity for this holiday style.");
+
+  const completed = getDatedTripFeedback({ ...selectedStyle, activities: ["Museums"] }, today);
+  expect(completed.errors).toEqual({});
+  expect(completed.remaining).toBe(0);
+});
+
 it("validates date relationships while the airport and style are still unanswered", () => {
   const feedback = getDatedTripFeedback({ ...draft, returnDate: "2027-03-26" }, today);
   expect(feedback.errors.returnDate).toContain("between 1 and 28 nights");
