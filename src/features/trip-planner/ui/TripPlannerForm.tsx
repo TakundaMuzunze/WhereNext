@@ -1,6 +1,7 @@
 "use client";
 import type { PlannerAnswers, TripType } from "@/entities/trip/model/types";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { PlannerProgress } from "./PlannerProgress";
@@ -104,6 +105,9 @@ export function TripPlannerForm({ initialAnswers = defaultAnswers }: TripPlanner
           </h1>
 
           <p className="mt-3 text-text/75">Answer a few questions and WhereNext will build your destination shortlist.</p>
+          <Link href="/planner?kind=dated" className="mt-3 inline-flex min-h-11 items-center text-primary underline">
+            Plan with exact dates and a UK airport
+          </Link>
         </div>
 
         {step === plannerSteps.tripDetails && <TripDetailsStep answers={answers} onUpdate={updateAnswer} />}

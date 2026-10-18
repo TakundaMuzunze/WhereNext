@@ -11,6 +11,7 @@ type DestinationDetailsProps = {
   answers?: PlannerAnswers;
   matchLabel?: string;
   backHref?: string;
+  backLabel?: string;
   editHref?: string;
 };
 
@@ -24,7 +25,7 @@ function formatMonths(months: string[]) {
   return months.map((month) => month.slice(0, 3)).join(" · ");
 }
 
-export function DestinationDetails({ destination, recommendation, answers, matchLabel, backHref, editHref }: DestinationDetailsProps) {
+export function DestinationDetails({ destination, recommendation, answers, matchLabel, backHref, backLabel, editHref }: DestinationDetailsProps) {
   const travellerCount = Number(answers?.travellers ?? 0);
   const estimatedTotal = destination.estimatedCostPerPerson * travellerCount;
   const isPersonalised = Boolean(recommendation && answers);
@@ -33,7 +34,7 @@ export function DestinationDetails({ destination, recommendation, answers, match
     <main className="mx-auto min-h-screen w-full max-w-5xl px-6 pt-28 pb-20">
       <Link href={backHref ?? "/saved"} className="mb-6 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary">
         <ArrowLeft className="size-4" aria-hidden="true" />
-        {isPersonalised ? "Back to your matches" : "Back to saved destinations"}
+        {backLabel ?? (isPersonalised ? "Back to your matches" : "Back to saved destinations")}
       </Link>
 
       <section className="grid gap-8 md:grid-cols-[1.15fr_0.85fr]" aria-labelledby="destination-title">
@@ -174,7 +175,7 @@ export function DestinationDetails({ destination, recommendation, answers, match
           className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white dark:text-[#101214]"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
-          {isPersonalised ? "Back to matches" : "Back to saved"}
+          {backLabel ?? (isPersonalised ? "Back to matches" : "Back to saved")}
         </Link>
         {isPersonalised && editHref && (
           <Link

@@ -1,3 +1,5 @@
+import { DatedTripReview } from "@/features/trip-planner/ui/DatedTripReview";
+import { parseDatedTripRequest, serializeDatedTripRequest } from "@/features/trip-planner/lib/datedPlannerSearchParams";
 import { getMatchLabel, getRecommendations } from "@/features/destination-matching";
 import { parsePlannerAnswers, serializePlannerAnswers, type PlannerSearchParams } from "@/features/trip-planner";
 import { destinations } from "@/shared/data/destinations";
@@ -19,7 +21,24 @@ export default async function DestinationPage({ params, searchParams }: Destinat
 
   if (!destination) notFound();
 
-  const answers = parsePlannerAnswers(await searchParams);
+  const queryParams = await searchParams;
+  if (queryParams.kind !== undefined) {
+    const request = parseDatedTripRequest(queryParams);
+    if (!request) return <DestinationDetails destination={destination} backHref="/planner?kind=dated" backLabel="Start a dated request" />;
+    return (
+      <>
+        <div className="mx-auto max-w-5xl px-6 pt-28">
+          <DatedTripReview request={request} />
+        </div>
+        <DestinationDetails
+          destination={destination}
+          backHref={`/results?${serializeDatedTripRequest(request)}`}
+          backLabel="Back to your trip request"
+        />
+      </>
+    );
+  }
+  const answers = parsePlannerAnswers(queryParams);
 
   if (!answers) return <DestinationDetails destination={destination} />;
 
