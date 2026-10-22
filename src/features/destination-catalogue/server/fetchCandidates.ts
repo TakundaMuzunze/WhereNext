@@ -101,7 +101,7 @@ function getGuideStatus(categories: Set<string>): DestinationCandidate["guideSta
 }
 
 // bounded preview/import, not an exhaustive country inventory.
-export async function fetchDestinationCandidates(countryCode: CandidateCountry, limit: number, userAgent: string) {
+export async function fetchDestinationCandidates(countryCode: CandidateCountry, limit: number, userAgent: string, cursor: string | null = null) {
   const isSupportedCountry = Object.hasOwn(candidateCountries, countryCode);
   const isValidLimit = Number.isInteger(limit) && limit >= 1 && limit <= 200;
   const hasUserAgent = userAgent.trim().length > 0;
@@ -110,17 +110,45 @@ export async function fetchDestinationCandidates(countryCode: CandidateCountry, 
     throw new Error("Choose a supported country, a limit from 1 to 200, and an identifying User-Agent.");
   }
 
+  let cursorFilter = "";
+  let previousPlaceUrl = "";
+
+  if (cursor !== null) {
+    const [cursorCountryCode, lastWikidataId, ...extraParts] = cursor.split(":");
+    const hasValidWikidataId = /^Q[1-9]\d*$/.test(lastWikidataId ?? "");
+
+    if (cursorCountryCode !== countryCode || !hasValidWikidataId || extraParts.length > 0) {
+      throw new Error("Use a valid resume cursor for the selected country.");
+    }
+
+    previousPlaceUrl = `http://www.wikidata.org/entity/${lastWikidataId}`;
+    cursorFilter = `FILTER(STR(?place) > "${previousPlaceUrl}")`;
+  }
+
   const countryWikidataId = candidateCountries[countryCode];
   const query = `SELECT DISTINCT ?place ?article WHERE {
     ?place wdt:P17 wd:${countryWikidataId}.
     ?article schema:about ?place; schema:isPartOf <https://en.wikivoyage.org/>.
-  } ORDER BY ?place LIMIT ${limit + 1}`;
+    ${cursorFilter}
+  } ORDER BY STR(?place) LIMIT ${limit + 1}`;
 
   const wikidataUrl = new URL("https://query.wikidata.org/sparql");
   wikidataUrl.search = new URLSearchParams({ query, format: "json" }).toString();
 
   const wikidataResponse = await fetchSourceJson(wikidataUrl, userAgent);
   const sourceDestinations = wikidataResponseSchema.parse(wikidataResponse).results.bindings;
+
+  // Compare full URLs alphabetically, using the same order as the source query.
+  for (const destination of sourceDestinations) {
+    const placeUrl = destination.place.value;
+
+    if (placeUrl <= previousPlaceUrl) {
+      throw new Error("Destination source did not advance in the requested order. No records imported.");
+    }
+
+    previousPlaceUrl = placeUrl;
+  }
+
   const selectedDestinations = sourceDestinations.slice(0, limit);
 
   const candidates: DestinationCandidate[] = [];
@@ -215,10 +243,22 @@ export async function fetchDestinationCandidates(countryCode: CandidateCountry, 
     throw new Error("Ambiguous destination identities. No records imported.");
   }
 
+  const truncated = sourceDestinations.length > limit;
+  let nextCursor: string | null = null;
+
+  if (truncated) {
+    // Skipped records must advance the cursor too, otherwise a run could get stuck.
+    const lastScannedDestination = selectedDestinations[selectedDestinations.length - 1];
+    const lastWikidataId = lastScannedDestination.place.value.replace("http://www.wikidata.org/entity/", "");
+
+    nextCursor = `${countryCode}:${lastWikidataId}`;
+  }
+
   return {
     candidates,
     scanned: selectedDestinations.length,
     skipped: skippedCount,
-    truncated: sourceDestinations.length > limit,
+    truncated,
+    nextCursor,
   };
 }
