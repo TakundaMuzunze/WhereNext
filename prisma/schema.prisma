@@ -122,3 +122,19 @@ model SearchReservation {
   @@index([provider, createdAt])
   @@index([provider, requestKey, blockedUntil])
 }
+
+model DestinationCandidate {
+  id                String   @id
+  wikidataId        String   @unique
+  wikivoyagePageId   Int      @unique
+  name              String
+  countryCode       String   @db.VarChar(2)
+  latitude          Float
+  longitude         Float
+  sourceUrl         String
+  sourceRevisionId  Int
+  guideStatus       String
+  importedAt        DateTime
+
+  @@index([countryCode])
+}

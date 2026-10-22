@@ -15,7 +15,9 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage --runInBand",
     "test:e2e": "npm run build && playwright test",
-    "test:flights:db": "node scripts/test-flight-search.mjs"
+    "test:flights:db": "node scripts/test-flight-search.mjs",
+    "test:catalogue:db": "node scripts/test-destination-catalogue.mjs",
+    "destinations:import": "node --experimental-strip-types scripts/import-destinations.mjs"
   },
   "dependencies": {
     "@better-auth/prisma-adapter": "^1.7.7",
