@@ -1,5 +1,7 @@
 # External travel data feasibility
 
+**Historical experiment only.** On 20 October 2026 SerpApi was rejected for production because its 250-search monthly free allowance is inadequate. These successful samples do not approve that provider's economics. Free-only production access is unresolved; see [the updated review](production-provider-review.md).
+
 Status: initial authenticated checks completed on 18 October 2026 (Europe/London). Eight search requests succeeded. Overall outcome: partial; discovery and pricing look viable, complete automated preference matching is not established. Do not record keys or raw credential-bearing request URLs in this report.
 
 ## Question

@@ -1,5 +1,7 @@
 # Automated preference evidence: mapping and limits
 
+Provider correction, 20 October 2026: SerpApi is rejected as a production dependency. Maps references below describe research observations/contracts, not a direction to spend the SerpApi allowance. Use the [non-flight provider review](non-flight-provider-review.md) when selecting a free evidence source. The domain distinctions and counterexamples remain applicable across providers.
+
 Research date: 18 October 2026 (Europe/London). Documentation investigation only; no authenticated requests or SerpApi credits used for this mapping. It complements [the observed travel API results](flight-feasibility.md) and [enrichment research](data-sources.md). Recommendations below are proposals for review, not additional user-agreed scope or a final architecture.
 
 Scope clarification from the user: the existing rules, weights and activity taxonomy are a frontend-era baseline, not requirements to preserve. The mapping below diagnoses that baseline; gaps do not require retaining or recreating every label. The new engine may be redesigned around the agreed product goal and available evidence.
