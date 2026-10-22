@@ -90,7 +90,7 @@ it("rejects duplicate destination identities", async () => {
 
 it("handles an empty country response without further requests", async () => {
   sourceFetch.mockResolvedValueOnce(Response.json({ results: { bindings: [] } }));
-  expect(await fetchDestinationCandidates("MT", 50, "test")).toEqual({ candidates: [], scanned: 0, skipped: 0, truncated: false });
+  expect(await fetchDestinationCandidates("MT", 50, "test")).toEqual({ candidates: [], scanned: 0, skipped: 0, truncated: false, nextCursor: null });
   expect(sourceFetch).toHaveBeenCalledTimes(1);
 });
 
@@ -99,4 +99,49 @@ it("does not retry source failures or accept an unbounded request", async () => 
   await expect(fetchDestinationCandidates("PT", 50, "test")).rejects.toThrow("HTTP 429");
   await expect(fetchDestinationCandidates("PT", 201, "test")).rejects.toThrow("limit");
   expect(sourceFetch).toHaveBeenCalledTimes(1);
+});
+
+it("resumes after the last scanned source record, even when that record is not an eligible destination", async () => {
+  mockSourceResponses(
+    [createWikivoyagePage("Q10", "Faro"), { ...createWikivoyagePage("Q20", "Region"), categories: [] }],
+    [createWikidataResult("Q10", "Faro"), createWikidataResult("Q20", "Region"), createWikidataResult("Q30", "Lisbon")],
+  );
+
+  const firstPage = await fetchDestinationCandidates("PT", 2, "test");
+
+  expect(firstPage.candidates.map((candidate) => candidate.name)).toEqual(["Faro"]);
+  expect(firstPage.nextCursor).toBe("PT:Q20");
+
+  mockSourceResponses([createWikivoyagePage("Q30", "Lisbon")], [createWikidataResult("Q30", "Lisbon")]);
+
+  const secondPage = await fetchDestinationCandidates("PT", 2, "test", firstPage.nextCursor);
+
+  expect(secondPage.candidates.map((candidate) => candidate.name)).toEqual(["Lisbon"]);
+  expect(secondPage.nextCursor).toBeNull();
+
+  const resumedRequest = new URL(String(sourceFetch.mock.calls[2][0]));
+
+  expect(resumedRequest.searchParams.get("query")).toContain('FILTER(STR(?place) > "http://www.wikidata.org/entity/Q20")');
+});
+
+it("rejects a source page that repeats the cursor instead of advancing", async () => {
+  mockSourceResponses([createWikivoyagePage("Q20", "Faro")], [createWikidataResult("Q20", "Faro")]);
+
+  await expect(fetchDestinationCandidates("PT", 2, "test", "PT:Q20")).rejects.toThrow("did not advance");
+});
+
+it.each(["ES:Q20", "PT:Q0", "PT:Q20:extra", 'PT:Q20" injected', "", "Q20"])(
+  "rejects invalid or wrong-country cursor %s before requesting a source",
+  async (cursor) => {
+    await expect(fetchDestinationCandidates("PT", 50, "test", cursor)).rejects.toThrow("valid resume cursor");
+    expect(sourceFetch).not.toHaveBeenCalled();
+  },
+);
+
+it("finishes on an exactly full final page without inventing another cursor", async () => {
+  mockSourceResponses([createWikivoyagePage("Q30", "Lisbon")], [createWikidataResult("Q30", "Lisbon")]);
+
+  const finalPage = await fetchDestinationCandidates("PT", 1, "test", "PT:Q20");
+
+  expect(finalPage).toMatchObject({ scanned: 1, truncated: false, nextCursor: null });
 });
