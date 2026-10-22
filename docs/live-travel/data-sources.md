@@ -2,6 +2,8 @@
 
 Research checked on 18 October 2026. This report explains the source investigation and its limits; [the specification](spec.md) owns product decisions. Provider prices, access terms and API contracts can change and must be checked before implementation.
 
+**Production recommendation withdrawn, 20 October 2026.** The user requires free-only ongoing access and rejects the SerpApi 250-search monthly allowance. The comparison below is historical research, not a direction to build on SerpApi. See the [production review](production-provider-review.md) and [evidence/accommodation review](non-flight-provider-review.md). Provider limits must be assessed per full planning session before implementation; request caps alone do not make a small free tier suitable.
+
 ## Discovery is different from route pricing
 
 Destination discovery asks where someone could go from an origin. A route-pricing request asks for flights to a destination already chosen. Searching every possible destination separately multiplies request use and latency. A flight API also does not establish activities, atmosphere, climate suitability or the rest of the holiday cost.

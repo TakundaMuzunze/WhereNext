@@ -14,7 +14,8 @@
     "test:migration": "node scripts/test-shortlist-migration.mjs",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage --runInBand",
-    "test:e2e": "npm run build && playwright test"
+    "test:e2e": "npm run build && playwright test",
+    "test:flights:db": "node scripts/test-flight-search.mjs"
   },
   "dependencies": {
     "@better-auth/prisma-adapter": "^1.7.7",

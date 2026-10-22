@@ -101,3 +101,24 @@ model Shortlist {
 
   createdAt DateTime @default(now())
 }
+
+// Shared request ceilings per provider; experimental SerpApi remains closed.
+model SearchAllowance {
+  provider    String   @id
+  limit       Int
+  used        Int      @default(0)
+  hourlyLimit Int
+  expiresAt   DateTime
+}
+
+// Reservations are retained even when the upstream request fails or times out.
+model SearchReservation {
+  id           String   @id @default(cuid())
+  provider     String
+  requestKey   String
+  createdAt    DateTime @default(now())
+  blockedUntil DateTime
+
+  @@index([provider, createdAt])
+  @@index([provider, requestKey, blockedUntil])
+}

@@ -27,3 +27,11 @@ _Avoid_: Live local prices
 **Shortlist**:
 A private, named collection of destinations owned by one person. It may group alternatives for one holiday or places sharing a theme, and a destination may belong to several shortlists.
 _Avoid_: Trip, itinerary
+
+**Budget fit**:
+How an adequately evidenced holiday cost compares with the travelling group's budget. It is unknown when the available cost evidence is insufficient.
+_Avoid_: Preference fit, cheap flights
+
+**Seasonal suitability**:
+How conditions during a period support the traveller's intended experiences at a destination, with the available evidence and limitations made explicit.
+_Avoid_: Universal best month, forecast

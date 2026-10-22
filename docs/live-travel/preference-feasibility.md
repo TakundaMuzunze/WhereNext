@@ -1,5 +1,7 @@
 # Automated destination evidence: observed feasibility
 
+**Historical experiment only.** On 20 October 2026 SerpApi was rejected as a production dependency. These samples demonstrate possible evidence, not sustainable source selection. See [the non-flight provider review](non-flight-provider-review.md) for the Geoapify candidate and hotel-access limitations.
+
 Investigation date: 18 October 2026 (Europe/London). This report records actual bounded data requests, separate from the [documentation mapping](preference-mapping.md). The user clarified during investigation that the frontend-era matching categories and 100-point engine may change. Affordability and useful preference matching remain the product requirements.
 
 ## Outcome

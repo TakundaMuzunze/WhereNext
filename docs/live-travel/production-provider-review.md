@@ -1,0 +1,55 @@
+# Production travel provider review
+
+Follow-up: [authenticated response check](replacement-response-check.md) records the 20 October live API probes. Access now works for both candidates; production suitability remains subject to the limitations recorded there. The documentation-only findings below predate those probes.
+
+Reviewed 20 October 2026. Public primary documentation only; no accounts created, paid services activated or production access demonstrated.
+
+The user confirmed **free-only ongoing API access** during this review. Paid alternatives below are documented for comparison, not approved options. A changed cached/indicative pricing scope still requires an explicit user decision.
+
+## Finding
+
+**No replacement has yet been verified to provide free, high-volume, live, exact-date, group-priced destination discovery plus accommodation for this project.** This is a research finding, not proof that no such service exists. Do not replace SerpApi with another provider in implementation tickets until access, coverage, price semantics, permitted reuse and session economics pass a real integration check.
+
+The existing planner and domain validation remain useful. Search-provider response handling should remain behind a boundary so this decision does not dictate the entire application. Preference matching and transparent whole-holiday affordability remain the product goals.
+
+## Candidate comparison
+
+| Candidate                            | Verified capability and access                                                                                                                                                                          | Production conclusion                                                                                                                  |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Aviasales Data API via Travelpayouts | Signup/token access; cached fares from previous searches. Origin-only requests can discover destinations, with specific departure and return dates. No adult-count input is documented for this method. | Strong free-scale **indicative discovery candidate**, not a live group-price replacement. Test UK route/date coverage before adopting. |
+| Aviasales Flight Search API          | Live search is separately gated at **50,000 confirmed monthly active users**.                                                                                                                           | Not an accessible integration for a pre-launch project.                                                                                |
+| Kiwi Tequila                         | Kiwi states new partnerships are invitation-only; Travelpayouts access requires 50,000 MAU.                                                                                                             | Do not assume public self-service access.                                                                                              |
+| Skyscanner Travel API                | Commercial partner selection; excludes non-commercial individuals and websites below 100,000 MAU.                                                                                                       | Not an accessible default for this project.                                                                                            |
+| Duffel                               | Live known-route offer requests with passengers and dates. Searches beyond a 1500:1 search-to-order ratio cost $0.005 each.                                                                             | Paid/search-and-book-oriented candidate; not a verified free destination-discovery solution.                                           |
+| FlightAPI.io                         | Known-route flight prices, round trips and passengers; advertises $49/month for 30,000 credits.                                                                                                         | Paid candidate, not a free solution; credit costs, onward links, storage permissions and discovery need verification.                  |
+| Booking.com Demand API               | Requires Managed Affiliate Partner status and a signed contract/account manager access before testing.                                                                                                  | Accommodation is a separate commercial-access gate.                                                                                    |
+| Amadeus Self-Service                 | Official developer organisation is deprecated and was archived on 17 July 2026.                                                                                                                         | Do not plan a new self-service integration around archived documentation. Enterprise access is a separate investigation.               |
+
+## Cached discovery: promising, with a different promise
+
+Travelpayouts permits token access after signup. Its documentation says data reflects previous user searches, rather than a new supplier search. Documentation differs on retention: the access page says 2–7 days, the overview says 7 days, and the specific-date endpoint says fares found during the last 48 hours. Display source observation age where available and never describe retrieval time as a fresh fare check. [Access requirements](https://support.travelpayouts.com/hc/en-us/articles/203956083-Requirements-for-Aviasales-data-API-access), [endpoint documentation](https://support.travelpayouts.com/hc/en-us/articles/203956163-Aviasales-Data-API).
+
+The specific-date method documents an optional destination when origin is supplied, return-trip selection, currency, market and onward Aviasales search links. It does not document party size. Multiplying a cached fare by adults would be an estimate, not verified seat availability or a group quote. UK exact-date coverage remains untested. [Endpoint documentation](https://support.travelpayouts.com/hc/en-us/articles/203956163-Aviasales-Data-API).
+
+The rate-limit table lists 600 requests/minute for `prices_for_dates`, not a 250/month allowance, and explicitly encourages caching to files/databases. It does not establish an unlimited-service guarantee or waive affiliate terms. [Rate limits and reuse guidance](https://support.travelpayouts.com/hc/en-us/articles/4402565416594-API-rate-limits).
+
+The live Flight Search API is a different product. Its access rule requires 50,000 confirmed MAU. Its usage rules require user-initiated searches, full result display and booking buttons; disallow combining other flight-metasearch APIs; and impose 9% booking-link and 5% purchase conversion requirements. These conditions need checking against any recommendation-ranking design even after access is granted. [Live access](https://support.travelpayouts.com/hc/en-us/articles/210995808-How-to-get-access-to-the-Aviasales-Search-API), [usage rules](https://support.travelpayouts.com/hc/en-us/articles/34788165535250-Search-API-usage-rules).
+
+## Other access and cost evidence
+
+- Kiwi's first-party announcement describes invitation-only new Tequila partnerships. The Travelpayouts integration independently states a 50,000 MAU gate. [Kiwi announcement](https://media.kiwi.com/articles-and-interviews/better-for-business-kiwi-com-takes-a-new-approach-to-partnerships/), [Travelpayouts Kiwi access](https://support.travelpayouts.com/hc/en-us/articles/360019237899-Kiwi-com-affiliate-program-API).
+- Skyscanner publishes commercial-use and selection requirements, including a minimum 100,000 MAU. [Travel API application criteria](https://www.partners.skyscanner.net/contact/travel-api).
+- Duffel requires origin/destination slices and passenger inputs. Its public pricing specifies a $0.005 excess-search fee above a 1500:1 search-to-book ratio. This is not 1,500 free searches irrespective of bookings. As an illustration, 10,000 billable excess searches cost $50 before other fees; ten destination searches per session magnify that cost. Production acceptance for a redirect-only recommender and data-retention terms were not verified. [Offer requests](https://duffel.com/docs/api/v2/offer-requests), [pricing](https://duffel.com/pricing).
+- FlightAPI.io advertises $49/month for 30,000 credits and a free trial, not an ongoing free production tier. Its registration page says 30 trial credits while the homepage says 20 calls: do not promise either without checking the account. Its documented search requires known airports. Credit-to-search conversion and onward booking flow remain open. [Pricing and product limits](https://www.flightapi.io/), [registration](https://api.flightapi.io/register), [API reference](https://www.flightapi.io/documentation/).
+- Booking.com requires managed affiliate status and signed-contract access before its Demand API can be tested. No generally accessible free accommodation quota was verified. [Prerequisites](https://developers.booking.com/demand/docs/getting-started/prerequisites).
+- The official Amadeus developer organisation marks itself deprecated and archived on 17 July 2026, linking an official portal statement. The statement itself could not be opened during this review; do not assert undocumented enterprise pricing or entitlements. [Official organisation](https://github.com/amadeus4dev), [linked official statement](https://amadeus.com/en/industry-messaging/statement-regarding-amadeus-for-developers-portal).
+
+## Consequence for implementation
+
+1. Remove SerpApi as a mandated production dependency from the plan; retain prior research as historical evidence only.
+2. Preserve completed dated planning, validation and domain work. Provider adapters and provider-specific counters may need replacement; do not delete working code as part of research.
+3. Gate the production integration on demonstrated credentials, UK-to-Europe exact-date coverage, passenger/room/fee semantics, onward links, storage rights and a quantified monthly request budget.
+4. If keeping zero ongoing API spend, investigate cached indicative discovery and source-backed destination information, with explicit unknowns and onward price checking. **This changes the live-pricing promise and requires product agreement.** Missing cached data is not proof that no suitable trip exists.
+5. If preserving live group-priced holidays, establish genuinely free production access through an obtainable partnership or keep that integration blocked. The user has ruled out a paid budget; search fees tied to eventual bookings are not an acceptable hidden substitute.
+
+Neither branch should silently redefine affordability or preference matching. No production provider is selected by this report.
