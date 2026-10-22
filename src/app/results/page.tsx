@@ -1,3 +1,4 @@
+import { DiscoveryPanel } from "@/features/destination-discovery/ui/DiscoveryPanel";
 import { formatTripDate } from "@/features/trip-planner/ui/DatedTripSummary";
 import { DatedTripReview } from "@/features/trip-planner/ui/DatedTripReview";
 import { parseDatedTripRequest, serializeDatedTripRequest, tripNights } from "@/features/trip-planner/lib/datedPlannerSearchParams";
@@ -43,6 +44,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
           </p>
         </header>
         <DatedTripReview request={request} />
+        <DiscoveryPanel key={requestQuery} request={request} />
         <section aria-label="Destination guides">
           <h2 className="font-serif text-3xl tracking-tight">A little inspiration for what comes next</h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
