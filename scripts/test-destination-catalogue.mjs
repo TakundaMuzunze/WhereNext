@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
-import { readFileSync, readdirSync } from "node:fs";
 import { randomUUID } from "node:crypto";
+import { readFileSync, readdirSync } from "node:fs";
 
 // Never use the project's database connection: this runner creates its own.
 const name = `where-next-catalogue-test-${randomUUID()}`;
@@ -61,7 +61,7 @@ try {
   const port = /^127\.0\.0\.1:(\d+)$/.exec(binding)?.[1];
   if (!port) throw new Error("Could not identify isolated Postgres port.");
   const databaseUrl = `postgresql://postgres:${password}@127.0.0.1:${port}/catalogue_test`;
-  console.log("Testing destination catalogue imports against disposable Postgres.");
+  console.log("Testing destination catalogue imports and reads against disposable Postgres.");
   const result = spawnSync(
     process.execPath,
     [
@@ -69,6 +69,7 @@ try {
       "--runInBand",
       "--runTestsByPath",
       "src/features/destination-catalogue/server/persistCandidates.integration.test.ts",
+      "src/features/destination-catalogue/server/readCandidates.integration.test.ts",
       "--testPathIgnorePatterns=/e2e/",
     ],
     {
