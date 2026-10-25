@@ -1,3 +1,4 @@
+import { resolveDestinationGuide } from "@/features/destination-catalogue/server/resolveDestinationGuide";
 import { DatedTripReview } from "@/features/trip-planner/ui/DatedTripReview";
 import { parseDatedTripRequest, serializeDatedTripRequest } from "@/features/trip-planner/lib/datedPlannerSearchParams";
 import { getMatchLabel, getRecommendations } from "@/features/destination-matching";
@@ -17,7 +18,7 @@ export function generateStaticParams() {
 
 export default async function DestinationPage({ params, searchParams }: DestinationPageProps) {
   const { id } = await params;
-  const destination = destinations.find((item) => item.id === id);
+  const destination = await resolveDestinationGuide(id);
 
   if (!destination) notFound();
 
@@ -43,7 +44,7 @@ export default async function DestinationPage({ params, searchParams }: Destinat
   if (!answers) return <DestinationDetails destination={destination} />;
 
   const recommendations = getRecommendations(answers, destinations.length);
-  const recommendationIndex = recommendations.findIndex((item) => item.destination.id === id);
+  const recommendationIndex = recommendations.findIndex((item) => item.destination.id === destination.id);
   const recommendation = recommendations[recommendationIndex];
 
   if (!recommendation) notFound();

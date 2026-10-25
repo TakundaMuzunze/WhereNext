@@ -6,6 +6,8 @@ import { DELETE, GET, PATCH, POST } from "./route";
 import { GET as getShortlist } from "./[shortlistid]/route";
 
 // Only authentication is stubbed: the route uses the real generated Prisma client.
+jest.mock("server-only", () => ({}), { virtual: true });
+
 jest.mock("@/shared/lib/auth/auth", () => ({ auth: { api: { getSession: jest.fn() } } }));
 
 function signIn(id = "alice") {
@@ -216,4 +218,20 @@ it("does not reveal another owner's shortlist or distinguish it from a missing o
     expect(response.status).toBe(404);
     await expect(response.json()).resolves.toEqual({ error: "Shortlist not found" });
   }
+});
+
+it("creates a shortlist with the original guide identity when given a verified Wikidata ID", async () => {
+  const response = await create("Summer", { destinationId: "wikidata:Q597" });
+  expect(response.status).toBe(201);
+  const lists = await GET(new Request("http://localhost/api/shortlists"));
+  await expect(lists.json()).resolves.toMatchObject({
+    userShortlists: [{ shortlistItems: [{ destinationId: "lisbon-portugal" }] }],
+  });
+});
+
+it("rejects unlinked IDs and guests creating a shortlist from an alias", async () => {
+  expect((await create("Summer", { destinationId: "wikidata:Q1000037" })).status).toBe(404);
+  jest.mocked(auth.api.getSession).mockResolvedValue(null);
+  expect((await create("Summer", { destinationId: "wikidata:Q597" })).status).toBe(401);
+  expect(await prisma.shortlist.count()).toBe(0);
 });

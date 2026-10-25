@@ -1,5 +1,5 @@
 import { Prisma } from "@/generated/prisma/client";
-import { destinations } from "@/shared/data/destinations";
+import { resolveDestinationGuide } from "@/features/destination-catalogue/server/resolveDestinationGuide";
 import { auth } from "@/shared/lib/auth/auth";
 import { prisma } from "@/shared/lib/db/prisma";
 import { NextResponse } from "next/server";
@@ -48,11 +48,13 @@ export async function PATCH(request: Request) {
     createName = body.createName.trim();
   }
 
-  const destinationId = body.destinationId;
+  const destination = await resolveDestinationGuide(body.destinationId);
 
-  if (!destinations.some((destination) => destination.id === destinationId)) {
+  if (!destination) {
     return NextResponse.json({ error: "Destination doesn't exist" }, { status: 404 });
   }
+
+  const destinationId = destination.id;
 
   const addTo = [...new Set(body.addTo)].sort();
 
@@ -100,7 +102,12 @@ export async function PATCH(request: Request) {
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
 
-      return NextResponse.json({ destinationId, ...result, isSaved: result.shortlistIds.length > 0 });
+      return NextResponse.json({
+        destinationId: body.destinationId,
+        ...(body.destinationId !== destinationId ? { canonicalDestinationId: destinationId } : {}),
+        ...result,
+        isSaved: result.shortlistIds.length > 0,
+      });
     } catch (error: unknown) {
       if (error instanceof UnavailableShortlistError || (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003")) {
         return NextResponse.json({ error: "One or more shortlists are unavailable. Refresh your shortlists and try again." }, { status: 404 });

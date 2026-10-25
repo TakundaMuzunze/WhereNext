@@ -181,8 +181,8 @@ function SessionShortlists({ children, signedIn, authPending }: { children: Reac
           const updated = lists.map((list) => ({
             ...list,
             destinationIds: result.shortlistIds.includes(list.id)
-              ? [...new Set([...list.destinationIds, change.destinationId])]
-              : list.destinationIds.filter((id) => id !== change.destinationId),
+              ? [...new Set([...list.destinationIds, result.destinationId])]
+              : list.destinationIds.filter((id) => id !== result.destinationId),
           }));
           if (result.createdShortlist && !updated.some((list) => list.id === result.createdShortlist?.id)) updated.push(result.createdShortlist);
           return updated;
