@@ -138,3 +138,11 @@ model DestinationCandidate {
 
   @@index([countryCode])
 }
+
+// links to existing guides. Multiple source aliases may share one guide.
+model DestinationGuideIdentity {
+  wikidataId          String @id
+  legacyDestinationId String
+
+  @@index([legacyDestinationId])
+}
