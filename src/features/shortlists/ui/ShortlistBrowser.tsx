@@ -87,7 +87,7 @@ export function ShortlistBrowser({ shortlistId }: { shortlistId?: string }) {
           <>
             <section className="mb-8 rounded-3xl border border-border bg-secondary p-6">
               <p className="text-sm text-muted">Private shortlist · {list.destinationIds.length} destinations</p>
-              <h2 className="mt-2 text-3xl font-semibold break-words">{list.name}</h2>
+              <h2 className="mt-2 text-3xl font-semibold wrap-break-word">{list.name}</h2>
               <div className="mt-5 flex gap-3">
                 <button className={shortlistButton} disabled={state.busy} onClick={() => setAction({ kind: "rename", id: list.id, name: list.name })}>
                   Rename shortlist
@@ -152,7 +152,7 @@ export function ShortlistBrowser({ shortlistId }: { shortlistId?: string }) {
           {state.shortlists.map((item) => (
             <article key={item.id} className="rounded-3xl border border-border bg-secondary p-6">
               <FolderHeart className="size-8 text-primary" aria-hidden="true" />
-              <h2 className="mt-5 text-2xl font-semibold break-words">
+              <h2 className="mt-5 text-2xl font-semibold wrap-break-word">
                 <Link href={`/saved/${encodeURIComponent(item.id)}`} className="hover:underline">
                   {item.name}
                 </Link>
@@ -244,7 +244,7 @@ function ManageShortlist({ action, onClose }: { action: Action; onClose: () => v
       >
         {action.kind === "delete" ? (
           <>
-            <p className="break-words">Delete “{action.name}”?</p>
+            <p className="wrap-break-word">Delete “{action.name}”?</p>
             <p className="mt-3 text-sm leading-6 text-muted">
               Currently, {exclusiveCount} {exclusiveCount === 1 ? "destination is" : "destinations are"} saved only here and will become unsaved.
               Destinations in other shortlists stay saved. This cannot be undone.
