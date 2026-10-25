@@ -26,6 +26,14 @@ The transaction checks ownership, inserts additions, deletes removals, and reads
 
 The response reflects this transaction's result for the session owner. Another request can subsequently change it.
 
+## Verified destination identities
+
+Both this endpoint and `POST /api/shortlists` accept an existing guide ID or a Wikidata ID with a verified guide link, such as `wikidata:Q597` for Lisbon. Both store the original `lisbon-portugal` identity, so aliases share memberships and cannot create duplicate saves. Unknown or unlinked destinations return 404.
+
+For an alias request, the membership response echoes the requested `destinationId` and adds `canonicalDestinationId` with the stored guide ID. The shared client uses that canonical ID for local membership state and newly created shortlists. Responses to original guide IDs keep their existing shape.
+
+Destination detail URLs accept the same verified aliases and retain planner navigation. The guide and Save button use the original guide ID. Apply the destination-guide identity migration before serving alias requests; imported places without a guide remain unsupported in this compatibility slice.
+
 ## Concurrent requests
 
 Transactions use Serializable isolation: successful operations behave as though they ran one at a time in a database-selected order. Simultaneous opposing changes have no guaranteed arrival-order winner; the later operation in that serial order determines the membership. Repeated additions cannot create duplicate memberships, and unrelated changes are preserved.

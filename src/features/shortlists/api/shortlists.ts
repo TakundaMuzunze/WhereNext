@@ -88,9 +88,15 @@ export async function changeMemberships(change: MembershipChange): Promise<Membe
   ) {
     throw new Error("Invalid membership response");
   }
+  const destinationId = "canonicalDestinationId" in body ? body.canonicalDestinationId : change.destinationId;
+
+  if (typeof destinationId !== "string" || destinationId.trim().length === 0) {
+    throw new Error("Invalid membership destination");
+  }
+
   const createdShortlist =
     "createdShortlist" in body
-      ? parseShortlist(record(body.createdShortlist) ? { ...body.createdShortlist, shortlistItems: [{ destinationId: change.destinationId }] } : null)
+      ? parseShortlist(record(body.createdShortlist) ? { ...body.createdShortlist, shortlistItems: [{ destinationId }] } : null)
       : undefined;
-  return { destinationId: change.destinationId, shortlistIds: body.shortlistIds, ...(createdShortlist ? { createdShortlist } : {}) };
+  return { destinationId, shortlistIds: body.shortlistIds, ...(createdShortlist ? { createdShortlist } : {}) };
 }

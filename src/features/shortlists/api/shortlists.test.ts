@@ -61,3 +61,22 @@ it("rejects a membership response for another destination", async () => {
 it("uses a recoverable error type", () => {
   expect(new ShortlistsError(404)).toBeInstanceOf(Error);
 });
+
+it("uses the canonical destination identity returned for a verified alias", async () => {
+  respond({
+    destinationId: "wikidata:Q597",
+    canonicalDestinationId: "lisbon-portugal",
+    shortlistIds: ["new"],
+    createdShortlist: { id: "new", shortlistName: "Summer" },
+  });
+  await expect(changeMemberships({ destinationId: "wikidata:Q597", addTo: [], removeFrom: [], createName: "Summer" })).resolves.toEqual({
+    destinationId: "lisbon-portugal",
+    shortlistIds: ["new"],
+    createdShortlist: { id: "new", name: "Summer", destinationIds: ["lisbon-portugal"] },
+  });
+});
+
+it.each([null, 42, "", "   "])("rejects an invalid canonical destination identity: %j", async (canonicalDestinationId) => {
+  respond({ destinationId: "wikidata:Q597", canonicalDestinationId, shortlistIds: [] });
+  await expect(changeMemberships({ destinationId: "wikidata:Q597", addTo: [], removeFrom: [] })).rejects.toThrow("Invalid membership");
+});

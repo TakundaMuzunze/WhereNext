@@ -5,6 +5,8 @@ import { auth } from "@/shared/lib/auth/auth";
 import { prisma } from "@/shared/lib/db/prisma";
 import { DELETE, GET, PATCH, POST } from "./route";
 
+jest.mock("server-only", () => ({}), { virtual: true });
+
 jest.mock("@/shared/lib/auth/auth", () => ({ auth: { api: { getSession: jest.fn() } } }));
 jest.mock("@/shared/lib/db/prisma", () => ({
   prisma: { shortlist: { create: jest.fn(), findMany: jest.fn(), deleteMany: jest.fn(), update: jest.fn() } },

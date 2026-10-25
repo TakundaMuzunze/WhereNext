@@ -1,4 +1,4 @@
-import { destinations } from "@/shared/data/destinations";
+import { resolveDestinationGuide } from "@/features/destination-catalogue/server/resolveDestinationGuide";
 import { auth } from "@/shared/lib/auth/auth";
 import { prisma } from "@/shared/lib/db/prisma";
 import { Prisma } from "@/generated/prisma/client";
@@ -36,11 +36,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "destinationId must be a string" }, { status: 400 });
     }
 
-    destinationId = body.destinationId;
+    const destination = await resolveDestinationGuide(body.destinationId);
 
-    if (!destinations.some((destination) => destination.id === destinationId)) {
+    if (!destination) {
       return NextResponse.json({ error: "Destination doesn't exist" }, { status: 404 });
     }
+
+    destinationId = destination.id;
   }
 
   try {

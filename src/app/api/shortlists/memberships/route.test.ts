@@ -4,6 +4,8 @@ import { auth } from "@/shared/lib/auth/auth";
 import { prisma } from "@/shared/lib/db/prisma";
 import { PATCH } from "./route";
 
+jest.mock("server-only", () => ({}), { virtual: true });
+
 jest.mock("@/shared/lib/auth/auth", () => ({ auth: { api: { getSession: jest.fn() } } }));
 jest.mock("@/shared/lib/db/prisma", () => ({ prisma: { $transaction: jest.fn() } }));
 const valid = { destinationId: "lisbon-portugal", addTo: ["list-1"], removeFrom: [] };
