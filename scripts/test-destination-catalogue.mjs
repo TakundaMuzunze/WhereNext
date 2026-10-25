@@ -70,6 +70,7 @@ try {
       "--runTestsByPath",
       "src/features/destination-catalogue/server/persistCandidates.integration.test.ts",
       "src/features/destination-catalogue/server/readCandidates.integration.test.ts",
+      "src/features/destination-catalogue/server/resolveDestinationGuide.integration.test.ts",
       "--testPathIgnorePatterns=/e2e/",
     ],
     {
