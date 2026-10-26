@@ -71,6 +71,33 @@ try {
   );
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error("Endpoint integration tests failed.");
+
+  if (process.argv.includes("--browser")) {
+    docker(
+      ["exec", "-i", name, "psql", "-U", "postgres", "-d", "shortlist_test", "-v", "ON_ERROR_STOP=1"],
+      `
+      INSERT INTO "DestinationCandidate"
+        ("id", "wikidataId", "wikivoyagePageId", "name", "countryCode", "latitude", "longitude", "sourceUrl", "sourceRevisionId", "guideStatus", "importedAt")
+      VALUES ('wikidata:Q159457', 'Q159457', 11446, 'Faro', 'PT', 37.0333, -7.9167,
+        'https://en.wikivoyage.org/wiki/Faro', 123, 'usable', '2020-01-01T00:00:00Z');
+    `,
+    );
+    const buildResult = spawnSync("npm", ["run", "build", "--", "--webpack"], {
+      stdio: "inherit",
+      timeout: 120_000,
+      env: { ...process.env, DATABASE_URL: databaseUrl, DIRECT_URL: databaseUrl },
+    });
+    if (buildResult.error) throw buildResult.error;
+    if (buildResult.status !== 0) throw new Error("Browser test build failed.");
+
+    const browserResult = spawnSync(process.execPath, ["node_modules/@playwright/test/cli.js", "test", "e2e/imported-destinations.spec.ts"], {
+      stdio: "inherit",
+      timeout: 180_000,
+      env: { ...process.env, DATABASE_URL: databaseUrl, DIRECT_URL: databaseUrl, IMPORTED_DESTINATION_TESTS: "disposable" },
+    });
+    if (browserResult.error) throw browserResult.error;
+    if (browserResult.status !== 0) throw new Error("Imported destination browser tests failed.");
+  }
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));
   process.exitCode = 1;

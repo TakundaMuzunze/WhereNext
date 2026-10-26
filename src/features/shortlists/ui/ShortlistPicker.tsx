@@ -15,7 +15,9 @@ export function ShortlistPicker({ destinationId, onClose }: { destinationId: str
   const [stale, setStale] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const lock = useRef(false);
-  const destination = destinations.find((item) => item.id === destinationId);
+  const destination =
+    destinations.find((item) => item.id === destinationId) ??
+    shortlists.flatMap((list) => list.destinationSummaries ?? []).find((item) => item.id === destinationId);
 
   async function save() {
     if (lock.current) return;

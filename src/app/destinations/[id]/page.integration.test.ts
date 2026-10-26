@@ -42,13 +42,45 @@ it("opens a verified destination URL with the original guide and planner context
   });
 });
 
-it.each(["lisbon-portugal", "wikidata:Q597"])("opens %s without planner answers", async (id) => {
+it.each(["lisbon-portugal", "wikidata:Q597", "wikidata%3AQ597"])("opens %s without planner answers", async (id) => {
   const page = await DestinationPage({ params: Promise.resolve({ id }), searchParams: Promise.resolve({}) });
   expect(page).toMatchObject({ props: { destination: { id: "lisbon-portugal" } } });
 });
 
-it.each(["wikidata:Q1000037", "wikidata:Q0", "missing"])("returns not found for an unsupported guide: %s", async (id) => {
+it.each(["wikidata:Q1000037", "wikidata:Q0", "missing", "wikidata%ZZQ597"])("returns not found for an unsupported guide: %s", async (id) => {
   await expect(DestinationPage({ params: Promise.resolve({ id }), searchParams: Promise.resolve({}) })).rejects.toThrow(
     "NEXT_HTTP_ERROR_FALLBACK;404",
   );
+});
+
+it("opens an imported destination without inventing a guide or requiring prices", async () => {
+  await prisma.destinationCandidate.create({
+    data: {
+      id: "wikidata:Q159457",
+      wikidataId: "Q159457",
+      wikivoyagePageId: 11446,
+      name: "Faro",
+      countryCode: "PT",
+      latitude: 37.0333,
+      longitude: -7.9167,
+      sourceUrl: "https://en.wikivoyage.org/wiki/Faro",
+      sourceRevisionId: 123,
+      guideStatus: "usable",
+      importedAt: new Date("2026-10-25T12:00:00Z"),
+    },
+  });
+
+  try {
+    const page = await DestinationPage({
+      params: Promise.resolve({ id: "wikidata%3AQ159457" }),
+      searchParams: Promise.resolve({}),
+    });
+    expect(page).toMatchObject({
+      props: {
+        destination: { id: "wikidata:Q159457", name: "Faro", sourceUrl: "https://en.wikivoyage.org/wiki/Faro" },
+      },
+    });
+  } finally {
+    await prisma.destinationCandidate.delete({ where: { id: "wikidata:Q159457" } });
+  }
 });

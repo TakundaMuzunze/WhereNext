@@ -2,6 +2,10 @@
 import { auth } from "@/shared/lib/auth/auth";
 import { prisma } from "@/shared/lib/db/prisma";
 import { PATCH } from "./route";
+import { GET } from "../route";
+import { Pool } from "pg";
+import { persistCandidates } from "@/features/destination-catalogue/server/persistCandidates";
+import type { DestinationCandidate } from "@/features/destination-catalogue/server/fetchCandidates";
 
 jest.mock("server-only", () => ({}), { virtual: true });
 
@@ -205,4 +209,72 @@ it("rejects unlinked IDs and guests without saving a destination", async () => {
   jest.mocked(auth.api.getSession).mockResolvedValue(null);
   expect((await change(["a"], [], { destinationId: "wikidata:Q597" })).status).toBe(401);
   expect(await prisma.shortlistItem.count()).toBe(0);
+});
+
+it("saves and reopens an imported place without dates, fares or an authored guide", async () => {
+  const candidate: DestinationCandidate = {
+    id: "wikidata:Q159457",
+    wikidataId: "Q159457",
+    wikivoyagePageId: 11446,
+    name: "Faro",
+    countryCode: "PT",
+    latitude: 37.0333,
+    longitude: -7.9167,
+    sourceUrl: "https://en.wikivoyage.org/wiki/Faro",
+    sourceRevisionId: 123,
+    guideStatus: "usable",
+    importedAt: new Date("2020-01-01T00:00:00Z"),
+  };
+  await prisma.destinationCandidate.create({ data: candidate });
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  try {
+    const response = await change(["a", "b"], [], { destinationId: "wikidata:Q159457" });
+    expect(response.status).toBe(200);
+    // A conflicting source identity fails the whole refresh, retaining the saved place's earlier information.
+    await expect(
+      persistCandidates(pool, [
+        { ...candidate, name: "Uncommitted refresh name" },
+        { ...candidate, id: "wikidata:Q159458", wikidataId: "Q159458" },
+      ]),
+    ).rejects.toThrow();
+    const savedLists = await GET(new Request("http://localhost/api/shortlists"));
+    await expect(savedLists.json()).resolves.toMatchObject({
+      userShortlists: [
+        {
+          id: "a",
+          shortlistItems: [{ destinationId: "wikidata:Q159457", destination: { id: "wikidata:Q159457", name: "Faro", country: "Portugal" } }],
+        },
+        {
+          id: "b",
+          shortlistItems: [{ destinationId: "wikidata:Q159457", destination: { id: "wikidata:Q159457", name: "Faro", country: "Portugal" } }],
+        },
+        { id: "c", shortlistItems: [] },
+      ],
+    });
+    expect(await prisma.shortlistItem.findMany({ orderBy: { shortlistId: "asc" } })).toEqual([
+      expect.objectContaining({ shortlistId: "a", destinationId: "wikidata:Q159457" }),
+      expect.objectContaining({ shortlistId: "b", destinationId: "wikidata:Q159457" }),
+    ]);
+    const concurrent = await Promise.all([
+      change(["b"], [], { destinationId: "wikidata:Q159457" }),
+      change(["b"], [], { destinationId: "wikidata:Q159457" }),
+    ]);
+    expect(concurrent.map((result) => result.status)).toEqual([200, 200]);
+    expect((await change(["c", "other"], ["a"], { destinationId: "wikidata:Q159457", createName: "Rollback" })).status).toBe(404);
+    expect(await prisma.shortlist.count()).toBe(4);
+    expect(await prisma.shortlistItem.count()).toBe(2);
+    expect((await change([], ["a"], { destinationId: "wikidata:Q159457" })).status).toBe(200);
+    expect(await prisma.shortlistItem.count()).toBe(1);
+  } finally {
+    await pool.end();
+    await prisma.destinationCandidate.delete({ where: { id: "wikidata:Q159457" } });
+  }
+});
+
+it("lets an owner remove a retained saved reference when its catalogue record is unavailable", async () => {
+  await prisma.shortlistItem.create({ data: { shortlistId: "a", destinationId: "wikidata:Q159457" } });
+  const response = await change([], ["a"], { destinationId: "wikidata:Q159457" });
+  expect(response.status).toBe(200);
+  expect(await prisma.shortlistItem.count()).toBe(0);
+  expect((await change(["a"], [], { destinationId: "wikidata:Q159457" })).status).toBe(404);
 });

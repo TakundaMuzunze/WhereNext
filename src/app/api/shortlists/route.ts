@@ -1,4 +1,5 @@
-import { resolveDestinationGuide } from "@/features/destination-catalogue/server/resolveDestinationGuide";
+import { getImportedDestinationSummaries } from "@/features/destination-catalogue/server/getImportedDestinationSummaries";
+import { resolveDestination } from "@/features/destination-catalogue/server/resolveDestination";
 import { auth } from "@/shared/lib/auth/auth";
 import { prisma } from "@/shared/lib/db/prisma";
 import { Prisma } from "@/generated/prisma/client";
@@ -36,13 +37,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "destinationId must be a string" }, { status: 400 });
     }
 
-    const destination = await resolveDestinationGuide(body.destinationId);
+    const destination = await resolveDestination(body.destinationId);
 
     if (!destination) {
       return NextResponse.json({ error: "Destination doesn't exist" }, { status: 404 });
     }
 
-    destinationId = destination.id;
+    destinationId = destination.destination.id;
   }
 
   try {
@@ -77,7 +78,16 @@ export async function GET(request: Request) {
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
   });
 
-  return NextResponse.json({ userShortlists }, { status: 200, headers: { "Cache-Control": "private, no-store" } });
+  const summaries = await getImportedDestinationSummaries(userShortlists.flatMap((list) => list.shortlistItems.map((item) => item.destinationId)));
+  const listsWithDestinations = userShortlists.map((list) => ({
+    ...list,
+    shortlistItems: list.shortlistItems.map((item) => ({
+      ...item,
+      ...(summaries.has(item.destinationId) ? { destination: summaries.get(item.destinationId) } : {}),
+    })),
+  }));
+
+  return NextResponse.json({ userShortlists: listsWithDestinations }, { status: 200, headers: { "Cache-Control": "private, no-store" } });
 }
 
 export async function DELETE(request: Request) {
