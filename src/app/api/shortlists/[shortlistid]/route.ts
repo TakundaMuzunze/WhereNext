@@ -1,3 +1,4 @@
+import { getImportedDestinationSummaries } from "@/features/destination-catalogue/server/getImportedDestinationSummaries";
 // app/api/shortlists/route.ts
 import { auth } from "@/shared/lib/auth/auth";
 import { prisma } from "@/shared/lib/db/prisma";
@@ -26,5 +27,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ shor
     return NextResponse.json({ error: "Shortlist not found" }, { status: 404 });
   }
 
-  return NextResponse.json({ shortlist }, { status: 200, headers: { "Cache-Control": "private, no-store" } });
+  const summaries = await getImportedDestinationSummaries(shortlist.shortlistItems.map((item) => item.destinationId));
+  const shortlistWithDestinations = {
+    ...shortlist,
+    shortlistItems: shortlist.shortlistItems.map((item) => ({
+      ...item,
+      ...(summaries.has(item.destinationId) ? { destination: summaries.get(item.destinationId) } : {}),
+    })),
+  };
+
+  return NextResponse.json({ shortlist: shortlistWithDestinations }, { status: 200, headers: { "Cache-Control": "private, no-store" } });
 }

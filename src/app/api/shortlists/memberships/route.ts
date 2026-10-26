@@ -1,5 +1,6 @@
+import { isImportedDestinationId } from "@/entities/destination/model/importedDestination";
 import { Prisma } from "@/generated/prisma/client";
-import { resolveDestinationGuide } from "@/features/destination-catalogue/server/resolveDestinationGuide";
+import { resolveDestination } from "@/features/destination-catalogue/server/resolveDestination";
 import { auth } from "@/shared/lib/auth/auth";
 import { prisma } from "@/shared/lib/db/prisma";
 import { NextResponse } from "next/server";
@@ -48,13 +49,17 @@ export async function PATCH(request: Request) {
     createName = body.createName.trim();
   }
 
-  const destination = await resolveDestinationGuide(body.destinationId);
+  const destination = await resolveDestination(body.destinationId);
 
-  if (!destination) {
+  const isRemovalOnly = body.addTo.length === 0 && body.removeFrom.length > 0 && createName === undefined;
+  const isImportedId = isImportedDestinationId(body.destinationId);
+
+  // A retained membership can still be removed when its catalogue information is unavailable.
+  if (!destination && !(isRemovalOnly && isImportedId)) {
     return NextResponse.json({ error: "Destination doesn't exist" }, { status: 404 });
   }
 
-  const destinationId = destination.id;
+  const destinationId = destination?.destination.id ?? body.destinationId;
 
   const addTo = [...new Set(body.addTo)].sort();
 
@@ -105,6 +110,9 @@ export async function PATCH(request: Request) {
       return NextResponse.json({
         destinationId: body.destinationId,
         ...(body.destinationId !== destinationId ? { canonicalDestinationId: destinationId } : {}),
+        ...(destination?.kind === "imported"
+          ? { destination: { id: destinationId, name: destination.destination.name, country: destination.destination.country } }
+          : {}),
         ...result,
         isSaved: result.shortlistIds.length > 0,
       });

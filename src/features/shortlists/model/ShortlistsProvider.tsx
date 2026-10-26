@@ -1,5 +1,6 @@
 "use client";
 
+import { isImportedDestinationId } from "@/entities/destination/model/importedDestination";
 import { useSession } from "@/shared/lib/auth/auth-client";
 import { consumePendingSave, signInHref } from "@/shared/lib/auth/signInJourney";
 import { destinations } from "@/shared/data/destinations";
@@ -32,6 +33,10 @@ type State = {
   remove: (id: string) => Promise<void>;
   submit: (change: MembershipChange) => Promise<void>;
 };
+function isSupportedDestinationId(id: string) {
+  return destinations.some((destination) => destination.id === id) || isImportedDestinationId(id);
+}
+
 const Context = createContext<State | null>(null);
 
 export function ShortlistsProvider({ children }: { children: ReactNode }) {
@@ -104,7 +109,7 @@ function SessionShortlists({ children, signedIn, authPending }: { children: Reac
         .then(() => {
           if (!active || !mounted.current) return;
           const intent = consumePendingSave();
-          if (intent && destinations.some((destination) => destination.id === intent.destinationId)) setPicker(intent.destinationId);
+          if (intent && isSupportedDestinationId(intent.destinationId)) setPicker(intent.destinationId);
         })
         .catch(() => {});
     }
@@ -145,7 +150,7 @@ function SessionShortlists({ children, signedIn, authPending }: { children: Reac
         .then(() => {
           if (!mounted.current) return;
           const intent = consumePendingSave();
-          if (intent && destinations.some((d) => d.id === intent.destinationId)) setPicker(intent.destinationId);
+          if (intent && isSupportedDestinationId(intent.destinationId)) setPicker(intent.destinationId);
         })
         .catch(() => {});
     },
@@ -180,6 +185,14 @@ function SessionShortlists({ children, signedIn, authPending }: { children: Reac
         setShortlists((lists) => {
           const updated = lists.map((list) => ({
             ...list,
+            ...(result.destination
+              ? {
+                  destinationSummaries: [
+                    ...(list.destinationSummaries ?? []).filter((destination) => destination.id !== result.destinationId),
+                    result.destination,
+                  ],
+                }
+              : {}),
             destinationIds: result.shortlistIds.includes(list.id)
               ? [...new Set([...list.destinationIds, result.destinationId])]
               : list.destinationIds.filter((id) => id !== result.destinationId),

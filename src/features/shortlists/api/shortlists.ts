@@ -1,6 +1,8 @@
-export type Shortlist = { id: string; name: string; destinationIds: string[] };
+import type { DestinationSummary } from "@/entities/destination/model/importedDestination";
+
+export type Shortlist = { id: string; name: string; destinationIds: string[]; destinationSummaries?: DestinationSummary[] };
 export type MembershipChange = { destinationId: string; addTo: string[]; removeFrom: string[]; createName?: string };
-export type MembershipResult = { destinationId: string; shortlistIds: string[]; createdShortlist?: Shortlist };
+export type MembershipResult = { destinationId: string; shortlistIds: string[]; createdShortlist?: Shortlist; destination?: DestinationSummary };
 
 export class ShortlistsError extends Error {
   constructor(
@@ -42,18 +44,36 @@ async function request(path: string, method = "GET", body?: unknown, signal?: Ab
   return response.json();
 }
 
+function parseDestinationSummary(value: unknown, destinationId: string): DestinationSummary {
+  if (!record(value) || value.id !== destinationId || typeof value.name !== "string" || typeof value.country !== "string") {
+    throw new Error("Invalid destination summary");
+  }
+
+  return { id: destinationId, name: value.name, country: value.country };
+}
+
 function parseShortlist(value: unknown): Shortlist {
   if (!record(value) || typeof value.id !== "string" || typeof value.shortlistName !== "string" || !Array.isArray(value.shortlistItems)) {
     throw new Error("Invalid shortlist response");
   }
 
+  const destinationSummaries: DestinationSummary[] = [];
   const destinationIds = value.shortlistItems.map((item: unknown) => {
     if (!record(item) || typeof item.destinationId !== "string") throw new Error("Invalid shortlist destination");
+
+    if ("destination" in item) {
+      destinationSummaries.push(parseDestinationSummary(item.destination, item.destinationId));
+    }
 
     return item.destinationId;
   });
 
-  return { id: value.id, name: value.shortlistName, destinationIds };
+  return {
+    id: value.id,
+    name: value.shortlistName,
+    destinationIds,
+    ...(destinationSummaries.length > 0 ? { destinationSummaries } : {}),
+  };
 }
 
 export async function getShortlists(signal?: AbortSignal): Promise<Shortlist[]> {
@@ -94,9 +114,20 @@ export async function changeMemberships(change: MembershipChange): Promise<Membe
     throw new Error("Invalid membership destination");
   }
 
+  const destination = "destination" in body ? parseDestinationSummary(body.destination, destinationId) : undefined;
+
   const createdShortlist =
     "createdShortlist" in body
-      ? parseShortlist(record(body.createdShortlist) ? { ...body.createdShortlist, shortlistItems: [{ destinationId }] } : null)
+      ? parseShortlist(
+          record(body.createdShortlist)
+            ? { ...body.createdShortlist, shortlistItems: [{ destinationId, ...(destination ? { destination } : {}) }] }
+            : null,
+        )
       : undefined;
-  return { destinationId, shortlistIds: body.shortlistIds, ...(createdShortlist ? { createdShortlist } : {}) };
+  return {
+    destinationId,
+    shortlistIds: body.shortlistIds,
+    ...(destination ? { destination } : {}),
+    ...(createdShortlist ? { createdShortlist } : {}),
+  };
 }

@@ -3,6 +3,8 @@ import { auth } from "@/shared/lib/auth/auth";
 import { prisma } from "@/shared/lib/db/prisma";
 import { GET } from "./route";
 
+jest.mock("server-only", () => ({}), { virtual: true });
+
 jest.mock("@/shared/lib/auth/auth", () => ({ auth: { api: { getSession: jest.fn() } } }));
 jest.mock("@/shared/lib/db/prisma", () => ({ prisma: { shortlist: { findFirst: jest.fn() } } }));
 function context(shortlistid = "list-1") {

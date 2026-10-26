@@ -107,24 +107,33 @@ export function ShortlistBrowser({ shortlistId }: { shortlistId?: string }) {
               </section>
             ) : (
               <section aria-label="Shortlist destinations" className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {list.destinationIds.flatMap((id) => {
-                  const destination = destinations.find((item) => item.id === id);
-                  if (!destination) return [];
-                  return [
+                {list.destinationIds.map((id) => {
+                  const guide = destinations.find((item) => item.id === id);
+                  const destination = guide ?? list.destinationSummaries?.find((item) => item.id === id);
+                  const name = destination?.name ?? "Unavailable destination";
+
+                  return (
                     <article key={id} className="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
-                      <div className="relative h-48 bg-secondary">
-                        <Image
-                          src={destination.image.src}
-                          alt={destination.image.alt}
-                          fill
-                          sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
-                          className="object-cover"
-                        />
-                      </div>
+                      {guide && (
+                        <div className="relative h-48 bg-secondary">
+                          <Image
+                            src={guide.image.src}
+                            alt={guide.image.alt}
+                            fill
+                            sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
+                            className="object-cover"
+                          />
+                        </div>
+                      )}
                       <div className="p-5">
-                        <p className="text-sm text-muted">{destination.country}</p>
-                        <h3 className="mt-1 text-2xl font-semibold">{destination.name}</h3>
-                        <p className="mt-3 text-sm leading-6 text-muted">{destination.description}</p>
+                        <p className="text-sm text-muted">{destination?.country ?? "Place information unavailable"}</p>
+                        <h3 className="mt-1 text-2xl font-semibold">{name}</h3>
+                        <p className="mt-3 text-sm leading-6 text-muted">
+                          {guide?.description ??
+                            (destination
+                              ? "Saved travel idea · activity, seasonal and budget fit unknown."
+                              : "Your saved reference is retained. You can try reopening it or remove it from this shortlist.")}
+                        </p>
                         <div className="mt-5 flex flex-wrap gap-3">
                           <Link className={shortlistButton} href={`/destinations/${id}`}>
                             View destination <ArrowRight className="ml-2 size-4" aria-hidden="true" />
@@ -132,11 +141,11 @@ export function ShortlistBrowser({ shortlistId }: { shortlistId?: string }) {
                           <button className={shortlistButton} disabled={state.busy} onClick={() => state.openPicker(id)} aria-haspopup="dialog">
                             Edit shortlists
                           </button>
-                          <RemoveMembership shortlistId={list.id} destinationId={id} name={destination.name} />
+                          <RemoveMembership shortlistId={list.id} destinationId={id} name={name} />
                         </div>
                       </div>
-                    </article>,
-                  ];
+                    </article>
+                  );
                 })}
               </section>
             )}

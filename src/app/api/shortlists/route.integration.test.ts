@@ -235,3 +235,48 @@ it("rejects unlinked IDs and guests creating a shortlist from an alias", async (
   expect((await create("Summer", { destinationId: "wikidata:Q597" })).status).toBe(401);
   expect(await prisma.shortlist.count()).toBe(0);
 });
+
+it("creates and reads a private shortlist containing an imported place", async () => {
+  await prisma.destinationCandidate.create({
+    data: {
+      id: "wikidata:Q159457",
+      wikidataId: "Q159457",
+      wikivoyagePageId: 11446,
+      name: "Faro",
+      countryCode: "PT",
+      latitude: 37.0333,
+      longitude: -7.9167,
+      sourceUrl: "https://en.wikivoyage.org/wiki/Faro",
+      sourceRevisionId: 123,
+      guideStatus: "usable",
+      importedAt: new Date("2020-01-01T00:00:00Z"),
+    },
+  });
+  try {
+    const response = await create("Summer", { destinationId: "wikidata:Q159457" });
+    expect(response.status).toBe(201);
+    const { shortlist } = await response.json();
+    const saved = await getShortlist(new Request(`http://localhost/api/shortlists/${shortlist.id}`), {
+      params: Promise.resolve({ shortlistid: shortlist.id }),
+    });
+    await expect(saved.json()).resolves.toMatchObject({
+      shortlist: {
+        shortlistItems: [{ destinationId: "wikidata:Q159457", destination: { id: "wikidata:Q159457", name: "Faro", country: "Portugal" } }],
+      },
+    });
+    const competingCreates = await Promise.all([
+      create("Winter", { destinationId: "wikidata:Q159457" }),
+      create("WINTER", { destinationId: "wikidata:Q159457" }),
+    ]);
+    expect(competingCreates.map((result) => result.status).sort()).toEqual([201, 409]);
+    expect(await prisma.shortlist.count()).toBe(2);
+    expect(await prisma.shortlistItem.count()).toBe(2);
+    signIn("bob");
+    const forbidden = await getShortlist(new Request(`http://localhost/api/shortlists/${shortlist.id}`), {
+      params: Promise.resolve({ shortlistid: shortlist.id }),
+    });
+    expect(forbidden.status).toBe(404);
+  } finally {
+    await prisma.destinationCandidate.delete({ where: { id: "wikidata:Q159457" } });
+  }
+});

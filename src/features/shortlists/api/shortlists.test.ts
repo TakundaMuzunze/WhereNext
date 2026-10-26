@@ -80,3 +80,36 @@ it.each([null, 42, "", "   "])("rejects an invalid canonical destination identit
   respond({ destinationId: "wikidata:Q597", canonicalDestinationId, shortlistIds: [] });
   await expect(changeMemberships({ destinationId: "wikidata:Q597", addTo: [], removeFrom: [] })).rejects.toThrow("Invalid membership");
 });
+
+it("keeps server-validated imported place summaries for saved cards", async () => {
+  respond({
+    userShortlists: [
+      {
+        id: "a",
+        shortlistName: "Summer",
+        shortlistItems: [{ destinationId: "wikidata:Q159457", destination: { id: "wikidata:Q159457", name: "Faro", country: "Portugal" } }],
+      },
+    ],
+  });
+  await expect(getShortlists()).resolves.toEqual([
+    {
+      id: "a",
+      name: "Summer",
+      destinationIds: ["wikidata:Q159457"],
+      destinationSummaries: [{ id: "wikidata:Q159457", name: "Faro", country: "Portugal" }],
+    },
+  ]);
+});
+
+it("rejects a summary attached to a different saved identity", async () => {
+  respond({
+    userShortlists: [
+      {
+        id: "a",
+        shortlistName: "Summer",
+        shortlistItems: [{ destinationId: "wikidata:Q159457", destination: { id: "wikidata:Q597", name: "Lisbon", country: "Portugal" } }],
+      },
+    ],
+  });
+  await expect(getShortlists()).rejects.toThrow("Invalid destination summary");
+});

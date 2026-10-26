@@ -1,7 +1,12 @@
+import type { DestinationSummary } from "../../src/entities/destination/model/importedDestination";
 import type { Page } from "@playwright/test";
 
 type List = { id: string; name: string; destinationIds: string[] };
-export async function mockShortlists(page: Page, initial: List[] = [{ id: "summer", name: "Summer", destinationIds: ["lisbon-portugal"] }]) {
+export async function mockShortlists(
+  page: Page,
+  initial: List[] = [{ id: "summer", name: "Summer", destinationIds: ["lisbon-portugal"] }],
+  destinationSummaries: DestinationSummary[] = [],
+) {
   const state = { signedIn: true, lists: structuredClone(initial), writes: 0, failNext: false, userId: "test-user" };
   await page.route("**/api/auth/sign-out", (route) => {
     state.signedIn = false;
@@ -41,7 +46,12 @@ export async function mockShortlists(page: Page, initial: List[] = [{ id: "summe
             id: list.id,
             shortlistName: list.name,
             _count: { shortlistItems: list.destinationIds.length },
-            shortlistItems: list.destinationIds.map((destinationId) => ({ destinationId })),
+            shortlistItems: list.destinationIds.map((destinationId) => ({
+              destinationId,
+              ...(destinationSummaries.some((destination) => destination.id === destinationId)
+                ? { destination: destinationSummaries.find((destination) => destination.id === destinationId) }
+                : {}),
+            })),
           })),
         },
       });
@@ -88,7 +98,15 @@ export async function mockShortlists(page: Page, initial: List[] = [{ id: "summe
     });
     const shortlistIds = state.lists.filter((list) => list.destinationIds.includes(body.destinationId)).map((list) => list.id);
     return route.fulfill({
-      json: { destinationId: body.destinationId, shortlistIds, isSaved: shortlistIds.length > 0, ...(createdShortlist ? { createdShortlist } : {}) },
+      json: {
+        destinationId: body.destinationId,
+        shortlistIds,
+        isSaved: shortlistIds.length > 0,
+        ...(destinationSummaries.some((destination) => destination.id === body.destinationId)
+          ? { destination: destinationSummaries.find((destination) => destination.id === body.destinationId) }
+          : {}),
+        ...(createdShortlist ? { createdShortlist } : {}),
+      },
     });
   });
   return state;
