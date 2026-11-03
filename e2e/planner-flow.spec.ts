@@ -18,7 +18,7 @@ async function completePlanner(page: Page) {
 }
 
 test("completes the planner and shows ranked destination matches", async ({ page }) => {
-  await page.goto("/planner");
+  await page.goto("/planner?mode=legacy");
   await completePlanner(page);
   await page.getByRole("button", { name: "See matches" }).click();
 
@@ -33,7 +33,7 @@ test("completes the planner and shows ranked destination matches", async ({ page
 });
 
 test("changing trip type clears activities from the previous choice", async ({ page }) => {
-  await page.goto("/planner");
+  await page.goto("/planner?mode=legacy");
   await completePlanner(page);
 
   await page.getByRole("button", { name: "Back" }).click();
@@ -46,7 +46,7 @@ test("changing trip type clears activities from the previous choice", async ({ p
 });
 
 test("edit answers returns to a populated planner", async ({ page }) => {
-  await page.goto("/planner");
+  await page.goto("/planner?mode=legacy");
   await completePlanner(page);
   await page.getByRole("button", { name: "See matches" }).click();
   await page.getByRole("link", { name: "Edit answers" }).click();
@@ -60,7 +60,7 @@ test("edit answers returns to a populated planner", async ({ page }) => {
 });
 
 test("asks guests to sign in before saving and preserves their results URL", async ({ page }) => {
-  await page.goto("/planner");
+  await page.goto("/planner?mode=legacy");
   await completePlanner(page);
   await page.getByRole("button", { name: "See matches" }).click();
   await expect(page).toHaveURL(/\/results\?/);

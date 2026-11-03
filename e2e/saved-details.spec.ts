@@ -7,11 +7,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("signing out from personalised details keeps the destination and planner answers", async ({ page }) => {
-  await page.goto("/");
-  await page
-    .getByRole("link", { name: /start planning/i })
-    .first()
-    .click();
+  await page.goto("/planner?mode=legacy");
   await page.getByLabel("Where are you travelling from?").fill("London");
   await page.getByLabel("When do you want to travel?").selectOption("June");
   await page.getByLabel("Duration").fill("5");

@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { readFileSync, readdirSync } from "node:fs";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 // Never use the project's database connection: this runner creates its own.
 const name = `where-next-endpoint-test-${randomUUID()}`;
@@ -83,6 +83,57 @@ try {
         'https://en.wikivoyage.org/wiki/Faro', 123, 'usable', '2020-01-01T00:00:00Z');
     `,
     );
+    // Discovery fixtures exercise real catalogue/cache reads without provider requests.
+    const retrievedAt = new Date();
+    const location = { destinationId: "wikidata:Q1000041", latitude: 37.471, longitude: -7.472 };
+    const category = "entertainment.museum";
+    const requestIdentity = {
+      source: "geoapify",
+      version: 1,
+      ...location,
+      category,
+      radiusMetres: 4000,
+      limit: 20,
+    };
+    const requestKey = createHash("sha256").update(JSON.stringify(requestIdentity)).digest("hex");
+    const observation = {
+      ...location,
+      category,
+      radiusMetres: 4000,
+      limit: 20,
+      retrievedAt: retrievedAt.toISOString(),
+      coverage: "sample",
+      places: [
+        {
+          sourceId: "test-museum",
+          name: "Test museum listing",
+          categories: [category],
+          latitude: location.latitude,
+          longitude: location.longitude,
+          sourceUrl: "https://www.openstreetmap.org/node/1",
+          access: "unknown",
+        },
+      ],
+    };
+    const observationJson = JSON.stringify(observation).replaceAll("'", "''");
+    docker(
+      ["exec", "-i", name, "psql", "-U", "postgres", "-d", "shortlist_test", "-v", "ON_ERROR_STOP=1"],
+      `
+      INSERT INTO "DestinationCandidate"
+        ("id", "wikidataId", "wikivoyagePageId", "name", "countryCode", "latitude", "longitude", "sourceUrl", "sourceRevisionId", "guideStatus", "importedAt")
+      VALUES ('wikidata:Q1000041', 'Q1000041', 1000041, 'Alcoutim', 'PT', 37.471, -7.472,
+        'https://en.wikivoyage.org/wiki/Alcoutim', 123, 'usable', now()),
+        ('wikidata:Q597', 'Q597', 597, 'Lisbon', 'PT', 38.72, -9.14,
+        'https://en.wikivoyage.org/wiki/Lisbon', 123, 'usable', now());
+      INSERT INTO "DestinationActivityEvidence" ("requestKey", "destinationId", "observation", "retrievedAt", "expiresAt")
+      VALUES ('${requestKey}', 'wikidata:Q1000041', '${observationJson}'::jsonb, '${retrievedAt.toISOString()}', now() + interval '7 days');
+      INSERT INTO "DestinationCandidate"
+        ("id", "wikidataId", "wikivoyagePageId", "name", "countryCode", "latitude", "longitude", "sourceUrl", "sourceRevisionId", "guideStatus", "importedAt")
+      SELECT 'wikidata:Q' || (9000000 + n), 'Q' || (9000000 + n), 9000000 + n,
+        'Test place ' || n, 'PT', 37, -8, 'https://en.wikivoyage.org/wiki/Test', 123, 'usable', now()
+      FROM generate_series(1, 13) AS n;
+      `,
+    );
     const buildResult = spawnSync("npm", ["run", "build", "--", "--webpack"], {
       stdio: "inherit",
       timeout: 120_000,
@@ -98,6 +149,9 @@ try {
         "test",
         "e2e/imported-destinations.spec.ts",
         "e2e/activity-evidence.spec.ts",
+        "e2e/destination-planning.spec.ts",
+        "e2e/dated-planner.spec.ts",
+        "e2e/planner-flow.spec.ts",
         "e2e/shortlists.spec.ts",
         "e2e/saved-details.spec.ts",
       ],

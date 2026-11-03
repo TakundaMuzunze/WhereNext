@@ -34,7 +34,7 @@ async function complete(page: Page) {
 
 test("dated request survives review, edits, guide navigation and sign-in cancellation", async ({ page }) => {
   await page.goto("/planner");
-  await page.getByRole("link", { name: "Plan with exact dates and a UK airport" }).click();
+  await page.getByRole("link", { name: "Open the existing dated travel planner" }).click();
   const date = await complete(page);
   await showStep(page, "Your style");
   await page.getByRole("button", { name: "Review trip request" }).click();
@@ -230,6 +230,7 @@ test("mobile summary expands beside review and the brief groups the holiday deta
   await showStep(page, "Your style");
   await page.getByRole("button", { name: "Review trip request" }).click();
   await expect(page.getByRole("heading", { name: "4 nights away for two." })).toBeVisible();
+  await page.getByLabel("Your dated trip request").getByText("View request details", { exact: true }).click();
   await expect(page.getByRole("heading", { name: "Room for the good stuff" })).toBeVisible();
   await expect(page.getByLabel("Destination guides")).toContainText("not matched holidays");
   await page.getByRole("link", { name: "Edit budget", exact: true }).click();
