@@ -61,6 +61,7 @@ try {
       "src/app/api/shortlists/route.integration.test.ts",
       "src/app/api/shortlists/memberships/route.integration.test.ts",
       "src/app/destinations/[id]/page.integration.test.ts",
+      "src/app/api/destinations/[id]/activities/route.integration.test.ts",
       "--testPathIgnorePatterns=/e2e/",
     ],
     {
@@ -90,11 +91,28 @@ try {
     if (buildResult.error) throw buildResult.error;
     if (buildResult.status !== 0) throw new Error("Browser test build failed.");
 
-    const browserResult = spawnSync(process.execPath, ["node_modules/@playwright/test/cli.js", "test", "e2e/imported-destinations.spec.ts"], {
-      stdio: "inherit",
-      timeout: 180_000,
-      env: { ...process.env, DATABASE_URL: databaseUrl, DIRECT_URL: databaseUrl, IMPORTED_DESTINATION_TESTS: "disposable" },
-    });
+    const browserResult = spawnSync(
+      process.execPath,
+      [
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "e2e/imported-destinations.spec.ts",
+        "e2e/activity-evidence.spec.ts",
+        "e2e/shortlists.spec.ts",
+        "e2e/saved-details.spec.ts",
+      ],
+      {
+        stdio: "inherit",
+        timeout: 180_000,
+        env: {
+          ...process.env,
+          DATABASE_URL: databaseUrl,
+          DIRECT_URL: databaseUrl,
+          IMPORTED_DESTINATION_TESTS: "disposable",
+          ACTIVITY_EVIDENCE_ENABLED: "false",
+        },
+      },
+    );
     if (browserResult.error) throw browserResult.error;
     if (browserResult.status !== 0) throw new Error("Imported destination browser tests failed.");
   }

@@ -1,3 +1,4 @@
+import { DestinationActivityEvidence } from "@/features/destination-activities/ui/DestinationActivityEvidence";
 import type { Destination, DestinationRecommendation } from "@/entities/destination";
 import type { PlannerAnswers } from "@/entities/trip/model/types";
 import { SaveDestinationButton } from "@/features/saved-destinations";
@@ -13,6 +14,7 @@ type DestinationDetailsProps = {
   backHref?: string;
   backLabel?: string;
   editHref?: string;
+  activities?: string[];
 };
 
 const costLevelLabels = {
@@ -25,7 +27,16 @@ function formatMonths(months: string[]) {
   return months.map((month) => month.slice(0, 3)).join(" · ");
 }
 
-export function DestinationDetails({ destination, recommendation, answers, matchLabel, backHref, backLabel, editHref }: DestinationDetailsProps) {
+export function DestinationDetails({
+  destination,
+  recommendation,
+  answers,
+  matchLabel,
+  backHref,
+  backLabel,
+  editHref,
+  activities,
+}: DestinationDetailsProps) {
   const travellerCount = Number(answers?.travellers ?? 0);
   const estimatedTotal = destination.estimatedCostPerPerson * travellerCount;
   const isPersonalised = Boolean(recommendation && answers);
@@ -185,6 +196,11 @@ export function DestinationDetails({ destination, recommendation, answers, match
           </Link>
         )}
       </div>
+      <DestinationActivityEvidence
+        key={destination.id + JSON.stringify(activities ?? answers?.activities)}
+        destinationId={destination.id}
+        activities={activities ?? answers?.activities}
+      />
     </main>
   );
 }
