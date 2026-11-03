@@ -140,7 +140,7 @@ function translateObservation(body: unknown, location: ActivityLocation, categor
   };
 }
 
-function validateCachedObservation(
+export function validateCachedObservation(
   cachedEvidence: DestinationActivityEvidence,
   location: ActivityLocation,
   category: string,
@@ -172,7 +172,7 @@ function validateCachedObservation(
   return observation;
 }
 
-export async function readActivityObservation(location: ActivityLocation, category: string): Promise<ActivityObservationResult> {
+export function activityObservationKey(location: ActivityLocation, category: string): string {
   // Version and geometry affect reuse. Dates, airports and traveller IDs do not belong in this key.
   const searchIdentity = {
     source: "geoapify",
@@ -183,7 +183,11 @@ export async function readActivityObservation(location: ActivityLocation, catego
     limit: resultLimit,
   };
   const serialisedSearchIdentity = JSON.stringify(searchIdentity);
-  const requestKey = createHash("sha256").update(serialisedSearchIdentity).digest("hex");
+  return createHash("sha256").update(serialisedSearchIdentity).digest("hex");
+}
+
+export async function readActivityObservation(location: ActivityLocation, category: string): Promise<ActivityObservationResult> {
+  const requestKey = activityObservationKey(location, category);
   let previousObservation: ActivityObservation | null = null;
 
   try {

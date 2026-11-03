@@ -1,3 +1,5 @@
+import type { DiscoveryRequest } from "@/features/destination-planning/model/discoveryRequest";
+import { DiscoveryRequestSummary } from "@/features/destination-planning/ui/DiscoveryRequestSummary";
 import { DestinationActivityEvidence } from "@/features/destination-activities/ui/DestinationActivityEvidence";
 import type { ImportedDestination } from "@/entities/destination/model/importedDestination";
 import { SaveDestinationButton } from "@/features/saved-destinations";
@@ -8,9 +10,16 @@ type ImportedDestinationDetailsProps = {
   backHref?: string;
   editHref?: string;
   activities?: string[];
+  discoveryRequest?: DiscoveryRequest;
 };
 
-export function ImportedDestinationDetails({ destination, backHref = "/saved", editHref, activities }: ImportedDestinationDetailsProps) {
+export function ImportedDestinationDetails({
+  destination,
+  backHref = "/saved",
+  editHref,
+  activities,
+  discoveryRequest,
+}: ImportedDestinationDetailsProps) {
   const importedDate = new Date(destination.importedAt).toLocaleDateString("en-GB", { timeZone: "UTC" });
 
   return (
@@ -18,6 +27,12 @@ export function ImportedDestinationDetails({ destination, backHref = "/saved", e
       <Link href={backHref} className="text-sm text-primary">
         ← Back to {backHref.startsWith("/results") ? "your trip" : "saved destinations"}
       </Link>
+
+      {discoveryRequest && (
+        <div className="mt-5">
+          <DiscoveryRequestSummary request={discoveryRequest} />
+        </div>
+      )}
 
       <section className="mt-6 rounded-3xl border border-border bg-surface p-8">
         <p className="text-sm text-muted">{destination.country}</p>

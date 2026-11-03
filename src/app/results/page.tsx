@@ -1,3 +1,5 @@
+import { DiscoveryResults } from "@/features/destination-planning/ui/DiscoveryResults";
+import { parseDiscoveryRequest } from "@/features/destination-planning/lib/discoveryRequest";
 import { DiscoveryPanel } from "@/features/destination-discovery/ui/DiscoveryPanel";
 import { formatTripDate } from "@/features/trip-planner/ui/DatedTripSummary";
 import { DatedTripReview } from "@/features/trip-planner/ui/DatedTripReview";
@@ -17,6 +19,31 @@ type ResultsPageProps = {
 
 export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const query = await searchParams;
+  if (query.kind === "discovery") {
+    const request = parseDiscoveryRequest(query);
+
+    if (!request) {
+      return (
+        <main className="mx-auto min-h-screen max-w-3xl px-6 py-28 text-text">
+          <h1 className="text-3xl">Check your trip request</h1>
+          <p className="mt-4">The discovery link contains invalid or missing trip details.</p>
+          <Link href="/planner" className="mt-6 inline-flex min-h-11 items-center text-primary underline">
+            Start planning
+          </Link>
+        </main>
+      );
+    }
+
+    const requestedPage = Number(query.page ?? 1);
+    let pageNumber = 1;
+
+    if (!Array.isArray(query.page) && Number.isSafeInteger(requestedPage) && requestedPage > 0) {
+      pageNumber = requestedPage;
+    }
+
+    return <DiscoveryResults request={request} pageNumber={pageNumber} />;
+  }
+
   if (query.kind !== undefined) {
     const request = parseDatedTripRequest(query);
     if (!request)
