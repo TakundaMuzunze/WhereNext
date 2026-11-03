@@ -27,6 +27,13 @@ async function reserve(provider: Provider, key: string): Promise<void> {
     const hourly = await tx.searchReservation.count({ where: { provider, createdAt: { gt: new Date(now.getTime() - 3_600_000) } } });
     const duplicate = await tx.searchReservation.findFirst({ where: { provider, requestKey: key, blockedUntil: { gt: now } } });
     if (used >= row.limit || hourly >= row.hourlyLimit || duplicate) throw new Error("Provider allowance exhausted");
+    if (provider === "geoapify") {
+      const recentRequests = await tx.searchReservation.count({
+        where: { provider, createdAt: { gt: new Date(now.getTime() - 1000) } },
+      });
+      if (recentRequests >= 4) throw new Error("Provider request rate exhausted");
+    }
+
     const expiresAt = reset ? new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)) : row.expiresAt;
     await tx.searchAllowance.update({ where: { provider }, data: { used: used + 1, expiresAt } });
     await tx.searchReservation.create({ data: { provider, requestKey: key, createdAt: now, blockedUntil: new Date(now.getTime() + 60_000) } });
@@ -43,6 +50,12 @@ function cacheKey(url: URL, headers?: HeadersInit) {
 
 export function providerRetrievedAt(url: URL, headers?: HeadersInit): string | null {
   return cache.get(cacheKey(url, headers))?.retrievedAt ?? null;
+}
+
+// Invalid external envelopes may be retained briefly, but must not poison a week-long evidence cache.
+export function coolDownProviderResponse(url: URL) {
+  const entry = cache.get(cacheKey(url));
+  if (entry) entry.expires = Math.min(entry.expires, Date.now() + 60_000);
 }
 
 // Bounded process cache coalesces concurrent identical requests. Database ceilings
