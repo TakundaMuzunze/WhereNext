@@ -1,0 +1,549 @@
+{
+  "Q159457-entertainment-museum": {
+    "destinationId": "wikidata:Q159457",
+    "coordinates": {
+      "latitude": 37.01611111111111,
+      "longitude": -7.9350000000000005,
+      "altitude": null,
+      "precision": 0.0002777777777777778,
+      "globe": "http://www.wikidata.org/entity/Q2"
+    },
+    "category": "entertainment.museum",
+    "retrievedAt": "2026-11-03T14:26:13.167Z",
+    "body": {
+      "features": [
+        {
+          "properties": {
+            "place_id": "51a89663682bbd1fc059e9d495cff2814240f00103f901f44f6e750100000092031f4d75736575206520496772656a61206461204d697365726963c3b372646961",
+            "name": "Museu e Igreja da Misericórdia",
+            "categories": ["entertainment", "entertainment.museum", "fee"],
+            "lat": 37.0152225,
+            "lon": -7.9347359,
+            "datasource": {
+              "raw": {
+                "osm_id": 6265130996,
+                "osm_type": "n",
+                "opening_hours": "Mo-Th 09:30-13:00,14:30-17:00; Fr 09:30-13:00,14:30-16:30"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "51d7aca8a4d9bc1fc05953e66685f4814240f00102f9015206e80a0000000092031f4d75736575206520496772656a61206461204d697365726963c3b372646961",
+            "name": "Museu e Igreja da Misericórdia",
+            "categories": ["building", "building.tourism", "entertainment", "entertainment.museum"],
+            "lat": 37.0152657,
+            "lon": -7.9344178,
+            "datasource": {
+              "raw": {
+                "osm_id": 182978130,
+                "osm_type": "w",
+                "opening_hours": "Mo-Fr 09:30-13:00"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "51daa1abbe04c01fc0593505d78118824240f00103f901dec28d700000000092032a4d75736575204d6172c3ad74696d6f20416c6d6972616e74652052616d616c686f204f72746967c3a36f",
+            "name": "Museu Marítimo Almirante Ramalho Ortigão",
+            "categories": ["entertainment", "entertainment.museum", "fee"],
+            "lat": 37.0163729,
+            "lon": -7.9375181,
+            "datasource": {
+              "raw": {
+                "osm_id": 1888338654,
+                "osm_type": "n",
+                "opening_hours": "Mo-Fr 09:00-12:00, 14:30-16:30"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "51d75c6b654bbb1fc0595e05f8b0cd814240f00102f9011601e80a0000000092031250616c61636574652042656c6d6172c3a76f",
+            "name": "Palacete Belmarço",
+            "categories": [
+              "building",
+              "building.historic",
+              "building.tourism",
+              "entertainment",
+              "entertainment.museum",
+              "heritage",
+              "tourism",
+              "tourism.sights",
+              "tourism.sights.manor"
+            ],
+            "lat": 37.0141287,
+            "lon": -7.9329099,
+            "datasource": {
+              "raw": {
+                "osm_id": 182976790,
+                "osm_type": "w"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "51bd785f019bbe1fc059d76168e4b3814240f00102f901888de50a0000000092032243656e74726f206465204369c3aa6e636961205669766120646f20416c6761727665",
+            "name": "Centro de Ciência Viva do Algarve",
+            "categories": [
+              "building",
+              "building.public_and_civil",
+              "building.tourism",
+              "entertainment",
+              "entertainment.museum",
+              "fee",
+              "wheelchair",
+              "wheelchair.limited"
+            ],
+            "lat": 37.0133553,
+            "lon": -7.9361497,
+            "datasource": {
+              "raw": {
+                "osm_id": 182816136,
+                "osm_type": "w",
+                "opening_hours": "Mo off; Tu-Su 10:00-13:00,14:00-18:00"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "51a8fc10c072b91fc0591ce269430f824240f00103f901d96b8814000000009203194d7573657520526567696f6e616c20646f20416c6761727665",
+            "name": "Museu Regional do Algarve",
+            "categories": ["entertainment", "entertainment.museum", "fee"],
+            "lat": 37.0160908,
+            "lon": -7.9311018,
+            "datasource": {
+              "raw": {
+                "osm_id": 344484825,
+                "osm_type": "n",
+                "opening_hours": "Tu-Fr 10:00-18:00; Sa 10:00-16:30"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "5116e357079bbd1fc059fe8f5db3a6814240f00103f901896a93d10200000092030f4661726f2073746f72792073706f74",
+            "name": "Faro story spot",
+            "categories": ["entertainment", "entertainment.museum", "fee"],
+            "lat": 37.0128998,
+            "lon": -7.9351617,
+            "datasource": {
+              "raw": {
+                "osm_id": 12106033801,
+                "osm_type": "n",
+                "opening_hours": "Mo-Fr 10:00-16:30; Sa 10:00-14:30"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "51c0d3bf7f4ebc1fc0593f79b361a8814240f00103f9018a4e1c22010000009203174d75736575204d756e69636970616c206465204661726f",
+            "name": "Museu Municipal de Faro",
+            "categories": ["entertainment", "entertainment.museum", "fee"],
+            "lat": 37.0129511,
+            "lon": -7.9338932,
+            "datasource": {
+              "raw": {
+                "osm_id": 4867247754,
+                "osm_type": "n",
+                "opening_hours": "Oct-May: Tu-Fr 10:00-19:00; Sa,Su 11:30-18:00"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "Q159457-catering-bar": {
+    "destinationId": "wikidata:Q159457",
+    "coordinates": {
+      "latitude": 37.01611111111111,
+      "longitude": -7.9350000000000005,
+      "altitude": null,
+      "precision": 0.0002777777777777778,
+      "globe": "http://www.wikidata.org/entity/Q2"
+    },
+    "category": "catering.bar",
+    "retrievedAt": "2026-11-03T14:26:14.696Z",
+    "body": {
+      "features": [
+        {
+          "properties": {
+            "place_id": "513e12e5c1ccbd1fc059dd44888620824240f00103f9018cfa213201000000920307426f68c3aa6d65",
+            "name": "Bohême",
+            "categories": ["catering", "catering.bar", "internet_access"],
+            "lat": 37.0166176,
+            "lon": -7.9353514,
+            "datasource": {
+              "raw": {
+                "osm_id": 5136054924,
+                "osm_type": "n",
+                "opening_hours": "Mo-Su 11:00-23:00"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "5134924e6e25bd1fc0595173a895f8814240f00103f901aaf43ab20000000092031c436f6c756d62757320436f636b7461696c20262057696e6520426172",
+            "name": "Columbus Cocktail & Wine Bar",
+            "categories": ["catering", "catering.bar", "internet_access", "internet_access.free"],
+            "lat": 37.0153987,
+            "lon": -7.9347131,
+            "datasource": {
+              "raw": {
+                "osm_id": 2990208170,
+                "osm_type": "n",
+                "opening_hours": "Mo-Su 18:00-02:00"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "513d1faf5120bd1fc059f12087d228824240f00103f901a6dabf5601000000920307c3826e636f7261",
+            "name": "Âncora",
+            "categories": ["catering", "catering.bar", "wheelchair", "wheelchair.limited"],
+            "lat": 37.0168708,
+            "lon": -7.9346936,
+            "datasource": {
+              "raw": {
+                "osm_id": 5750381222,
+                "osm_type": "n"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "510c91d3d7f3bd1fc059bfccc17d2e824240f00103f9012dbdf1a702000000920309526f636b204c696e65",
+            "name": "Rock Line",
+            "categories": ["catering", "catering.bar"],
+            "lat": 37.0170438,
+            "lon": -7.9355005,
+            "datasource": {
+              "raw": {
+                "osm_id": 11407572269,
+                "osm_type": "n",
+                "opening_hours": "We-Mo 19:00-02:00"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "511e8d9eb6a1bd1fc0593f7f901b34824240f00103f90159ca72a7020000009203023234",
+            "name": 24,
+            "categories": ["catering", "catering.bar"],
+            "lat": 37.0172152,
+            "lon": -7.9351872,
+            "datasource": {
+              "raw": {
+                "osm_id": 11399252569,
+                "osm_type": "n"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "5142fee3ce96bd1fc059f6c65a8d36824240f00103f901ed0dd35c0100000092030d426172204368655373656e7461",
+            "name": "Bar CheSsenta",
+            "categories": ["catering", "catering.bar"],
+            "lat": 37.0172898,
+            "lon": -7.9351456,
+            "datasource": {
+              "raw": {
+                "osm_id": 5852302829,
+                "osm_type": "n"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "5187a8c29fe1bd1fc059ecd1657b3e824240f00103f901eb0dd35c01000000920303445558",
+            "name": "DUX",
+            "categories": ["catering", "catering.bar"],
+            "lat": 37.0175318,
+            "lon": -7.935431,
+            "datasource": {
+              "raw": {
+                "osm_id": 5852302827,
+                "osm_type": "n"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "516c932f0d68be1fc0595af624b039824240f00103f901342756b2000000009203164d35204f7269656e74616c204261722042697374726f",
+            "name": "M5 Oriental Bar Bistro",
+            "categories": ["catering", "catering.bar", "internet_access", "wheelchair", "wheelchair.limited"],
+            "lat": 37.0173855,
+            "lon": -7.9359438,
+            "datasource": {
+              "raw": {
+                "osm_id": 2991990580,
+                "osm_type": "n",
+                "opening_hours": "Mo-Sa 10:00-02:00"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "5192527534b3bb1fc0593e8cb564fa814240f00103f901c27a885e0200000092030947414d45204f564552",
+            "name": "GAME OVER",
+            "categories": ["catering", "catering.bar"],
+            "lat": 37.0154539,
+            "lon": -7.9333008,
+            "datasource": {
+              "raw": {
+                "osm_id": 10175937218,
+                "osm_type": "n",
+                "opening_hours": "Tu-Su 18:00-02:00"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "51229111ab9abb1fc05983f8c08eff814240f00103f90155d02f320100000092031543696e646572656c6c612050617374656c65726961",
+            "name": "Cinderella Pasteleria",
+            "categories": ["catering", "catering.bar", "internet_access", "wheelchair", "wheelchair.limited"],
+            "lat": 37.0156115,
+            "lon": -7.9332072,
+            "datasource": {
+              "raw": {
+                "osm_id": 5136961621,
+                "osm_type": "n"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "5122d3eb600ebc1fc05922aa4b21eb814240f00103f90122ab08700100000092030b4f73204172746973746173",
+            "name": "Os Artistas",
+            "categories": ["catering", "catering.bar"],
+            "lat": 37.0149881,
+            "lon": -7.9336486,
+            "datasource": {
+              "raw": {
+                "osm_id": 6174583586,
+                "osm_type": "n"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "51417fa1478cbe1fc059c3ceb9803c824240f00103f901f2c134940100000092031233706f696e74732053706f72747320426172",
+            "name": "3points Sports Bar",
+            "categories": ["catering", "catering.bar"],
+            "lat": 37.0174714,
+            "lon": -7.936082,
+            "datasource": {
+              "raw": {
+                "osm_id": 6781452786,
+                "osm_type": "n",
+                "opening_hours": "Mo-Su 10:00-02:00"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "51ebcaf38cb7bd1fc0598fd5d4694d824240f00102f9013493960c0000000092030b48656176656e20436c7562",
+            "name": "Heaven Club",
+            "categories": ["building", "building.catering", "catering", "catering.bar"],
+            "lat": 37.0179864,
+            "lon": -7.9352701,
+            "datasource": {
+              "raw": {
+                "osm_id": 211194676,
+                "osm_type": "w",
+                "opening_hours": "Mo-Su 18:00-04:00"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "51a4b4ed6aa8bf1fc059aaedcb3e34824240f00103f901b8b773650200000092030b456c20736f6d627265726f",
+            "name": "El sombrero",
+            "categories": ["catering", "catering.bar"],
+            "lat": 37.0172194,
+            "lon": -7.9371659,
+            "datasource": {
+              "raw": {
+                "osm_id": 10292017080,
+                "osm_type": "n"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "5182e7dec325bf1fc05975d256804a824240f00103f901d90146d90000000092030743616261726574",
+            "name": "Cabaret",
+            "categories": ["catering", "catering.bar"],
+            "lat": 37.0178986,
+            "lon": -7.9366675,
+            "datasource": {
+              "raw": {
+                "osm_id": 3645243865,
+                "osm_type": "n"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "51aafd8cc179bf1fc0591af1aec44d824240f00103f901f00dd35c0100000092030f426f7465636f204cc3a12052757461",
+            "name": "Boteco Lá Ruta",
+            "categories": ["catering", "catering.bar"],
+            "lat": 37.0179983,
+            "lon": -7.9369879,
+            "datasource": {
+              "raw": {
+                "osm_id": 5852302832,
+                "osm_type": "n"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "51f5a4a723dbbc1fc059b17499f5bd814240f00103f901d9c935750100000092032552657374617572616e7465204369646164652056656c6861202d2050617374656c61726961",
+            "name": "Restaurante Cidade Velha - Pastelaria",
+            "categories": ["catering", "catering.bar", "wheelchair", "wheelchair.limited"],
+            "lat": 37.0136096,
+            "lon": -7.9344297,
+            "datasource": {
+              "raw": {
+                "osm_id": 6261426649,
+                "osm_type": "n"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "51237c94b65dbd1fc059299e697869824240f00103f901c9c11ca70100000092030a42696c6861726573326b",
+            "name": "Bilhares2k",
+            "categories": ["catering", "catering.bar"],
+            "lat": 37.0188437,
+            "lon": -7.9349278,
+            "datasource": {
+              "raw": {
+                "osm_id": 7098646985,
+                "osm_type": "n"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "5119a9f7544ebb1fc059ab64b61ac8814240f00103f90169429c0a03000000",
+            "categories": ["catering", "catering.bar"],
+            "lat": 37.0139192,
+            "lon": -7.932916,
+            "datasource": {
+              "raw": {
+                "osm_id": 13062914665,
+                "osm_type": "n"
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "place_id": "51a5ebd33b26bc1fc0594ec23baf67824240f00103f901c37e5c02010000009203094d616b746f73746173",
+            "name": "Maktostas",
+            "categories": ["catering", "catering.bar"],
+            "lat": 37.0187892,
+            "lon": -7.9337396,
+            "datasource": {
+              "raw": {
+                "osm_id": 4334583491,
+                "osm_type": "n"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "Q1000037-commercial-marketplace": {
+    "destinationId": "wikidata:Q1000037",
+    "coordinates": {
+      "latitude": 39.416666666667,
+      "longitude": -7.45,
+      "altitude": null,
+      "precision": 0.016666666666667,
+      "globe": "http://www.wikidata.org/entity/Q2"
+    },
+    "category": "commercial.marketplace",
+    "retrievedAt": "2026-11-03T14:26:19.074Z",
+    "body": {
+      "features": [
+        {
+          "properties": {
+            "place_id": "51b368afce90d41dc059150abc952bb54340f00102f901106d0916000000009203114d65726361646f204d756e69636970616c",
+            "name": "Mercado Municipal",
+            "categories": ["building", "building.commercial", "commercial.marketplace"],
+            "lat": 39.415369,
+            "lon": -7.457567,
+            "datasource": {
+              "raw": {
+                "osm_id": 369716496,
+                "osm_type": "w"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "Q1000041-beach": {
+    "destinationId": "wikidata:Q1000041",
+    "coordinates": {
+      "latitude": 37.469972222222,
+      "longitude": -7.4731111111111,
+      "altitude": null,
+      "precision": 0.000027777777777778,
+      "globe": "http://www.wikidata.org/entity/Q2"
+    },
+    "category": "beach",
+    "retrievedAt": "2026-11-03T14:26:20.183Z",
+    "body": {
+      "features": [
+        {
+          "properties": {
+            "place_id": "51914536d379e81dc059bfb4c27470bc4240f00102f901698dac04000000009203135072616961206465205065676f2046756e646f",
+            "name": "Praia de Pego Fundo",
+            "categories": ["beach"],
+            "lat": 37.4723674,
+            "lon": -7.4771847,
+            "datasource": {
+              "raw": {
+                "osm_id": 78417257,
+                "osm_type": "w",
+                "opening_hours": "24/7"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
