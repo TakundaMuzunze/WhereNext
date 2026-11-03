@@ -9,6 +9,7 @@ async function enterDiscovery(page: import("@playwright/test").Page) {
   await page.getByLabel("Adults", { exact: true }).fill("2");
   await page.getByLabel("Group budget (GBP)").fill("2000.50");
   await page.getByRole("checkbox", { name: "Museums", exact: true }).check();
+  await page.getByText("Beaches & water", { exact: true }).click();
   await page.getByRole("checkbox", { name: "Swimming", exact: true }).check();
 }
 
@@ -37,8 +38,8 @@ test("discovers without dates or fares and preserves context through details, ed
   await page.goto(returnTo!);
   await page.getByRole("link", { name: "Edit request", exact: true }).click();
   await expect(page.getByLabel("Group budget (GBP)")).toHaveValue("2000.50");
-  await expect(page.getByRole("checkbox", { name: "Swimming", exact: true })).toBeChecked();
-  await page.getByRole("checkbox", { name: "Swimming", exact: true }).uncheck();
+  await expect(page.getByRole("button", { name: "Remove Swimming", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Remove Swimming", exact: true }).click();
   await page.getByRole("button", { name: "Explore destinations", exact: true }).click();
   await expect(page).toHaveURL((url) => url.pathname === "/results" && url.searchParams.getAll("activity").join(",") === "Museums");
   expect(providerCalls).toBe(0);
@@ -96,5 +97,56 @@ test("compares stored evidence without fares, paginates after ranking and preser
   await expect(page.getByText("Ideal duration", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Best months", { exact: true })).toHaveCount(0);
   await page.getByRole("link", { name: "Edit request", exact: true }).click();
-  await expect(page.getByRole("checkbox", { name: "Swimming", exact: true })).toBeChecked();
+  await expect(page.getByRole("button", { name: "Remove Swimming", exact: true })).toBeVisible();
+});
+
+test("groups interests, keeps multiple groups open and removes selections without exceeding ten", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockShortlists(page);
+  await page.goto("/planner");
+  const interests = page.getByRole("group", { name: "What would you like to do?" });
+  const culture = interests.locator("details").filter({ hasText: "Culture & history" });
+  const beaches = interests.locator("details").filter({ hasText: "Beaches & water" });
+
+  await expect(culture).toHaveAttribute("open", "");
+  await expect(beaches).not.toHaveAttribute("open", "");
+  await beaches.getByText("Beaches & water", { exact: true }).click();
+  await expect(culture).toHaveAttribute("open", "");
+  await expect(beaches).toHaveAttribute("open", "");
+
+  for (const interest of [
+    "Museums",
+    "Architecture",
+    "Historic sites",
+    "Walking tours",
+    "Old towns",
+    "Local culture",
+    "Shopping",
+    "Beaches",
+    "Boat trips",
+    "Swimming",
+  ]) {
+    await interests.getByRole("checkbox", { name: interest, exact: true }).check();
+  }
+
+  await expect(interests.getByRole("status")).toHaveText("10 of 10 selected");
+  await expect(culture.locator("summary")).toContainText("7 selected");
+  await expect(beaches.locator("summary")).toContainText("3 selected");
+  await expect(interests.getByRole("checkbox", { name: "Island hopping", exact: true })).toBeDisabled();
+  await culture.getByText("Culture & history", { exact: true }).click();
+  await interests.getByRole("button", { name: "Remove Museums", exact: true }).click();
+  await expect(interests.getByRole("status")).toHaveText("9 of 10 selected");
+  await expect(interests.getByRole("checkbox", { name: "Island hopping", exact: true })).toBeEnabled();
+  await expect(culture).not.toHaveAttribute("open", "");
+  await culture.getByText("Culture & history", { exact: true }).click();
+  await expect(interests.getByRole("checkbox", { name: "Museums", exact: true })).not.toBeChecked();
+
+  const { discoveryInterests } = await import("../src/features/destination-planning/model/discoveryRequest");
+  const renderedInterests = await interests
+    .getByRole("checkbox", { includeHidden: true })
+    .evaluateAll((checkboxes) => checkboxes.map((checkbox) => checkbox.closest("label")?.textContent?.trim()));
+  expect(renderedInterests.sort()).toEqual([...discoveryInterests].sort());
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await interests.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: test.info().outputPath("grouped-interests-mobile.png"), fullPage: true });
 });

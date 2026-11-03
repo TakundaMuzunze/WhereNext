@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { discoveryInterests, type DiscoveryRequest } from "../model/discoveryRequest";
-import { parseDiscoveryRequest, serializeDiscoveryRequest } from "../lib/discoveryRequest";
 import { poundsToPence } from "@/features/trip-planner/lib/datedPlannerSearchParams";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, type FormEvent } from "react";
+import { parseDiscoveryRequest, serializeDiscoveryRequest } from "../lib/discoveryRequest";
+import { type DiscoveryRequest } from "../model/discoveryRequest";
+import { DiscoveryInterests } from "./DiscoveryInterests";
 
 const inputClassName = "mt-2 block min-h-11 w-full rounded-xl border border-border bg-surface px-3 py-2 text-text";
 
@@ -32,7 +33,9 @@ export function DiscoveryPlanner({ initialRequest, invalidLink = false }: Discov
       return;
     }
 
-    setActivities([...activities, interest]);
+    if (activities.length < 10) {
+      setActivities([...activities, interest]);
+    }
   }
 
   function submitRequest(event: FormEvent<HTMLFormElement>) {
@@ -172,25 +175,7 @@ export function DiscoveryPlanner({ initialRequest, invalidLink = false }: Discov
           </p>
         </fieldset>
 
-        <fieldset className="rounded-2xl border border-border p-5 sm:p-7">
-          <legend className="px-2 text-xl font-medium">What would you like to do?</legend>
-          <p className="mb-5 text-sm text-muted">
-            Choose up to 10 interests. Each has equal importance. Some interests do not yet have verified evidence.
-          </p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {discoveryInterests.map((interest) => (
-              <label key={interest} className="flex min-h-11 items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={activities.includes(interest)}
-                  onChange={() => toggleInterest(interest)}
-                  className="size-4 accent-primary"
-                />
-                {interest}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        <DiscoveryInterests selectedInterests={activities} onToggle={toggleInterest} />
 
         {errorMessage && (
           <p role="alert" className="rounded-xl border border-border p-4">
