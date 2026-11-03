@@ -197,11 +197,11 @@ export function DiscoveryPlanner({ initialRequest, invalidLink = false }: Discov
             {errorMessage}
           </p>
         )}
-        <button type="submit" className="min-h-11 rounded-xl bg-primary px-6 py-3 text-primary-foreground">
+        <button type="submit" className="min-h-11 cursor-pointer rounded-xl bg-primary px-6 py-3 text-primary-foreground">
           Explore destinations
         </button>
       </form>
-      <Link href="/planner?kind=dated" className="mt-8 inline-flex min-h-11 items-center text-sm text-primary underline">
+      <Link href="/planner?kind=dated" className="mt-8 inline-flex min-h-11 cursor-pointer items-center text-sm text-primary underline">
         Open the existing dated travel planner
       </Link>
     </main>

@@ -29,7 +29,7 @@ function DestinationResult({ destination, query }: { destination: DiscoveryCandi
               <ul className="mt-2 space-y-1 text-sm">
                 {assessment.places.slice(0, 2).map((place) => (
                   <li key={place.sourceId}>
-                    <a href={place.sourceUrl} target="_blank" rel="noreferrer" className="text-primary underline">
+                    <a href={place.sourceUrl} target="_blank" rel="noreferrer" className="cursor-pointer text-primary underline">
                       {place.name}
                     </a>
                   </li>
@@ -56,7 +56,7 @@ function DestinationResult({ destination, query }: { destination: DiscoveryCandi
       <p className="mt-5 text-sm text-muted">Budget fit: unknown</p>
       <p className="mt-2 text-sm text-muted">Seasonal suitability: unknown</p>
       <div className="mt-5 flex flex-wrap items-center gap-4">
-        <Link href={detailsHref} className="inline-flex min-h-11 items-center text-primary underline">
+        <Link href={detailsHref} className="inline-flex min-h-11 cursor-pointer items-center text-primary underline">
           Explore {destination.name}
         </Link>
         <SaveDestinationButton destinationId={destination.id} />
@@ -85,7 +85,7 @@ export async function DiscoveryResults({ request, pageNumber = 1 }: { request: D
         <p role="alert" className="mt-6">
           We could not load the destination catalogue. Your request is preserved.
         </p>
-        <Link href={`/results?${query}`} className="mt-6 inline-flex min-h-11 items-center text-primary underline">
+        <Link href={`/results?${query}`} className="mt-6 inline-flex min-h-11 cursor-pointer items-center text-primary underline">
           Try again
         </Link>
       </main>
@@ -130,7 +130,10 @@ export async function DiscoveryResults({ request, pageNumber = 1 }: { request: D
       {totalPages > 1 && (
         <nav aria-label="Result pages" className="mt-8 flex flex-wrap items-center gap-5">
           {currentPage > 1 && (
-            <Link href={`/results?${query}&page=${currentPage - 1}`} className="inline-flex min-h-11 items-center text-primary underline">
+            <Link
+              href={`/results?${query}&page=${currentPage - 1}`}
+              className="inline-flex min-h-11 cursor-pointer items-center text-primary underline"
+            >
               Previous destinations
             </Link>
           )}
@@ -138,7 +141,10 @@ export async function DiscoveryResults({ request, pageNumber = 1 }: { request: D
             Page {currentPage} of {totalPages}
           </p>
           {currentPage < totalPages && (
-            <Link href={`/results?${query}&page=${currentPage + 1}`} className="inline-flex min-h-11 items-center text-primary underline">
+            <Link
+              href={`/results?${query}&page=${currentPage + 1}`}
+              className="inline-flex min-h-11 cursor-pointer items-center text-primary underline"
+            >
               More destinations
             </Link>
           )}
@@ -146,11 +152,11 @@ export async function DiscoveryResults({ request, pageNumber = 1 }: { request: D
       )}
       <p className="mt-8 text-xs text-muted">
         Activity data:{" "}
-        <a href="https://www.geoapify.com/" className="underline">
+        <a href="https://www.geoapify.com/" className="cursor-pointer underline">
           Geoapify
         </a>{" "}
         /{" "}
-        <a href="https://www.openstreetmap.org/copyright" className="underline">
+        <a href="https://www.openstreetmap.org/copyright" className="cursor-pointer underline">
           OpenStreetMap contributors
         </a>
         . Listings are a bounded sample, not a quality score or complete inventory.

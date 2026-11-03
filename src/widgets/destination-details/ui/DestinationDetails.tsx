@@ -47,7 +47,7 @@ export function DestinationDetails({
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-5xl px-6 pt-28 pb-20">
-      <Link href={backHref ?? "/saved"} className="mb-6 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary">
+      <Link href={backHref ?? "/saved"} className="mb-6 inline-flex min-h-11 cursor-pointer items-center gap-2 text-sm font-medium text-primary">
         <ArrowLeft className="size-4" aria-hidden="true" />
         {backLabel ?? (isPersonalised ? "Back to your matches" : "Back to saved destinations")}
       </Link>
@@ -199,7 +199,7 @@ export function DestinationDetails({
       <div className="mt-12 flex flex-wrap gap-3 border-t border-primary/15 pt-7">
         <Link
           href={backHref ?? "/saved"}
-          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+          className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           {backLabel ?? (isPersonalised ? "Back to matches" : "Back to saved")}
@@ -207,7 +207,7 @@ export function DestinationDetails({
         {isPersonalised && editHref && (
           <Link
             href={editHref}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-primary/40 px-4 py-2 text-sm font-medium text-text"
+            className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-primary/40 px-4 py-2 text-sm font-medium text-text"
           >
             <Pencil className="size-4" aria-hidden="true" />
             Edit trip answers

@@ -25,7 +25,7 @@ export function DiscoveryRequestSummary({ request }: { request: DiscoveryRequest
     <section aria-label="Your trip request" className="rounded-2xl border border-border bg-secondary p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="font-medium">{timingLabel}</p>
-        <Link href={editHref} className="inline-flex min-h-11 items-center text-sm text-primary underline">
+        <Link href={editHref} className="inline-flex min-h-11 cursor-pointer items-center text-sm text-primary underline">
           Edit request
         </Link>
       </div>

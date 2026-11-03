@@ -87,7 +87,7 @@ export function DatedTripReview({ request }: DatedTripReviewProps) {
               <h3 className="text-lg font-medium">{title}</h3>
               <Link
                 href={`${editRequestHref}#${anchor}`}
-                className="inline-flex min-h-11 items-center text-sm text-primary underline underline-offset-4"
+                className="inline-flex min-h-11 cursor-pointer items-center text-sm text-primary underline underline-offset-4"
               >
                 {edit}
               </Link>
@@ -114,7 +114,7 @@ export function DatedTripReview({ request }: DatedTripReviewProps) {
           </p>
         )}
       </details>
-      <Link href={editRequestHref} className="mt-3 inline-flex min-h-11 items-center rounded-xl border border-primary/40 px-4 py-2">
+      <Link href={editRequestHref} className="mt-3 inline-flex min-h-11 cursor-pointer items-center rounded-xl border border-primary/40 px-4 py-2">
         Edit dated request
       </Link>
     </section>

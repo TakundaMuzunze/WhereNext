@@ -27,7 +27,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
         <main className="mx-auto min-h-screen max-w-3xl px-6 py-28 text-text">
           <h1 className="text-3xl">Check your trip request</h1>
           <p className="mt-4">The discovery link contains invalid or missing trip details.</p>
-          <Link href="/planner" className="mt-6 inline-flex min-h-11 items-center text-primary underline">
+          <Link href="/planner" className="mt-6 inline-flex min-h-11 cursor-pointer items-center text-primary underline">
             Start planning
           </Link>
         </main>
@@ -51,7 +51,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
         <main className="mx-auto min-h-screen max-w-4xl px-6 py-28 text-text">
           <h1 className="text-3xl">Invalid dated request</h1>
           <p className="mt-4">Check your dates and trip details before continuing.</p>
-          <Link className="mt-6 inline-flex min-h-11 items-center underline" href="/planner?kind=dated">
+          <Link className="mt-6 inline-flex min-h-11 cursor-pointer items-center underline" href="/planner?kind=dated">
             Start a dated request
           </Link>
         </main>
@@ -84,7 +84,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
               .map((destination) => (
                 <li key={destination.id}>
                   <Link
-                    className="group block overflow-hidden rounded-2xl border border-border bg-surface focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                    className="group block cursor-pointer overflow-hidden rounded-2xl border border-border bg-surface focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
                     href={`/destinations/${destination.id}?${requestQuery}`}
                   >
                     <div className="relative aspect-[3/2] overflow-hidden bg-secondary">
@@ -119,7 +119,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
         <section className="w-full rounded-3xl border border-border bg-surface p-8 text-center shadow-sm">
           <h1 className="text-3xl font-semibold text-text">We need your trip details first</h1>
           <p className="mt-3 text-muted">Complete the planner so we can build a destination shortlist around your answers.</p>
-          <Link href="/planner" className="mt-6 inline-flex rounded-xl bg-primary px-5 py-3 text-primary-foreground">
+          <Link href="/planner" className="mt-6 inline-flex cursor-pointer rounded-xl bg-primary px-5 py-3 text-primary-foreground">
             Start planning
           </Link>
         </section>

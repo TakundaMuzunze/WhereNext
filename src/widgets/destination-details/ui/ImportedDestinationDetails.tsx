@@ -24,7 +24,7 @@ export function ImportedDestinationDetails({
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-5xl px-6 pt-28 pb-20">
-      <Link href={backHref} className="text-sm text-primary">
+      <Link href={backHref} className="cursor-pointer text-sm text-primary">
         ← Back to {backHref.startsWith("/results") ? "your trip" : "saved destinations"}
       </Link>
 
@@ -44,7 +44,7 @@ export function ImportedDestinationDetails({
           <SaveDestinationButton destinationId={destination.id} />
         </div>
         {editHref && (
-          <Link href={editHref} className="mt-5 inline-block text-sm text-primary">
+          <Link href={editHref} className="mt-5 inline-block cursor-pointer text-sm text-primary">
             Edit your trip
           </Link>
         )}
@@ -77,13 +77,18 @@ export function ImportedDestinationDetails({
           establish current prices, availability or suitability.
         </p>
         <div className="mt-4 flex flex-wrap gap-5 text-sm text-primary">
-          <a href={destination.sourceUrl} target="_blank" rel="noreferrer">
+          <a className="cursor-pointer" href={destination.sourceUrl} target="_blank" rel="noreferrer">
             Read the Wikivoyage guide
           </a>
-          <a href={`https://en.wikivoyage.org/w/index.php?oldid=${destination.sourceRevisionId}`} target="_blank" rel="noreferrer">
+          <a
+            className="cursor-pointer"
+            href={`https://en.wikivoyage.org/w/index.php?oldid=${destination.sourceRevisionId}`}
+            target="_blank"
+            rel="noreferrer"
+          >
             Source revision and contributors
           </a>
-          <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">
+          <a className="cursor-pointer" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">
             CC BY-SA 4.0
           </a>
         </div>
