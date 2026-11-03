@@ -146,3 +146,14 @@ model DestinationGuideIdentity {
 
   @@index([legacyDestinationId])
 }
+
+model DestinationActivityEvidence {
+  requestKey    String   @id
+  destinationId String
+  observation   Json
+  retrievedAt   DateTime
+  expiresAt     DateTime
+
+  @@index([destinationId])
+  @@index([expiresAt])
+}

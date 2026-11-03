@@ -1,3 +1,4 @@
+import { DestinationActivityEvidence } from "@/features/destination-activities/ui/DestinationActivityEvidence";
 import type { ImportedDestination } from "@/entities/destination/model/importedDestination";
 import { SaveDestinationButton } from "@/features/saved-destinations";
 import Link from "next/link";
@@ -6,9 +7,10 @@ type ImportedDestinationDetailsProps = {
   destination: ImportedDestination;
   backHref?: string;
   editHref?: string;
+  activities?: string[];
 };
 
-export function ImportedDestinationDetails({ destination, backHref = "/saved", editHref }: ImportedDestinationDetailsProps) {
+export function ImportedDestinationDetails({ destination, backHref = "/saved", editHref, activities }: ImportedDestinationDetailsProps) {
   const importedDate = new Date(destination.importedAt).toLocaleDateString("en-GB", { timeZone: "UTC" });
 
   return (
@@ -37,9 +39,9 @@ export function ImportedDestinationDetails({ destination, backHref = "/saved", e
         <h2 id="destination-evidence-title" className="text-2xl font-semibold">
           What we know so far
         </h2>
+        <DestinationActivityEvidence key={destination.id + JSON.stringify(activities)} destinationId={destination.id} activities={activities} />
         <dl className="mt-6 grid gap-6 sm:grid-cols-3">
           {[
-            ["Activity fit", "Unknown — activity evidence is not available yet."],
             ["Seasonal suitability", "Unknown — we have not assessed conditions for your intended experiences."],
             ["Budget fit", "Unknown — a complete trip estimate is not available."],
           ].map(([label, explanation]) => (

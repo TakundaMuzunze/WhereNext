@@ -48,6 +48,7 @@ export default async function DestinationPage({ params, searchParams }: Destinat
         destination={resolved.destination}
         backHref={query ? `/results?${query}` : undefined}
         editHref={query ? `/planner?${query}` : undefined}
+        activities={datedRequest?.preferences.activities ?? plannerAnswers?.activities}
       />
     );
   }
@@ -66,6 +67,7 @@ export default async function DestinationPage({ params, searchParams }: Destinat
           destination={destination}
           backHref={`/results?${serializeDatedTripRequest(request)}`}
           backLabel="Back to your trip request"
+          activities={request.preferences.activities}
         />
       </>
     );
