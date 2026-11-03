@@ -1,3 +1,5 @@
+import type { DiscoveryRequest } from "@/features/destination-planning/model/discoveryRequest";
+import { DiscoveryRequestSummary } from "@/features/destination-planning/ui/DiscoveryRequestSummary";
 import { DestinationActivityEvidence } from "@/features/destination-activities/ui/DestinationActivityEvidence";
 import type { Destination, DestinationRecommendation } from "@/entities/destination";
 import type { PlannerAnswers } from "@/entities/trip/model/types";
@@ -15,6 +17,7 @@ type DestinationDetailsProps = {
   backLabel?: string;
   editHref?: string;
   activities?: string[];
+  discoveryRequest?: DiscoveryRequest;
 };
 
 const costLevelLabels = {
@@ -36,6 +39,7 @@ export function DestinationDetails({
   backLabel,
   editHref,
   activities,
+  discoveryRequest,
 }: DestinationDetailsProps) {
   const travellerCount = Number(answers?.travellers ?? 0);
   const estimatedTotal = destination.estimatedCostPerPerson * travellerCount;
@@ -43,10 +47,16 @@ export function DestinationDetails({
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-5xl px-6 pt-28 pb-20">
-      <Link href={backHref ?? "/saved"} className="mb-6 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary">
+      <Link href={backHref ?? "/saved"} className="mb-6 inline-flex min-h-11 cursor-pointer items-center gap-2 text-sm font-medium text-primary">
         <ArrowLeft className="size-4" aria-hidden="true" />
         {backLabel ?? (isPersonalised ? "Back to your matches" : "Back to saved destinations")}
       </Link>
+
+      {discoveryRequest && (
+        <div className="mb-6">
+          <DiscoveryRequestSummary request={discoveryRequest} />
+        </div>
+      )}
 
       <section className="grid gap-8 md:grid-cols-[1.15fr_0.85fr]" aria-labelledby="destination-title">
         <div className="flex min-h-80 flex-col justify-center rounded-3xl border border-border bg-surface p-8 shadow-sm sm:p-10">
@@ -86,15 +96,23 @@ export function DestinationDetails({
         </div>
       </section>
 
-      <section
-        className="my-6 grid overflow-hidden rounded-2xl border border-primary/15 bg-primary/15 sm:grid-cols-2 lg:grid-cols-4"
-        aria-label="Destination essentials"
-      >
-        <Fact label="Estimated cost" value={`£${destination.estimatedCostPerPerson.toLocaleString()} per person`} />
-        <Fact label="Ideal duration" value={`${destination.recommendedDuration.min}-${destination.recommendedDuration.max} days`} />
-        <Fact label="Best months" value={formatMonths(destination.bestMonths)} />
-        <Fact label="Cost level" value={costLevelLabels[destination.costLevel]} />
-      </section>
+      {discoveryRequest ? (
+        <section aria-label="Evidence gaps" className="my-6 rounded-2xl border border-border p-5 text-sm text-muted">
+          <p>Budget fit: unknown — a complete trip estimate is not available.</p>
+          <p className="mt-2">Seasonal suitability: unknown — conditions for your interests have not been verified.</p>
+          <p className="mt-2">The guide below offers general inspiration, not verified preference or seasonal evidence.</p>
+        </section>
+      ) : (
+        <section
+          className="my-6 grid overflow-hidden rounded-2xl border border-primary/15 bg-primary/15 sm:grid-cols-2 lg:grid-cols-4"
+          aria-label="Destination essentials"
+        >
+          <Fact label="Estimated cost" value={`£${destination.estimatedCostPerPerson.toLocaleString()} per person`} />
+          <Fact label="Ideal duration" value={`${destination.recommendedDuration.min}-${destination.recommendedDuration.max} days`} />
+          <Fact label="Best months" value={formatMonths(destination.bestMonths)} />
+          <Fact label="Cost level" value={costLevelLabels[destination.costLevel]} />
+        </section>
+      )}
 
       <div className="mt-10 grid gap-10 md:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-10">
@@ -181,7 +199,7 @@ export function DestinationDetails({
       <div className="mt-12 flex flex-wrap gap-3 border-t border-primary/15 pt-7">
         <Link
           href={backHref ?? "/saved"}
-          className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+          className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           {backLabel ?? (isPersonalised ? "Back to matches" : "Back to saved")}
@@ -189,7 +207,7 @@ export function DestinationDetails({
         {isPersonalised && editHref && (
           <Link
             href={editHref}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-primary/40 px-4 py-2 text-sm font-medium text-text"
+            className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-primary/40 px-4 py-2 text-sm font-medium text-text"
           >
             <Pencil className="size-4" aria-hidden="true" />
             Edit trip answers

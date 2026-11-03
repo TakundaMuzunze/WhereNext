@@ -1,3 +1,4 @@
+import { parseDiscoveryRequest, serializeDiscoveryRequest } from "@/features/destination-planning/lib/discoveryRequest";
 import { resolveDestination } from "@/features/destination-catalogue/server/resolveDestination";
 import { ImportedDestinationDetails } from "@/widgets/destination-details/ui/ImportedDestinationDetails";
 import { DatedTripReview } from "@/features/trip-planner/ui/DatedTripReview";
@@ -32,6 +33,42 @@ export default async function DestinationPage({ params, searchParams }: Destinat
   if (!resolved) notFound();
 
   const queryParams = await searchParams;
+  if (queryParams.kind === "discovery") {
+    const request = parseDiscoveryRequest(queryParams);
+
+    if (!request) {
+      return (
+        <main className="mx-auto max-w-3xl px-6 py-28 text-text">
+          <h1 className="text-3xl">Check your trip request</h1>
+          <p className="mt-4">This destination link contains invalid discovery inputs. Return to the planner to update them.</p>
+        </main>
+      );
+    }
+
+    const query = serializeDiscoveryRequest(request);
+
+    if (resolved.kind === "imported") {
+      return (
+        <ImportedDestinationDetails
+          destination={resolved.destination}
+          backHref={`/results?${query}`}
+          activities={request.activities}
+          discoveryRequest={request}
+        />
+      );
+    }
+
+    return (
+      <DestinationDetails
+        destination={resolved.destination}
+        backHref={`/results?${query}`}
+        backLabel="Back to destinations"
+        activities={request.activities}
+        discoveryRequest={request}
+      />
+    );
+  }
+
   if (resolved.kind === "imported") {
     const datedRequest = parseDatedTripRequest(queryParams);
     const plannerAnswers = parsePlannerAnswers(queryParams);
