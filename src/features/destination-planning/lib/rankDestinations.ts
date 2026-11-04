@@ -1,8 +1,10 @@
+import type { Destination } from "@/entities/destination/model/types";
 import type { DestinationSummary } from "@/entities/destination/model/importedDestination";
 import type { ActivityAssessment } from "@/features/destination-activities/model/activityEvidence";
 
 export type DiscoveryCandidate = DestinationSummary & {
   assessments: ActivityAssessment[];
+  guideImage?: Destination["image"];
 };
 
 function supportedInterests(candidate: DiscoveryCandidate): number {

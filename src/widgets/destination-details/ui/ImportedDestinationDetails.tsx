@@ -1,3 +1,4 @@
+import { DestinationPhoto } from "@/entities/destination/ui/DestinationPhoto";
 import type { DiscoveryRequest } from "@/features/destination-planning/model/discoveryRequest";
 import { DiscoveryRequestSummary } from "@/features/destination-planning/ui/DiscoveryRequestSummary";
 import { DestinationActivityEvidence } from "@/features/destination-activities/ui/DestinationActivityEvidence";
@@ -34,20 +35,23 @@ export function ImportedDestinationDetails({
         </div>
       )}
 
-      <section className="mt-6 rounded-3xl border border-border bg-surface p-8">
-        <p className="text-sm text-muted">{destination.country}</p>
-        <h1 className="mt-3 text-5xl font-semibold">{destination.name}</h1>
-        <p className="mt-5 max-w-2xl leading-7 text-muted">
-          Keep this place as a travel idea while you explore whether it suits your trip. You can save it before choosing dates or checking prices.
-        </p>
-        <div className="mt-6">
-          <SaveDestinationButton destinationId={destination.id} />
+      <section className="mt-6 overflow-hidden rounded-3xl border border-border bg-surface">
+        <DestinationPhoto name={destination.name} image={destination.image} variant="hero" />
+        <div className="p-6 sm:p-8">
+          <p className="text-sm text-muted">{destination.country}</p>
+          <h1 className="mt-3 text-5xl font-semibold">{destination.name}</h1>
+          <p className="mt-5 max-w-2xl leading-7 text-muted">
+            Keep this place as a travel idea while you explore whether it suits your trip. You can save it before choosing dates or checking prices.
+          </p>
+          <div className="mt-6">
+            <SaveDestinationButton destinationId={destination.id} />
+          </div>
+          {editHref && (
+            <Link href={editHref} className="mt-5 inline-block cursor-pointer text-sm text-primary">
+              Edit your trip
+            </Link>
+          )}
         </div>
-        {editHref && (
-          <Link href={editHref} className="mt-5 inline-block cursor-pointer text-sm text-primary">
-            Edit your trip
-          </Link>
-        )}
       </section>
 
       <section className="mt-8 rounded-3xl border border-border p-8" aria-labelledby="destination-evidence-title">
@@ -57,8 +61,8 @@ export function ImportedDestinationDetails({
         <DestinationActivityEvidence key={destination.id + JSON.stringify(activities)} destinationId={destination.id} activities={activities} />
         <dl className="mt-6 grid gap-6 sm:grid-cols-3">
           {[
-            ["Seasonal suitability", "Unknown — we have not assessed conditions for your intended experiences."],
-            ["Budget fit", "Unknown — a complete trip estimate is not available."],
+            ["Seasonal suitability", "Unknown - we have not assessed conditions for your intended experiences."],
+            ["Budget fit", "Unknown - a complete trip estimate is not available."],
           ].map(([label, explanation]) => (
             <div key={label}>
               <dt className="font-semibold">{label}</dt>

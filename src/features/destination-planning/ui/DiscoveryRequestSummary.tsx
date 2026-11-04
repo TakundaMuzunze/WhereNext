@@ -22,17 +22,22 @@ export function DiscoveryRequestSummary({ request }: { request: DiscoveryRequest
   const editHref = `/planner?${serializeDiscoveryRequest(request)}`;
 
   return (
-    <section aria-label="Your trip request" className="rounded-2xl border border-border bg-secondary p-4 sm:p-5">
+    <section aria-label="Your trip request" className="rounded-2xl border border-border bg-secondary px-4 py-3 sm:px-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="font-medium">{timingLabel}</p>
+        <p className="text-sm leading-6">
+          <span className="font-medium">
+            {request.approximateNights} nights · {request.adultCount} adults
+          </span>
+          <span className="text-muted">
+            {" "}
+            · {formatTripMoney(request.groupBudgetPence)} group budget · {timingLabel}
+          </span>
+        </p>
         <Link href={editHref} className="inline-flex min-h-11 cursor-pointer items-center text-sm text-primary underline">
           Edit request
         </Link>
       </div>
-      <p className="mt-1 text-sm text-muted">
-        {request.approximateNights} nights · {request.adultCount} adults · {formatTripMoney(request.groupBudgetPence)} group budget
-      </p>
-      <details className="mt-3 text-sm">
+      <details className="text-sm">
         <summary className="min-h-11 cursor-pointer py-3 text-primary">View request details</summary>
         <p className="mt-2 leading-6">{request.activities.join(", ")}</p>
         <p className="mt-3 leading-6 text-muted">

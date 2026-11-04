@@ -109,7 +109,7 @@ export function DestinationActivityEvidence({ destinationId, activities = initia
         Activity fit
       </h3>
 
-      {!activityResult && <p className="mt-3 text-sm text-muted">Unknown — nearby activity evidence has not been checked.</p>}
+      {!activityResult && <p className="mt-3 text-sm text-muted">Unknown - nearby activity evidence has not been checked.</p>}
 
       <p className="mt-3 text-sm leading-6 text-muted">
         Check named places within 4 km of the recorded destination centre. This is a bounded nearby sample, not a complete guide or a rating. Evidence

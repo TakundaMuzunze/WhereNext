@@ -113,3 +113,30 @@ it("rejects a summary attached to a different saved identity", async () => {
   });
   await expect(getShortlists()).rejects.toThrow("Invalid destination summary");
 });
+
+it("retains image credits in imported summaries and discards unsafe optional image metadata", async () => {
+  const image = {
+    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Faro.jpg/1280px-Faro.jpg",
+    fileTitle: "File:Faro.jpg",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Faro.jpg",
+    author: "Photographer",
+    license: "CC BY 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
+    attribution: "",
+    width: 1280,
+    height: 960,
+  };
+  const summary = { id: "wikidata:Q159457", name: "Faro", country: "Portugal", image };
+  respond({ userShortlists: [{ id: "a", shortlistName: "Summer", shortlistItems: [{ destinationId: summary.id, destination: summary }] }] });
+  expect((await getShortlists())[0].destinationSummaries?.[0].image).toEqual(image);
+  respond({
+    userShortlists: [
+      {
+        id: "a",
+        shortlistName: "Summer",
+        shortlistItems: [{ destinationId: summary.id, destination: { ...summary, image: { ...image, src: "https://example.com/unsafe.jpg" } } }],
+      },
+    ],
+  });
+  expect((await getShortlists())[0].destinationSummaries?.[0].image).toBeUndefined();
+});

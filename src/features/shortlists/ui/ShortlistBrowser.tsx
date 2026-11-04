@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import Image from "next/image";
+import { DestinationPhoto } from "@/entities/destination/ui/DestinationPhoto";
 import Link from "next/link";
 import { Bookmark, ArrowRight, FolderHeart, Plus } from "lucide-react";
 import { useSession } from "@/shared/lib/auth/auth-client";
@@ -54,7 +54,7 @@ export function ShortlistBrowser({ shortlistId }: { shortlistId?: string }) {
     <>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         {shortlistId ? (
-          <Link href="/saved" className="text-sm text-primary">
+          <Link href="/saved" className="cursor-pointer text-sm text-primary">
             ← All shortlists
           </Link>
         ) : (
@@ -113,19 +113,9 @@ export function ShortlistBrowser({ shortlistId }: { shortlistId?: string }) {
                   const name = destination?.name ?? "Unavailable destination";
 
                   return (
-                    <article key={id} className="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
-                      {guide && (
-                        <div className="relative h-48 bg-secondary">
-                          <Image
-                            src={guide.image.src}
-                            alt={guide.image.alt}
-                            fill
-                            sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
-                            className="object-cover"
-                          />
-                        </div>
-                      )}
-                      <div className="p-5">
+                    <article key={id} className="flex flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
+                      <DestinationPhoto name={name} image={destination?.image} />
+                      <div className="flex flex-1 flex-col p-5">
                         <p className="text-sm text-muted">{destination?.country ?? "Place information unavailable"}</p>
                         <h3 className="mt-1 text-2xl font-semibold">{name}</h3>
                         <p className="mt-3 text-sm leading-6 text-muted">
@@ -134,7 +124,7 @@ export function ShortlistBrowser({ shortlistId }: { shortlistId?: string }) {
                               ? "Saved travel idea · activity, seasonal and budget fit unknown."
                               : "Your saved reference is retained. You can try reopening it or remove it from this shortlist.")}
                         </p>
-                        <div className="mt-5 flex flex-wrap gap-3">
+                        <div className="mt-auto flex flex-wrap gap-3 pt-5">
                           <Link className={shortlistButton} href={`/destinations/${id}`}>
                             View destination <ArrowRight className="ml-2 size-4" aria-hidden="true" />
                           </Link>
@@ -162,7 +152,7 @@ export function ShortlistBrowser({ shortlistId }: { shortlistId?: string }) {
             <article key={item.id} className="rounded-3xl border border-border bg-secondary p-6">
               <FolderHeart className="size-8 text-primary" aria-hidden="true" />
               <h2 className="mt-5 text-2xl font-semibold wrap-break-word">
-                <Link href={`/saved/${encodeURIComponent(item.id)}`} className="hover:underline">
+                <Link href={`/saved/${encodeURIComponent(item.id)}`} className="cursor-pointer hover:underline">
                   {item.name}
                 </Link>
               </h2>

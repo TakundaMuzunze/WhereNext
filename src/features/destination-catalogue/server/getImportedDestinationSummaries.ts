@@ -1,3 +1,4 @@
+import { readDestinationImages } from "@/features/destination-images/server/readDestinationImages";
 import "server-only";
 
 import { isImportedDestinationId, type DestinationSummary } from "@/entities/destination/model/importedDestination";
@@ -15,6 +16,7 @@ export async function getImportedDestinationSummaries(destinationIds: string[]) 
     where: { id: { in: importedIds } },
     select: { id: true, name: true, countryCode: true },
   });
+  const images = await readDestinationImages(importedIds);
   const countryNames = new Intl.DisplayNames(["en"], { type: "region" });
 
   for (const candidate of candidates) {
@@ -22,6 +24,7 @@ export async function getImportedDestinationSummaries(destinationIds: string[]) 
       id: candidate.id,
       name: candidate.name,
       country: countryNames.of(candidate.countryCode) ?? candidate.countryCode,
+      ...(images.has(candidate.id) ? { image: images.get(candidate.id) } : {}),
     });
   }
 
