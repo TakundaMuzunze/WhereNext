@@ -98,8 +98,8 @@ export function DestinationDetails({
 
       {discoveryRequest ? (
         <section aria-label="Evidence gaps" className="my-6 rounded-2xl border border-border p-5 text-sm text-muted">
-          <p>Budget fit: unknown — a complete trip estimate is not available.</p>
-          <p className="mt-2">Seasonal suitability: unknown — conditions for your interests have not been verified.</p>
+          <p>Budget fit: unknown - a complete trip estimate is not available.</p>
+          <p className="mt-2">Seasonal suitability: unknown - conditions for your interests have not been verified.</p>
           <p className="mt-2">The guide below offers general inspiration, not verified preference or seasonal evidence.</p>
         </section>
       ) : (
