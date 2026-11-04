@@ -1,3 +1,4 @@
+import { mockWikimediaPhotos } from "./destinationImages";
 import type { DestinationSummary } from "../../src/entities/destination/model/importedDestination";
 import type { Page } from "@playwright/test";
 
@@ -7,6 +8,7 @@ export async function mockShortlists(
   initial: List[] = [{ id: "summer", name: "Summer", destinationIds: ["lisbon-portugal"] }],
   destinationSummaries: DestinationSummary[] = [],
 ) {
+  await mockWikimediaPhotos(page);
   const state = { signedIn: true, lists: structuredClone(initial), writes: 0, failNext: false, userId: "test-user" };
   await page.route("**/api/auth/sign-out", (route) => {
     state.signedIn = false;

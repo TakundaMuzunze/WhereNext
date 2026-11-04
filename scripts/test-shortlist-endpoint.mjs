@@ -134,6 +134,22 @@ try {
       FROM generate_series(1, 13) AS n;
       `,
     );
+    const photo = {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Faro.jpg/1280px-Faro.jpg",
+      fileTitle: "File:Faro.jpg",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Faro.jpg",
+      author: "Test photographer",
+      license: "CC BY 4.0",
+      licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
+      attribution: "Test image credit",
+      width: 1280,
+      height: 960,
+    };
+    docker(
+      ["exec", "-i", name, "psql", "-U", "postgres", "-d", "shortlist_test", "-v", "ON_ERROR_STOP=1"],
+      `INSERT INTO "DestinationImage" ("destinationId", "image", "retrievedAt")
+       VALUES ('wikidata:Q159457', '${JSON.stringify(photo)}'::jsonb, now());`,
+    );
     const buildResult = spawnSync("npm", ["run", "build", "--", "--webpack"], {
       stdio: "inherit",
       timeout: 120_000,
@@ -142,31 +158,32 @@ try {
     if (buildResult.error) throw buildResult.error;
     if (buildResult.status !== 0) throw new Error("Browser test build failed.");
 
-    const browserResult = spawnSync(
-      process.execPath,
-      [
-        "node_modules/@playwright/test/cli.js",
-        "test",
-        "e2e/imported-destinations.spec.ts",
-        "e2e/activity-evidence.spec.ts",
-        "e2e/destination-planning.spec.ts",
-        "e2e/dated-planner.spec.ts",
-        "e2e/planner-flow.spec.ts",
-        "e2e/shortlists.spec.ts",
-        "e2e/saved-details.spec.ts",
-      ],
-      {
-        stdio: "inherit",
-        timeout: 180_000,
-        env: {
-          ...process.env,
-          DATABASE_URL: databaseUrl,
-          DIRECT_URL: databaseUrl,
-          IMPORTED_DESTINATION_TESTS: "disposable",
-          ACTIVITY_EVIDENCE_ENABLED: "false",
-        },
+    // Arguments after -- allow a focused browser run without changing the default regression suite.
+    const browserArgumentIndex = process.argv.indexOf("--");
+    const browserArguments =
+      browserArgumentIndex >= 0
+        ? process.argv.slice(browserArgumentIndex + 1)
+        : [
+            "e2e/imported-destinations.spec.ts",
+            "e2e/activity-evidence.spec.ts",
+            "e2e/destination-planning.spec.ts",
+            "e2e/destination-images.spec.ts",
+            "e2e/dated-planner.spec.ts",
+            "e2e/planner-flow.spec.ts",
+            "e2e/shortlists.spec.ts",
+            "e2e/saved-details.spec.ts",
+          ];
+    const browserResult = spawnSync(process.execPath, ["node_modules/@playwright/test/cli.js", "test", ...browserArguments], {
+      stdio: "inherit",
+      timeout: 180_000,
+      env: {
+        ...process.env,
+        DATABASE_URL: databaseUrl,
+        DIRECT_URL: databaseUrl,
+        IMPORTED_DESTINATION_TESTS: "disposable",
+        ACTIVITY_EVIDENCE_ENABLED: "false",
       },
-    );
+    });
     if (browserResult.error) throw browserResult.error;
     if (browserResult.status !== 0) throw new Error("Imported destination browser tests failed.");
   }

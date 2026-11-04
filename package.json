@@ -17,6 +17,7 @@
     "test:e2e": "npm run build && playwright test",
     "test:flights:db": "node scripts/test-flight-search.mjs",
     "test:catalogue:db": "node scripts/test-destination-catalogue.mjs",
+    "destinations:images": "node --experimental-strip-types scripts/enrich-destination-images.mjs",
     "destinations:import": "node --experimental-strip-types scripts/import-destinations.mjs"
   },
   "dependencies": {

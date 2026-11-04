@@ -24,7 +24,7 @@ test("opens imported details, confirms saves, reopens and removes only the selec
   await expect(page.getByText(/^Unknown —/)).toHaveCount(3);
   await expect(page.getByRole("link", { name: "Read the Wikivoyage guide" })).toHaveAttribute("href", "https://en.wikivoyage.org/wiki/Faro");
   await expect(page.getByRole("link", { name: "Edit your trip" })).toHaveAttribute("href", `/planner?${plannerQuery}`);
-  await expect(page.locator("main img")).toHaveCount(0);
+  await expect(page.getByRole("img", { name: "View of Faro" })).toBeVisible();
   await page.screenshot({ path: test.info().outputPath("imported-details.png"), fullPage: true });
 
   await page.getByRole("button", { name: "Save destination", exact: true }).click();
