@@ -1,3 +1,4 @@
+import { destinationImageSchema } from "@/entities/destination/model/destinationImage";
 import type { DestinationSummary } from "@/entities/destination/model/importedDestination";
 
 export type Shortlist = { id: string; name: string; destinationIds: string[]; destinationSummaries?: DestinationSummary[] };
@@ -49,7 +50,14 @@ function parseDestinationSummary(value: unknown, destinationId: string): Destina
     throw new Error("Invalid destination summary");
   }
 
-  return { id: destinationId, name: value.name, country: value.country };
+  const image = destinationImageSchema.safeParse(value.image);
+
+  return {
+    id: destinationId,
+    name: value.name,
+    country: value.country,
+    ...(image.success ? { image: image.data } : {}),
+  };
 }
 
 function parseShortlist(value: unknown): Shortlist {

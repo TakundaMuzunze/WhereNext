@@ -1,3 +1,4 @@
+import { readDestinationImages } from "@/features/destination-images/server/readDestinationImages";
 import "server-only";
 
 import { prisma } from "@/shared/lib/db/prisma";
@@ -15,12 +16,13 @@ export type DiscoveryResults = {
 
 export async function getDiscoveryResults(request: DiscoveryRequest): Promise<DiscoveryResults> {
   const candidates = await prisma.destinationCandidate.findMany({ orderBy: { id: "asc" } });
+  const images = await readDestinationImages(candidates.map((candidate) => candidate.id));
   const identityLinks = await prisma.destinationGuideIdentity.findMany();
-  const knownGuideIds = new Set(destinations.map((destination) => destination.id));
+  const guidesById = new Map(destinations.map((destination) => [destination.id, destination]));
   const canonicalIds = new Map<string, string>();
 
   for (const link of identityLinks) {
-    if (knownGuideIds.has(link.legacyDestinationId)) {
+    if (guidesById.has(link.legacyDestinationId)) {
       canonicalIds.set(link.wikidataId, link.legacyDestinationId);
     }
   }
@@ -45,6 +47,8 @@ export async function getDiscoveryResults(request: DiscoveryRequest): Promise<Di
   const assessedCandidates: DiscoveryCandidate[] = [];
 
   for (const candidate of candidates) {
+    const guideId = canonicalIds.get(candidate.wikidataId);
+    const guide = guideId ? guidesById.get(guideId) : undefined;
     const location = {
       destinationId: canonicalIds.get(candidate.wikidataId) ?? candidate.id,
       latitude: candidate.latitude,
@@ -84,6 +88,8 @@ export async function getDiscoveryResults(request: DiscoveryRequest): Promise<Di
       id: candidate.id,
       name: candidate.name,
       country: countryNames.of(candidate.countryCode) ?? candidate.countryCode,
+      ...(images.has(candidate.id) ? { image: images.get(candidate.id) } : {}),
+      ...(guide ? { guideImage: guide.image } : {}),
       assessments,
     });
   }

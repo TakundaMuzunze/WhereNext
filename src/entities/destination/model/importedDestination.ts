@@ -1,7 +1,10 @@
+import type { DestinationImage } from "./destinationImage";
+
 export type DestinationSummary = {
   id: string;
   name: string;
   country: string;
+  image?: DestinationImage;
 };
 
 export type ImportedDestination = DestinationSummary & {

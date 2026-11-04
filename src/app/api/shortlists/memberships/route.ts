@@ -111,7 +111,14 @@ export async function PATCH(request: Request) {
         destinationId: body.destinationId,
         ...(body.destinationId !== destinationId ? { canonicalDestinationId: destinationId } : {}),
         ...(destination?.kind === "imported"
-          ? { destination: { id: destinationId, name: destination.destination.name, country: destination.destination.country } }
+          ? {
+              destination: {
+                id: destinationId,
+                name: destination.destination.name,
+                country: destination.destination.country,
+                ...(destination.destination.image ? { image: destination.destination.image } : {}),
+              },
+            }
           : {}),
         ...result,
         isSaved: result.shortlistIds.length > 0,

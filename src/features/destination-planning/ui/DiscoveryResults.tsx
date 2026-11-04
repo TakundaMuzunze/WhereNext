@@ -1,3 +1,4 @@
+import { DestinationPhoto } from "@/entities/destination/ui/DestinationPhoto";
 import Link from "next/link";
 import { SaveDestinationButton } from "@/features/saved-destinations";
 import type { DiscoveryRequest } from "../model/discoveryRequest";
@@ -29,6 +30,9 @@ function DestinationResult({ destination, query }: { destination: DiscoveryCandi
       aria-label={`${destination.name}, ${destination.country}`}
       className="flex flex-col overflow-hidden rounded-2xl border border-border bg-surface"
     >
+      <div className="aspect-video overflow-hidden">
+        <DestinationPhoto name={destination.name} image={destination.guideImage ?? destination.image} />
+      </div>
       <div className="flex flex-1 flex-col p-5">
         <p className="text-sm text-muted">{destination.country}</p>
         <h2 className="mt-2 font-serif text-3xl">{destination.name}</h2>
@@ -128,7 +132,7 @@ export async function DiscoveryResults({ request, pageNumber = 1 }: { request: D
         <DiscoveryRequestSummary request={request} />
       </div>
       <div className="mt-5 text-sm text-muted">
-        <p>Based on your selected interests. Prices haven’t been checked.</p>
+        <p>Based on your selected interests. Prices haven&apos;t been checked.</p>
         <details className="mt-1">
           <summary className="min-h-11 cursor-pointer py-3 text-primary">How these results work</summary>
           <div className="max-w-3xl space-y-2 pb-2 leading-6">
