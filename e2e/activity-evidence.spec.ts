@@ -96,6 +96,59 @@ test("retries the same interests and labels expired examples as unknown on mobil
   await page.screenshot({ path: test.info().outputPath("activity-evidence-mobile.png"), fullPage: true });
 });
 
+test("retains previous evidence after a failed retry and replaces it on recovery", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockShortlists(page);
+
+  const initialResult: ActivityResult = {
+    destinationId: "wikidata:Q159457",
+    assessments: [
+      { activity: "Museums", status: "supported", reason: "named_places", places: museumObservation.places, observation: museumObservation },
+      { activity: "Swimming", status: "unknown", reason: "unsupported_interest", places: [], observation: null },
+    ],
+  };
+
+  await page.route("**/api/destinations/*/activities", (route) => route.fulfill({ json: initialResult }));
+  await page.goto(`/destinations/wikidata:Q159457?${plannerQuery}`);
+  await page.getByRole("button", { name: "Check nearby activity evidence" }).click();
+
+  const museumLink = page.getByRole("link", { name: "Museu Municipal de Faro", exact: true });
+  const retrievalTime = page.getByText(/Retrieved .* UTC · Search radius 4 km/);
+
+  await expect(museumLink).toBeVisible();
+  const originalRetrievalTime = await retrievalTime.innerText();
+
+  await page.route("**/api/destinations/*/activities", (route) => route.fulfill({ status: 503, json: { error: "Unavailable" } }));
+  await page.getByRole("button", { name: "Check activity evidence again" }).click();
+
+  const activityPanel = page.getByRole("region", { name: "Activity fit", exact: true });
+
+  await expect(activityPanel.getByRole("alert")).toContainText(
+    "The latest check failed. Showing previous evidence with its original retrieval times.",
+  );
+  await expect(museumLink).toBeVisible();
+  await expect(retrievalTime).toHaveText(originalRetrievalTime);
+  await expect(page.getByRole("heading", { name: "Swimming: unknown" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Save destination", exact: true })).toBeEnabled();
+  await expect(page.getByRole("link", { name: "Edit your trip" })).toHaveAttribute("href", `/planner?${plannerQuery}`);
+
+  const recoveredResult: ActivityResult = {
+    ...initialResult,
+    assessments: [
+      { activity: "Museums", status: "unknown", reason: "no_places", places: [], observation: { ...museumObservation, places: [] } },
+      initialResult.assessments[1],
+    ],
+  };
+
+  await page.route("**/api/destinations/*/activities", (route) => route.fulfill({ json: recoveredResult }));
+  await page.getByRole("button", { name: "Check activity evidence again" }).click();
+
+  await expect(page.getByRole("heading", { name: "Museums: unknown" })).toBeVisible();
+  await expect(museumLink).toHaveCount(0);
+  await expect(activityPanel.getByRole("alert")).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
 test("preserves a legacy guide when activity geography is unknown", async ({ page }) => {
   await mockShortlists(page);
   await page.route("**/api/destinations/*/activities", (route) =>

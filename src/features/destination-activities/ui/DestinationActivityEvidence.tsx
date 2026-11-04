@@ -83,7 +83,6 @@ export function DestinationActivityEvidence({ destinationId, activities = initia
           message = cause.message;
         }
 
-        setActivityResult(null);
         setErrorMessage(message);
       }
     } finally {
@@ -132,6 +131,7 @@ export function DestinationActivityEvidence({ destinationId, activities = initia
 
       {errorMessage && (
         <p role="alert" className="mt-3 text-sm text-red-600 dark:text-red-400">
+          {activityResult && "The latest check failed. Showing previous evidence with its original retrieval times. "}
           {errorMessage}
         </p>
       )}
