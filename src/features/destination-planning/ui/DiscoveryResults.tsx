@@ -15,51 +15,74 @@ const statusLabels = {
 function DestinationResult({ destination, query }: { destination: DiscoveryCandidate; query: string }) {
   const detailsHref = `/destinations/${encodeURIComponent(destination.id)}?${query}`;
 
+  const unverified = destination.assessments.filter(
+    (assessment) =>
+      assessment.status === "unknown" &&
+      ["unsupported_interest", "unavailable", "location_unknown"].includes(assessment.reason) &&
+      assessment.places.length === 0 &&
+      !assessment.observation,
+  );
+  const evidence = destination.assessments.filter((assessment) => !unverified.includes(assessment));
+
   return (
-    <article aria-label={`${destination.name}, ${destination.country}`} className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
-      <p className="text-sm text-muted">{destination.country}</p>
-      <h2 className="mt-2 font-serif text-3xl">{destination.name}</h2>
-      <ul className="mt-5 space-y-4">
-        {destination.assessments.map((assessment) => (
-          <li key={assessment.activity}>
-            <p className="font-medium">
-              {assessment.activity}: {statusLabels[assessment.status]}
-            </p>
-            {assessment.places.length > 0 && (
-              <ul className="mt-2 space-y-1 text-sm">
-                {assessment.places.slice(0, 2).map((place) => (
-                  <li key={place.sourceId}>
-                    <a href={place.sourceUrl} target="_blank" rel="noreferrer" className="cursor-pointer text-primary underline">
-                      {place.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {assessment.observation && (
-              <p className="mt-2 text-xs leading-5 text-muted">
-                Nearby sample within 4 km, retrieved {formatEvidenceDate(assessment.observation.retrievedAt)}. Opening on your dates is unverified.
+    <article
+      aria-label={`${destination.name}, ${destination.country}`}
+      className="flex flex-col overflow-hidden rounded-2xl border border-border bg-surface"
+    >
+      <div className="flex flex-1 flex-col p-5">
+        <p className="text-sm text-muted">{destination.country}</p>
+        <h2 className="mt-2 font-serif text-3xl">{destination.name}</h2>
+        <ul className="mt-4 space-y-3">
+          {evidence.map((assessment) => (
+            <li key={assessment.activity}>
+              <p className="font-medium">
+                {assessment.activity}: {statusLabels[assessment.status]}
               </p>
-            )}
-            {assessment.reason === "stale_evidence" && (
-              <p className="mt-1 text-sm text-muted">Earlier evidence has expired; examples do not establish a current match.</p>
-            )}
-            {assessment.reason === "incomplete_evidence" && (
-              <p className="mt-1 text-sm text-muted">Evidence is incomplete; examples do not establish a confirmed match.</p>
-            )}
-            {assessment.reason === "unsupported_interest" && (
-              <p className="mt-1 text-sm text-muted">We do not yet have verified evidence for this interest.</p>
-            )}
-          </li>
-        ))}
-      </ul>
-      <p className="mt-5 text-sm text-muted">Budget fit: unknown</p>
-      <p className="mt-2 text-sm text-muted">Seasonal suitability: unknown</p>
-      <div className="mt-5 flex flex-wrap items-center gap-4">
-        <Link href={detailsHref} className="inline-flex min-h-11 cursor-pointer items-center text-primary underline">
-          Explore {destination.name}
-        </Link>
-        <SaveDestinationButton destinationId={destination.id} />
+              {assessment.places.length > 0 && (
+                <ul className="mt-2 space-y-1 text-sm">
+                  {assessment.places.slice(0, 2).map((place) => (
+                    <li key={place.sourceId}>
+                      <a href={place.sourceUrl} target="_blank" rel="noreferrer" className="cursor-pointer text-primary underline">
+                        {place.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {assessment.observation && (
+                <p className="mt-2 text-xs leading-5 text-muted">
+                  Nearby sample within 4 km, retrieved {formatEvidenceDate(assessment.observation.retrievedAt)}. Opening on your dates is unverified.
+                </p>
+              )}
+              {assessment.reason === "stale_evidence" && (
+                <p className="mt-1 text-sm text-muted">Earlier evidence has expired; examples do not establish a current match.</p>
+              )}
+              {assessment.reason === "incomplete_evidence" && (
+                <p className="mt-1 text-sm text-muted">Evidence is incomplete; examples do not establish a confirmed match.</p>
+              )}
+              {["unsupported_interest", "unavailable", "location_unknown"].includes(assessment.reason) && (
+                <p className="mt-1 text-sm text-muted">We do not yet have verified evidence for this interest.</p>
+              )}
+            </li>
+          ))}
+        </ul>
+        {unverified.length > 0 && (
+          <div className="mt-4 rounded-xl bg-secondary/60 p-3 text-sm">
+            <h3 className="font-medium">Still to verify</h3>
+            <p className="mt-1 leading-6">{unverified.map((assessment) => assessment.activity).join(" · ")}</p>
+            <p className="mt-1 text-xs leading-5 text-muted">We don’t yet have verified information for these interests.</p>
+          </div>
+        )}
+        <p className="mt-4 text-xs leading-5 text-muted">Budget fit and seasonal suitability: unknown</p>
+        <div className="mt-auto flex flex-wrap items-center gap-3 pt-4">
+          <Link
+            href={detailsHref}
+            className="inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-xl bg-primary px-4 py-2 text-center text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Explore {destination.name}
+          </Link>
+          <SaveDestinationButton destinationId={destination.id} iconOnly />
+        </div>
       </div>
     </article>
   );
@@ -104,14 +127,22 @@ export async function DiscoveryResults({ request, pageNumber = 1 }: { request: D
       <div className="mt-6">
         <DiscoveryRequestSummary request={request} />
       </div>
-      <p className="mt-6 max-w-3xl text-sm leading-6 text-muted">
-        Ordered by supported interests, then fewer explicit conflicts. Evidence ties use destination name. Unknowns remain unknown. Missing prices
-        never exclude a place; your budget does not yet establish affordability.
-      </p>
-      <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
-        Current imported catalogue coverage is limited. These results use stored evidence; browsing does not trigger live checks. Open a destination
-        to check nearby activities. No flight search has been made.
-      </p>
+      <div className="mt-5 text-sm text-muted">
+        <p>Based on your selected interests. Prices haven’t been checked.</p>
+        <details className="mt-1">
+          <summary className="min-h-11 cursor-pointer py-3 text-primary">How these results work</summary>
+          <div className="max-w-3xl space-y-2 pb-2 leading-6">
+            <p>
+              Ordered by supported interests, then fewer explicit conflicts. Evidence ties use destination name. Unknowns remain unknown. Missing
+              prices never exclude a place; your budget does not yet establish affordability.
+            </p>
+            <p>
+              Current imported catalogue coverage is limited. These results use stored evidence; browsing does not trigger live checks. Open a
+              destination to check nearby activities. No flight search has been made.
+            </p>
+          </div>
+        </details>
+      </div>
       {result.evidenceUnavailable && (
         <p role="status" className="mt-4">
           Activity evidence is temporarily unavailable. Destinations remain available with unknown interests.
@@ -122,7 +153,7 @@ export async function DiscoveryResults({ request, pageNumber = 1 }: { request: D
           No destinations have been imported yet. Your request is ready; try again once catalogue coverage is available.
         </p>
       )}
-      <div className="mt-8 grid gap-5 md:grid-cols-2">
+      <div className="mt-4 grid gap-5 md:grid-cols-2">
         {visibleCandidates.map((destination) => (
           <DestinationResult key={destination.id} destination={destination} query={query} />
         ))}
