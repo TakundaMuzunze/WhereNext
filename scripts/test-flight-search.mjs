@@ -60,6 +60,7 @@ try {
       "--runTestsByPath",
       "src/features/destination-discovery/server/searchFlightOptions.integration.test.ts",
       "src/features/destination-discovery/server/providerRequest.integration.test.ts",
+      "src/features/destination-discovery/server/cleanupReservations.integration.test.ts",
       "--testPathIgnorePatterns=/e2e/",
     ],
     {
