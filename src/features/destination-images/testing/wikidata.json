@@ -1,0 +1,550 @@
+{
+  "entities": {
+    "Q1157834": {
+      "id": "Q1157834",
+      "claims": {
+        "P18": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "6d34f7e458b960fef545cec32e578c80c0c13fa7",
+              "datavalue": {
+                "value": "Bembibre.JPG",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ],
+        "P948": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P948",
+              "hash": "3751ef83bf3190f7c22fb56cb67e3204d2cb18c8",
+              "datavalue": {
+                "value": "Bembibre banner.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ]
+      }
+    },
+    "Q11263": {
+      "id": "Q11263",
+      "claims": {
+        "P18": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "f6da0b7dba5acc1529c72dd66cce7dfc0f7ec678",
+              "datavalue": {
+                "value": "Cadaques Pueblo Marinero.JPG",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          },
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "764fd13c75f8f55503508336f0fd7b8bcf90f5b3",
+              "datavalue": {
+                "value": "Cadaques town view with church 2026.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ],
+        "P948": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P948",
+              "hash": "53fff6c1087e03752d0969d7c1b2dfb0f5c2ffc5",
+              "datavalue": {
+                "value": "Cadaques banner.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ]
+      }
+    },
+    "Q1242293": {
+      "id": "Q1242293",
+      "claims": {
+        "P18": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "05dde5ed97a3301d6c415a63aac70d0c2486403e",
+              "datavalue": {
+                "value": "Bozel jcc.JPG",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          },
+          {
+            "rank": "preferred",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "302a9b441e9512c261d83e31662ddbb7869af586",
+              "datavalue": {
+                "value": "Bozel depuis les hauteurs sud en été (juillet 2024).JPG",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          },
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "fe19d1db69db2bad03fca0d6e61d75225b86cd99",
+              "datavalue": {
+                "value": "Bozel en automne (octobre 2025).JPG",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ],
+        "P948": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P948",
+              "hash": "af282347dea789d9c5fa17bddcb8b8e69e9ca911",
+              "datavalue": {
+                "value": "Bozel jcc (cropped).JPG",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ]
+      }
+    },
+    "Q1106266": {
+      "id": "Q1106266",
+      "claims": {
+        "P18": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "3255316e7547bc65b735b814b95f97c063a59655",
+              "datavalue": {
+                "value": "Port de La Tremblade.JPG",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ],
+        "P948": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P948",
+              "hash": "eb46c82d271239a462aa618349bdbcc651b415f8",
+              "datavalue": {
+                "value": "Wikivoyage banner of La tremblade.png",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ]
+      }
+    },
+    "Q12872300": {
+      "id": "Q12872300",
+      "claims": {
+        "P18": [
+          {
+            "rank": "preferred",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "a3ad9290c06ccaee41739792dd6dff8748a82195",
+              "datavalue": {
+                "value": "Folklore museum of Doliana-Building.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          },
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "5070db8eb44e8119328a94126e2defacce531c17",
+              "datavalue": {
+                "value": "Ano Doliana.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ],
+        "P948": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P948",
+              "hash": "0e662f1b6968c303b4552a04b1136f31e697f55f",
+              "datavalue": {
+                "value": "Ano Doliana Banner.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ]
+      }
+    },
+    "Q12886120": {
+      "id": "Q12886120",
+      "claims": {
+        "P18": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "e8d013e1dbf70803aba9ff85432957b490fe05f9",
+              "datavalue": {
+                "value": "Horefto - panoramio2.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          },
+          {
+            "rank": "preferred",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "720d94a6824335d7200b7d5c8240c2179947bf63",
+              "datavalue": {
+                "value": "IMG Chorefto.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ],
+        "P948": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P948",
+              "hash": "e18c0ee75027df5a4e53b755fa4570c69ce7a403",
+              "datavalue": {
+                "value": "Agii Saranta banner.JPG",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ]
+      }
+    },
+    "Q104911": {
+      "id": "Q104911",
+      "claims": {
+        "P18": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "a018865c4290488a232305499ef72810bd468094",
+              "datavalue": {
+                "value": "Iseo1.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ],
+        "P948": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P948",
+              "hash": "76af796f2436185136f42543ed4e0c30cbc1864b",
+              "datavalue": {
+                "value": "Iseo banner.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ]
+      }
+    },
+    "Q107338": {
+      "id": "Q107338",
+      "claims": {
+        "P18": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "aaa0d4649fa5c5b55dc231c24411e2c04e287508",
+              "datavalue": {
+                "value": "Lampedusa Nordküste.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ],
+        "P948": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P948",
+              "hash": "fe9c3e5a9b847452ec06d269a2501d3e2c28e80f",
+              "datavalue": {
+                "value": "Lampedusa banner.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ]
+      }
+    },
+    "Q680230": {
+      "id": "Q680230",
+      "claims": {
+        "P18": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "548d1c8943f23be490487437920089222d3dfc2a",
+              "datavalue": {
+                "value": "Birgu et Senglea - Vue depuis La Valette - 2011.png",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ],
+        "P948": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P948",
+              "hash": "5d780f5ec46430cea04c155bd77423cb303d1b51",
+              "datavalue": {
+                "value": "Cottonera WV banner.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ]
+      }
+    },
+    "Q207277": {
+      "id": "Q207277",
+      "claims": {
+        "P18": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "06b0990c197fc8ed1163d8bc8293b25cd322b752",
+              "datavalue": {
+                "value": "Aerial view Mdina, Malta.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ],
+        "P948": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P948",
+              "hash": "53617feeb1ac2bec75f33ccdaf01eaabe5fde16e",
+              "datavalue": {
+                "value": "Mdina banner.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ]
+      }
+    },
+    "Q1000041": {
+      "id": "Q1000041",
+      "claims": {
+        "P18": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "c0adfcf53c1e64b8904f8db5e0ff8393274555e5",
+              "datavalue": {
+                "value": "Alcoutim, Portugal (33090282632).jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          },
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "688fed7100c97f4580604adea5233ef69baaa318",
+              "datavalue": {
+                "value": "Alcoutim - Vista a partir do castelo.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ],
+        "P948": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P948",
+              "hash": "2f7492f2edacb4590cd927b9285062de2ec53880",
+              "datavalue": {
+                "value": "Alcoutim Wikivoyage Banner.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ]
+      }
+    },
+    "Q1029544": {
+      "id": "Q1029544",
+      "claims": {
+        "P18": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "2326911d7bbd5445e65f5e0e9c8957629fb3031b",
+              "datavalue": {
+                "value": "Torre do Relógio, Caminha, Portugal 2006.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          },
+          {
+            "rank": "preferred",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "10f1d0d9687cd7540826804839463e5c49825126",
+              "datavalue": {
+                "value": "Torre do Relogio - Caminha.JPG",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ],
+        "P948": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P948",
+              "hash": "29999736d39d9238367498c6de2762c04f466c7e",
+              "datavalue": {
+                "value": "Praia de Moledo 03.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ]
+      }
+    },
+    "Q11286": {
+      "id": "Q11286",
+      "claims": {
+        "P18": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P18",
+              "hash": "d7aee90055db024e1222e69dca5ca313830ee393",
+              "datavalue": {
+                "value": "Castelló d'Empúries, plaça dels Homes - panoramio.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ],
+        "P948": [
+          {
+            "rank": "normal",
+            "mainsnak": {
+              "snaktype": "value",
+              "property": "P948",
+              "hash": "5afd737571627f6763f7ffaffc79f054acb1386d",
+              "datavalue": {
+                "value": "Banner Castelló d'Empúries.jpg",
+                "type": "string"
+              },
+              "datatype": "commonsMedia"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

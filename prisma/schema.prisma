@@ -136,6 +136,8 @@ model DestinationCandidate {
   guideStatus       String
   importedAt        DateTime
 
+  image DestinationImage?
+
   @@index([countryCode])
 }
 
@@ -156,4 +158,11 @@ model DestinationActivityEvidence {
 
   @@index([destinationId])
   @@index([expiresAt])
+}
+
+model DestinationImage {
+  destinationId String @id
+  destination DestinationCandidate @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  image Json
+  retrievedAt DateTime
 }
