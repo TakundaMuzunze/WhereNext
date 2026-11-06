@@ -1,3 +1,4 @@
+import { getDestinationSeason } from "@/features/destination-seasons/server/getDestinationSeason";
 import { parseDiscoveryRequest, serializeDiscoveryRequest } from "@/features/destination-planning/lib/discoveryRequest";
 import { resolveDestination } from "@/features/destination-catalogue/server/resolveDestination";
 import { ImportedDestinationDetails } from "@/widgets/destination-details/ui/ImportedDestinationDetails";
@@ -46,6 +47,7 @@ export default async function DestinationPage({ params, searchParams }: Destinat
     }
 
     const query = serializeDiscoveryRequest(request);
+    const seasonalGuidance = await getDestinationSeason(id, request);
 
     if (resolved.kind === "imported") {
       return (
@@ -54,6 +56,7 @@ export default async function DestinationPage({ params, searchParams }: Destinat
           backHref={`/results?${query}`}
           activities={request.activities}
           discoveryRequest={request}
+          seasonalGuidance={seasonalGuidance}
         />
       );
     }
@@ -65,11 +68,13 @@ export default async function DestinationPage({ params, searchParams }: Destinat
         backLabel="Back to destinations"
         activities={request.activities}
         discoveryRequest={request}
+        seasonalGuidance={seasonalGuidance}
       />
     );
   }
 
   if (resolved.kind === "imported") {
+    const seasonalGuidance = await getDestinationSeason(id);
     const datedRequest = parseDatedTripRequest(queryParams);
     const plannerAnswers = parsePlannerAnswers(queryParams);
     let query: string | undefined;
@@ -83,6 +88,7 @@ export default async function DestinationPage({ params, searchParams }: Destinat
     return (
       <ImportedDestinationDetails
         destination={resolved.destination}
+        seasonalGuidance={seasonalGuidance}
         backHref={query ? `/results?${query}` : undefined}
         editHref={query ? `/planner?${query}` : undefined}
         activities={datedRequest?.preferences.activities ?? plannerAnswers?.activities}

@@ -1,8 +1,10 @@
+import type { ImportedDestination } from "@/entities/destination/model/importedDestination";
 import { DestinationPhoto } from "@/entities/destination/ui/DestinationPhoto";
+import { DestinationActivityEvidence } from "@/features/destination-activities/ui/DestinationActivityEvidence";
 import type { DiscoveryRequest } from "@/features/destination-planning/model/discoveryRequest";
 import { DiscoveryRequestSummary } from "@/features/destination-planning/ui/DiscoveryRequestSummary";
-import { DestinationActivityEvidence } from "@/features/destination-activities/ui/DestinationActivityEvidence";
-import type { ImportedDestination } from "@/entities/destination/model/importedDestination";
+import { assessSeason, type SeasonalGuidance } from "@/features/destination-seasons/lib/assessSeason";
+import { SeasonalEvidence } from "@/features/destination-seasons/ui/SeasonalGuidance";
 import { SaveDestinationButton } from "@/features/saved-destinations";
 import Link from "next/link";
 
@@ -12,6 +14,7 @@ type ImportedDestinationDetailsProps = {
   editHref?: string;
   activities?: string[];
   discoveryRequest?: DiscoveryRequest;
+  seasonalGuidance?: SeasonalGuidance;
 };
 
 export function ImportedDestinationDetails({
@@ -20,6 +23,7 @@ export function ImportedDestinationDetails({
   editHref,
   activities,
   discoveryRequest,
+  seasonalGuidance,
 }: ImportedDestinationDetailsProps) {
   const importedDate = new Date(destination.importedAt).toLocaleDateString("en-GB", { timeZone: "UTC" });
 
@@ -59,11 +63,9 @@ export function ImportedDestinationDetails({
           What we know so far
         </h2>
         <DestinationActivityEvidence key={destination.id + JSON.stringify(activities)} destinationId={destination.id} activities={activities} />
+        <SeasonalEvidence guidance={seasonalGuidance ?? assessSeason(null, discoveryRequest?.timing ?? { kind: "flexible" }, activities ?? [])} />
         <dl className="mt-6 grid gap-6 sm:grid-cols-3">
-          {[
-            ["Seasonal suitability", "Unknown - we have not assessed conditions for your intended experiences."],
-            ["Budget fit", "Unknown - a complete trip estimate is not available."],
-          ].map(([label, explanation]) => (
+          {[["Budget fit", "Unknown - a complete trip estimate is not available."]].map(([label, explanation]) => (
             <div key={label}>
               <dt className="font-semibold">{label}</dt>
               <dd className="mt-2 text-sm leading-6 text-muted">{explanation}</dd>

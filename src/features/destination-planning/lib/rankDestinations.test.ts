@@ -37,3 +37,14 @@ it("breaks evidence ties by name then ID, without mutating the input or using ra
   expect(rankDestinations(input).map((place) => place.id)).toEqual(["z", "a", "b"]);
   expect(input.map((place) => place.id)).toEqual(["b", "a", "z"]);
 });
+
+it("uses seasonal preferences only after activity evidence, keeping unknown climate neutral", () => {
+  const betterClimate = {
+    ...candidate("climate", "Z climate", ["unknown"]),
+    seasonalGuidance: { observation: null, months: [], recommendedMonths: [], ranking: { matched: 1, tradeOffs: 0 } },
+  };
+  const unknownClimate = candidate("unknown", "A unknown", ["unknown"]);
+  const activitySupport = candidate("activity", "Activity", ["supported"]);
+
+  expect(rankDestinations([unknownClimate, betterClimate, activitySupport]).map((place) => place.id)).toEqual(["activity", "climate", "unknown"]);
+});

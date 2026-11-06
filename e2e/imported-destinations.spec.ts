@@ -21,7 +21,8 @@ test("opens imported details, confirms saves, reopens and removes only the selec
   expect(response?.status()).toBe(200);
   await expect(page.getByRole("heading", { name: "Faro", exact: true })).toBeVisible();
   await expect(page.getByText("Portugal", { exact: true })).toBeVisible();
-  await expect(page.getByText(/^Unknown —/)).toHaveCount(3);
+  await expect(page.getByRole("region", { name: "Seasonal guidance" })).toBeVisible();
+  await expect(page.getByText("Unknown - a complete trip estimate is not available.")).toBeVisible();
   await expect(page.getByRole("link", { name: "Read the Wikivoyage guide" })).toHaveAttribute("href", "https://en.wikivoyage.org/wiki/Faro");
   await expect(page.getByRole("link", { name: "Edit your trip" })).toHaveAttribute("href", `/planner?${plannerQuery}`);
   await expect(page.getByRole("img", { name: "View of Faro" })).toBeVisible();

@@ -1,11 +1,13 @@
+import { assessSeason, seasonalFit, type SeasonalFit } from "@/features/destination-seasons/lib/assessSeason";
 import { DestinationPhoto } from "@/entities/destination/ui/DestinationPhoto";
 import Link from "next/link";
 import { SaveDestinationButton } from "@/features/saved-destinations";
 import type { DiscoveryRequest } from "../model/discoveryRequest";
 import { serializeDiscoveryRequest } from "../lib/discoveryRequest";
 import type { DiscoveryCandidate } from "../lib/rankDestinations";
-import { DiscoveryRequestSummary } from "./DiscoveryRequestSummary";
+import { DiscoveryRequestSummary, discoveryTimingLabel } from "./DiscoveryRequestSummary";
 import { getDiscoveryResults } from "../server/getDiscoveryResults";
+import { SeasonalSummary } from "@/features/destination-seasons/ui/SeasonalGuidance";
 
 const statusLabels = {
   supported: "evidence found nearby",
@@ -36,7 +38,10 @@ function DestinationResult({ destination, query }: { destination: DiscoveryCandi
       <div className="flex flex-1 flex-col p-5">
         <p className="text-sm text-muted">{destination.country}</p>
         <h2 className="mt-2 font-serif text-3xl">{destination.name}</h2>
-        <ul className="mt-4 space-y-3">
+        <div className="mt-4">
+          <SeasonalSummary guidance={destination.seasonalGuidance} />
+        </div>
+        <ul className={evidence.length > 0 ? "mt-4 space-y-3" : undefined}>
           {evidence.map((assessment) => (
             <li key={assessment.activity}>
               <p className="font-medium">
@@ -71,13 +76,12 @@ function DestinationResult({ destination, query }: { destination: DiscoveryCandi
           ))}
         </ul>
         {unverified.length > 0 && (
-          <div className="mt-4 rounded-xl bg-secondary/60 p-3 text-sm">
-            <h3 className="font-medium">Still to verify</h3>
-            <p className="mt-1 leading-6">{unverified.map((assessment) => assessment.activity).join(" · ")}</p>
-            <p className="mt-1 text-xs leading-5 text-muted">We don’t yet have verified information for these interests.</p>
-          </div>
+          <p className="mt-3 text-sm leading-6 text-muted">
+            <span className="font-medium text-text">Activities unverified: </span>
+            {unverified.map((assessment) => assessment.activity).join(" · ")}
+          </p>
         )}
-        <p className="mt-4 text-xs leading-5 text-muted">Budget fit and seasonal suitability: unknown</p>
+        <p className="mt-3 text-xs leading-5 text-muted">Budget fit: unknown</p>
         <div className="mt-auto flex flex-wrap items-center gap-3 pt-4">
           <Link
             href={detailsHref}
@@ -96,7 +100,15 @@ function formatEvidenceDate(date: string): string {
   return new Date(date).toLocaleDateString("en-GB", { timeZone: "UTC" });
 }
 
-export async function DiscoveryResults({ request, pageNumber = 1 }: { request: DiscoveryRequest; pageNumber?: number }) {
+export async function DiscoveryResults({
+  request,
+  pageNumber = 1,
+  seasonalView = "matching",
+}: {
+  request: DiscoveryRequest;
+  pageNumber?: number;
+  seasonalView?: SeasonalFit;
+}) {
   const query = serializeDiscoveryRequest(request);
   let result;
 
@@ -119,11 +131,28 @@ export async function DiscoveryResults({ request, pageNumber = 1 }: { request: D
     );
   }
 
+  const groups: Record<SeasonalFit, DiscoveryCandidate[]> = { matching: [], tradeoffs: [], unverified: [] };
+  const fallbackGuidance = assessSeason(null, request.timing, request.activities);
+  const hasClimatePreference = fallbackGuidance.months.some((month) => month.preferences.length > 0);
+
+  for (const candidate of result.candidates) {
+    const fit = seasonalFit(candidate.seasonalGuidance ?? fallbackGuidance, request.timing);
+    groups[fit].push(candidate);
+  }
+
+  const activeView = hasClimatePreference ? seasonalView : "matching";
+  const selectedCandidates = groups[activeView];
+  const paginationQuery = `${query}&seasonal=${activeView}`;
+  const viewLabels = {
+    matching: "Climate matches",
+    tradeoffs: "Trade-offs",
+    unverified: "Unverified",
+  };
   const pageSize = 12;
-  const totalPages = Math.max(1, Math.ceil(result.candidates.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(selectedCandidates.length / pageSize));
   const currentPage = Math.min(Math.max(1, pageNumber), totalPages);
   const firstIndex = (currentPage - 1) * pageSize;
-  const visibleCandidates = result.candidates.slice(firstIndex, firstIndex + pageSize);
+  const visibleCandidates = selectedCandidates.slice(firstIndex, firstIndex + pageSize);
 
   return (
     <main className="mx-auto min-h-screen max-w-5xl px-6 pt-28 pb-20 text-text">
@@ -137,12 +166,30 @@ export async function DiscoveryResults({ request, pageNumber = 1 }: { request: D
           <summary className="min-h-11 cursor-pointer py-3 text-primary">How these results work</summary>
           <div className="max-w-3xl space-y-2 pb-2 leading-6">
             <p>
-              Ordered by supported interests, then fewer explicit conflicts. Evidence ties use destination name. Unknowns remain unknown. Missing
-              prices never exclude a place; your budget does not yet establish affordability.
+              Ordered by supported interests, then fewer explicit conflicts, then climate preference matches and fewer climate trade-offs. Remaining
+              ties use destination name within each view. Climate matches appear by default; climate trade-offs and unverified seasonal fit have
+              separate views. Unknowns remain unknown. Missing prices never exclude a place; your budget does not yet establish affordability.
             </p>
             <p>
               Current imported catalogue coverage is limited. These results use stored evidence; browsing does not trigger live checks. Open a
               destination to check nearby activities. No flight search has been made.
+            </p>
+            <p>
+              Matches meet every selected climate preference for your month or dates. Flexible trips need at least one matching month. Climate
+              preferences do not verify beaches, events or activity availability. Mean air temperature includes day and night; precipitation is an
+              average amount, not rain probability.
+            </p>
+            <p>
+              Regional climate averages, 1991–2020. Source:{" "}
+              <a
+                href="https://power.larc.nasa.gov/docs/referencing/"
+                target="_blank"
+                rel="noreferrer"
+                className="cursor-pointer text-primary underline"
+              >
+                NASA POWER / MERRA-2
+              </a>
+              . Open a destination for monthly conditions, preference rules and full source details.
             </p>
           </div>
         </details>
@@ -157,6 +204,66 @@ export async function DiscoveryResults({ request, pageNumber = 1 }: { request: D
           No destinations have been imported yet. Your request is ready; try again once catalogue coverage is available.
         </p>
       )}
+      {hasClimatePreference && result.candidates.length > 0 && (
+        <section aria-label="Climate result filters" className="mt-5">
+          <h2 className="sr-only">{viewLabels[activeView]}</h2>
+          <nav aria-label="Climate result views" className="flex flex-wrap gap-2 text-sm">
+            {(["matching", "tradeoffs", "unverified"] as const).map((view) => {
+              const count = groups[view].length;
+              const selected = activeView === view;
+              const label = `${viewLabels[view]} ${count}`;
+              const className = `inline-flex min-h-11 items-center gap-2 rounded-xl border px-4 py-2 font-medium transition-colors ${
+                selected ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted hover:bg-secondary hover:text-text"
+              }`;
+              const content = (
+                <>
+                  {viewLabels[view]} <span className="text-xs tabular-nums">{count}</span>
+                </>
+              );
+
+              return count === 0 ? (
+                <button
+                  key={view}
+                  type="button"
+                  disabled
+                  aria-label={label}
+                  aria-current={selected ? "page" : undefined}
+                  className={`${className} cursor-default opacity-50`}
+                >
+                  {content}
+                </button>
+              ) : (
+                <Link
+                  key={view}
+                  href={`/results?${query}${view === "matching" ? "" : `&seasonal=${view}`}`}
+                  aria-label={label}
+                  aria-current={selected ? "page" : undefined}
+                  className={`${className} cursor-pointer`}
+                >
+                  {content}
+                </Link>
+              );
+            })}
+          </nav>
+          <p className="mt-2 text-xs leading-5 text-muted">
+            {activeView === "matching"
+              ? request.timing.kind === "flexible"
+                ? "Compare regional climate across the year."
+                : `Regional climate matches your ${discoveryTimingLabel(request)} preferences.`
+              : activeView === "tradeoffs"
+                ? "These destinations have climate trade-offs for your preferences."
+                : "These destinations need more climate data to assess your preferences."}{" "}
+            Activities are assessed separately.
+          </p>
+          {selectedCandidates.length === 0 && (
+            <p role="status" className="mt-3 text-sm">
+              {activeView === "matching"
+                ? "No destinations have a verified seasonal match yet. Explore climate trade-offs, check unverified places, or edit your interests and timing."
+                : "No destinations in this seasonal view."}
+            </p>
+          )}
+        </section>
+      )}
       <div className="mt-4 grid gap-5 md:grid-cols-2">
         {visibleCandidates.map((destination) => (
           <DestinationResult key={destination.id} destination={destination} query={query} />
@@ -166,7 +273,7 @@ export async function DiscoveryResults({ request, pageNumber = 1 }: { request: D
         <nav aria-label="Result pages" className="mt-8 flex flex-wrap items-center gap-5">
           {currentPage > 1 && (
             <Link
-              href={`/results?${query}&page=${currentPage - 1}`}
+              href={`/results?${paginationQuery}&page=${currentPage - 1}`}
               className="inline-flex min-h-11 cursor-pointer items-center text-primary underline"
             >
               Previous destinations
@@ -177,7 +284,7 @@ export async function DiscoveryResults({ request, pageNumber = 1 }: { request: D
           </p>
           {currentPage < totalPages && (
             <Link
-              href={`/results?${query}&page=${currentPage + 1}`}
+              href={`/results?${paginationQuery}&page=${currentPage + 1}`}
               className="inline-flex min-h-11 cursor-pointer items-center text-primary underline"
             >
               More destinations
