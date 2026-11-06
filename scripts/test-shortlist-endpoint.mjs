@@ -150,6 +150,28 @@ try {
       `INSERT INTO "DestinationImage" ("destinationId", "image", "retrievedAt")
        VALUES ('wikidata:Q159457', '${JSON.stringify(photo)}'::jsonb, now());`,
     );
+    // Synthetic climate fixture: one warm/drier month and eleven cooler/wetter months.
+    const climate = {
+      source: "nasa-power",
+      apiVersion: "v2.10.1",
+      baselineStart: 1991,
+      baselineEnd: 2020,
+      latitude: 37,
+      longitude: -8.125,
+      elevationMetres: 30,
+      retrievedAt: new Date().toISOString(),
+      months: Array.from({ length: 12 }, (_, index) => ({
+        month: index + 1,
+        meanTemperatureC: index === 6 ? 21 : 10,
+        precipitationMmPerDay: index === 6 ? 0.5 : 3,
+      })),
+    };
+    docker(
+      ["exec", "-i", name, "psql", "-U", "postgres", "-d", "shortlist_test", "-v", "ON_ERROR_STOP=1"],
+      `INSERT INTO "SeasonalClimate" ("requestKey", "observation", "retrievedAt")
+       VALUES ('nasa-power:merra2:1991-2020:v1:37:-8.125', '${JSON.stringify(climate)}'::jsonb, '${climate.retrievedAt}');`,
+    );
+
     const buildResult = spawnSync("npm", ["run", "build", "--", "--webpack"], {
       stdio: "inherit",
       timeout: 120_000,
@@ -167,6 +189,7 @@ try {
             "e2e/imported-destinations.spec.ts",
             "e2e/activity-evidence.spec.ts",
             "e2e/destination-planning.spec.ts",
+            "e2e/seasonal-guidance.spec.ts",
             "e2e/destination-images.spec.ts",
             "e2e/dated-planner.spec.ts",
             "e2e/planner-flow.spec.ts",

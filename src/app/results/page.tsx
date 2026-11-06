@@ -41,7 +41,8 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
       pageNumber = requestedPage;
     }
 
-    return <DiscoveryResults request={request} pageNumber={pageNumber} />;
+    const seasonalView = query.seasonal === "tradeoffs" || query.seasonal === "unverified" ? query.seasonal : "matching";
+    return <DiscoveryResults request={request} pageNumber={pageNumber} seasonalView={seasonalView} />;
   }
 
   if (query.kind !== undefined) {

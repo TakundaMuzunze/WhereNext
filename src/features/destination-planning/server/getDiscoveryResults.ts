@@ -8,6 +8,9 @@ import { assessActivity, unknownActivity } from "@/features/destination-activiti
 import { activityObservationKey, validateCachedObservation } from "@/features/destination-activities/server/readActivityObservation";
 import { rankDestinations, type DiscoveryCandidate } from "../lib/rankDestinations";
 import type { DiscoveryRequest } from "../model/discoveryRequest";
+import { readClimate } from "@/features/destination-seasons/server/readClimate";
+import { climateLocation } from "@/features/destination-seasons/model/climateObservation";
+import { assessSeason } from "@/features/destination-seasons/lib/assessSeason";
 
 export type DiscoveryResults = {
   candidates: DiscoveryCandidate[];
@@ -17,6 +20,7 @@ export type DiscoveryResults = {
 export async function getDiscoveryResults(request: DiscoveryRequest): Promise<DiscoveryResults> {
   const candidates = await prisma.destinationCandidate.findMany({ orderBy: { id: "asc" } });
   const images = await readDestinationImages(candidates.map((candidate) => candidate.id));
+  const climate = await readClimate(candidates);
   const identityLinks = await prisma.destinationGuideIdentity.findMany();
   const guidesById = new Map(destinations.map((destination) => [destination.id, destination]));
   const canonicalIds = new Map<string, string>();
@@ -84,6 +88,9 @@ export async function getDiscoveryResults(request: DiscoveryRequest): Promise<Di
       return assessActivity(activity, observation);
     });
 
+    const climateKey = climateLocation(candidate.latitude, candidate.longitude).requestKey;
+    const seasonalGuidance = assessSeason(climate.get(climateKey) ?? null, request.timing, request.activities);
+
     assessedCandidates.push({
       id: candidate.id,
       name: candidate.name,
@@ -91,6 +98,7 @@ export async function getDiscoveryResults(request: DiscoveryRequest): Promise<Di
       ...(images.has(candidate.id) ? { image: images.get(candidate.id) } : {}),
       ...(guide ? { guideImage: guide.image } : {}),
       assessments,
+      seasonalGuidance,
     });
   }
 
