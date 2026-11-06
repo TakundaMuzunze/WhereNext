@@ -29,7 +29,7 @@ The first request initializes each replacement provider's allowance. Defaults ar
 
 Every cache miss reserves capacity transactionally before network work. Failed calls retain the charge; requests have an 8-second timeout and no retries or redirects. Identical requests are coalesced in a bounded 200-entry process cache: fares 15 minutes, city catalogue 24 hours, geography/evidence 7 days, failures 60 seconds. A shared 60-second duplicate reservation suppresses identical misses on other instances; those instances may temporarily show unknown/error rather than share results. Cache eviction/restarts can increase usage; the database ceilings remain shared and authoritative. This is not a distributed result cache or per-user abuse limiter. [Reservation cleanup](provider-reservation-cleanup.md) retains at least 24 hours and every active cooldown without refunding allowance usage. A bounded daily Actions workflow is included; its maintenance secret and hosted operation must be verified after merge.
 
-The endpoint rejects browser cross-origin requests, but it is public. Shared quotas cap upstream usage, not service fairness: an abusive client can exhaust the app allowance. Add deployment-level rate protection before public rollout.
+The legacy discovery endpoint rejects browser cross-origin requests, but it is public. Shared quotas cap upstream usage, not service fairness. [Activity-check rate limiting](activity-rate-limiting.md) adds a Netlify IP/domain rule for activity POSTs; hosted enforcement still needs deploy-preview verification. The legacy discovery endpoint is outside that path rule and needs a separate retirement or protection decision before broader public rollout.
 
 ## Price and evidence contract
 
