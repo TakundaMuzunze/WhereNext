@@ -132,6 +132,16 @@ test("retains previous evidence after a failed retry and replaces it on recovery
   await expect(page.getByRole("button", { name: "Save destination", exact: true })).toBeEnabled();
   await expect(page.getByRole("link", { name: "Edit your trip" })).toHaveAttribute("href", `/planner?${plannerQuery}`);
 
+  await page.route("**/api/destinations/*/activities", (route) =>
+    route.fulfill({ status: 429, contentType: "text/plain", body: "Too Many Requests" }),
+  );
+  await page.getByRole("button", { name: "Check activity evidence again" }).click();
+
+  await expect(activityPanel.getByRole("alert")).toContainText("Too many activity checks. Please wait a minute before trying again.");
+  await expect(museumLink).toBeVisible();
+  await expect(retrievalTime).toHaveText(originalRetrievalTime);
+  await expect(page.getByRole("button", { name: "Save destination", exact: true })).toBeEnabled();
+
   const recoveredResult: ActivityResult = {
     ...initialResult,
     assessments: [

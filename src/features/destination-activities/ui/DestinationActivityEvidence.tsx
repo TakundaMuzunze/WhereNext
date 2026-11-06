@@ -56,6 +56,10 @@ export function DestinationActivityEvidence({ destinationId, activities = initia
         signal: requestController.signal,
       });
 
+      if (response.status === 429) {
+        throw new Error("Too many activity checks. Please wait a minute before trying again.");
+      }
+
       if (!response.ok) {
         throw new Error("Activity evidence could not be loaded. Please try again.");
       }
