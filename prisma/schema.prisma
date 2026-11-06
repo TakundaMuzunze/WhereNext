@@ -166,3 +166,10 @@ model DestinationImage {
   image Json
   retrievedAt DateTime
 }
+
+// Shared regional climate cells; baseline/version/geometry form the request key.
+model SeasonalClimate {
+  requestKey  String   @id
+  observation Json
+  retrievedAt DateTime
+}

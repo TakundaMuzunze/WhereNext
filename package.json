@@ -20,6 +20,7 @@
     "test:flights:db": "node scripts/test-flight-search.mjs",
     "test:catalogue:db": "node scripts/test-destination-catalogue.mjs",
     "destinations:images": "node --experimental-strip-types scripts/enrich-destination-images.mjs",
+    "destinations:climate": "node --experimental-strip-types scripts/enrich-destination-climate.mjs",
     "destinations:import": "node --experimental-strip-types scripts/import-destinations.mjs"
   },
   "dependencies": {
