@@ -28,10 +28,25 @@ A failed database batch rolls back and exits nonzero. Verify the error before re
 
 ## Operational status
 
-This command is manual. No production deletion or automatic schedule was performed as part of implementation. For an initial rollout, review previews per provider and apply bounded batches during a quiet period. A future scheduled job should record exit status and the summary, alert on failures, and drain any backlog in bounded runs. Scheduling and deployment-level rate protection remain separate follow-ups under #43; catalogue import scheduling remains #38.
+The single-provider command remains manual. `.github/workflows/provider-reservation-cleanup.yml` adds a daily scheduled run at 03:23 UTC and a manual Actions run that previews by default. The workflow only runs from `main`; it does not run on pull requests or pushes. Once merged and configured, scheduled runs apply cleanup automatically. No hosted workflow or production cleanup was run during implementation.
+
+The scheduled runner processes Geoapify, GeoNames, Travelpayouts and dormant SerpApi records sequentially. Each provider gets at most ten batches of 1,000 records. It stops early when no eligible records remain. Preview only inspects one batch per provider. A database failure stops that provider while other providers are still checked. A remaining backlog after ten batches also makes the run fail, rather than silently reporting completion. Previously committed batches remain applied; rerunning requires no cursor.
+
+Workflow concurrency allows only one cleanup run at a time and does not cancel an active run. Database row locking still protects against overlap with an operator running the manual command. The job has a ten-minute timeout and each child command has a thirty-second timeout. If a job is interrupted, inspect its logs and rerun; some earlier batches may have committed. Run logs and the Actions summary contain per-provider status, successful batch count, matched/deleted counts and a failure/backlog explanation, without reservation keys or database credentials.
+
+## Configure and verify the scheduled job
+
+1. Add the repository Actions secret `PROVIDER_MAINTENANCE_DATABASE_URL`, pointing to the intended application database. It is deliberately separate from CI's `DATABASE_URL`; verify the target rather than assuming the CI secret points to production. The connection needs to read and delete `SearchReservation`, but this job does not need API keys, authentication secrets or permission to edit allowance totals. Use a database role with only the required table access where available.
+2. Merge the reviewed workflow into `main`. The daily schedule will then apply cleanup using that secret. For an initial preview before enabling deletion, merge without the secret, add it shortly before the manual check, and run the workflow with **apply unchecked**. A missing secret fails visibly without connecting to a database.
+3. Review preview output, then optionally run manually with **apply checked**. Confirm the expected database target, counts and unchanged quota behaviour. The next daily schedule applies without needing this checkbox.
+4. Enable the desired GitHub Actions failure notifications in your account/repository settings and monitor the initial runs. The workflow marks failures and adds an error annotation; email delivery depends on your notification preferences. Review backlog failures before changing batch limits.
+
+GitHub schedules use UTC: 03:23 is 03:23 London time in winter and 04:23 during British Summer Time. Scheduled starts can be delayed or skipped by GitHub, and public repository schedules can be disabled after inactivity. Treat the schedule as best effort and review the latest successful run rather than assuming it executed. See [GitHub schedule behaviour](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule) and [concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency).
+
+Deployment-level rate protection and free-capacity verification remain follow-ups under #43; catalogue import scheduling remains #38.
 
 Reservations are operational limit records, not a permanent audit log or billing history. If longer historical analysis is needed, agree a separate aggregate retention policy. Revisit this cleanup rule before introducing any rate-limit window longer than 24 hours or any new use of reservation history.
 
 ## Verification
 
-`npm run test:flights:db` exercises the actual command against disposable PostgreSQL alongside the existing provider guards. Tests cover read-only preview, bounded repeat runs, recent and future reservations, active cooldowns on old records, provider isolation, unchanged allowance totals, overlapping locks, invalid arguments and deletion rollback. No external provider calls are made.
+`npm run test:flights:db` exercises the actual commands against disposable PostgreSQL alongside the existing provider guards. Tests cover read-only preview, bounded repeat runs, recent and future reservations, active cooldowns on old records, provider isolation, unchanged allowance totals, overlapping locks, invalid arguments and deletion rollback. Scheduled-runner tests cover preview across all providers, multi-batch apply, the hard backlog limit, partial provider failure and the Actions summary. No external provider calls are made. Actual GitHub scheduling, secret configuration and notification delivery still need hosted verification after merge.

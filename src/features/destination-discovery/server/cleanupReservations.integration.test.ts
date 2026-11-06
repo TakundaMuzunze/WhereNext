@@ -1,5 +1,8 @@
 /** @jest-environment node */
 import { spawnSync } from "node:child_process";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { Pool } from "pg";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -27,6 +30,111 @@ function runCleanup(...argumentsList: string[]) {
     env: process.env,
   });
 }
+
+function runScheduledCleanup(argumentsList: string[] = [], summaryFile = "") {
+  return spawnSync(process.execPath, ["scripts/run-provider-reservation-cleanup.mjs", ...argumentsList], {
+    encoding: "utf8",
+    timeout: 30000,
+    env: { ...process.env, GITHUB_STEP_SUMMARY: summaryFile },
+  });
+}
+
+it("previews every provider for the scheduled job without deleting reservations", async () => {
+  await pool.query(`INSERT INTO "SearchReservation" ("id", "provider", "requestKey", "createdAt", "blockedUntil")
+    VALUES ('obsolete', 'geoapify', 'old-request', now() - interval '25 hours', now() - interval '24 hours')`);
+
+  const result = runScheduledCleanup();
+
+  expect(result.status).toBe(0);
+  expect(JSON.parse(result.stdout)).toMatchObject({
+    mode: "preview",
+    failed: false,
+    providers: [
+      { provider: "geoapify", matched: 1, deleted: 0, batches: 1, status: "preview" },
+      { provider: "geonames", matched: 0, deleted: 0, batches: 1, status: "preview" },
+      { provider: "travelpayouts", matched: 0, deleted: 0, batches: 1, status: "preview" },
+      { provider: "serpapi", matched: 0, deleted: 0, batches: 1, status: "preview" },
+    ],
+  });
+  expect((await pool.query('SELECT "id" FROM "SearchReservation"')).rows).toEqual([{ id: "obsolete" }]);
+});
+
+it("drains multiple batches in the scheduled runner while preserving current reservations and allowances", async () => {
+  await pool.query(`INSERT INTO "SearchReservation" ("id", "provider", "requestKey", "createdAt", "blockedUntil")
+    SELECT 'obsolete-' || number, 'geoapify', 'request-' || number, now() - interval '25 hours', now() - interval '24 hours'
+    FROM generate_series(1, 1001) AS number`);
+  await pool.query(`INSERT INTO "SearchReservation" ("id", "provider", "requestKey", "createdAt", "blockedUntil")
+    VALUES ('current', 'geoapify', 'current', now(), now() + interval '1 minute')`);
+  await pool.query(`INSERT INTO "SearchAllowance" ("provider", "limit", "used", "hourlyLimit", "expiresAt")
+    VALUES ('geoapify', 2500, 2500, 200, now() + interval '1 day')`);
+  const allowanceBeforeCleanup = await pool.query('SELECT * FROM "SearchAllowance"');
+
+  const result = runScheduledCleanup(["--apply"]);
+
+  expect(result.status).toBe(0);
+  expect(JSON.parse(result.stdout)).toMatchObject({
+    mode: "apply",
+    failed: false,
+    providers: expect.arrayContaining([{ provider: "geoapify", matched: 1001, deleted: 1001, batches: 2, hasMore: false, status: "complete" }]),
+  });
+  expect((await pool.query('SELECT "id" FROM "SearchReservation"')).rows).toEqual([{ id: "current" }]);
+  expect((await pool.query('SELECT * FROM "SearchAllowance"')).rows).toEqual(allowanceBeforeCleanup.rows);
+});
+
+it("fails visibly at the scheduled batch limit instead of draining an unbounded backlog", async () => {
+  await pool.query(`INSERT INTO "SearchReservation" ("id", "provider", "requestKey", "createdAt", "blockedUntil")
+    SELECT 'obsolete-' || number, 'geoapify', 'request-' || number, now() - interval '25 hours', now() - interval '24 hours'
+    FROM generate_series(1, 10001) AS number`);
+
+  const result = runScheduledCleanup(["--apply"]);
+
+  expect(result.status).toBe(1);
+  expect(result.stderr).toContain("obsolete reservations remain after the bounded run");
+  expect(JSON.parse(result.stdout)).toMatchObject({
+    failed: true,
+    providers: expect.arrayContaining([{ provider: "geoapify", matched: 10000, deleted: 10000, batches: 10, hasMore: true, status: "backlog" }]),
+  });
+  expect((await pool.query('SELECT COUNT(*)::int AS count FROM "SearchReservation"')).rows).toEqual([{ count: 1 }]);
+});
+
+it("reports a failed provider and still cleans other providers with an Actions summary", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "where-next-cleanup-summary-"));
+  const summaryFile = join(directory, "summary.md");
+  await pool.query(`INSERT INTO "SearchReservation" ("id", "provider", "requestKey", "createdAt", "blockedUntil") VALUES
+    ('failed-provider', 'geoapify', 'old', now() - interval '25 hours', now() - interval '24 hours'),
+    ('successful-provider', 'geonames', 'old', now() - interval '25 hours', now() - interval '24 hours')`);
+  await pool.query(`CREATE FUNCTION reject_scheduled_test_deletion() RETURNS trigger LANGUAGE plpgsql AS $$
+    BEGIN
+      IF OLD.provider = 'geoapify' THEN
+        RAISE EXCEPTION 'Simulated storage failure';
+      END IF;
+      RETURN OLD;
+    END;
+    $$`);
+  await pool.query(`CREATE TRIGGER reject_scheduled_test_deletion
+    BEFORE DELETE ON "SearchReservation" FOR EACH ROW EXECUTE FUNCTION reject_scheduled_test_deletion()`);
+
+  try {
+    const result = runScheduledCleanup(["--apply"], summaryFile);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("geoapify: cleanup batch failed");
+    expect(JSON.parse(result.stdout)).toMatchObject({
+      failed: true,
+      providers: expect.arrayContaining([
+        { provider: "geoapify", matched: 0, deleted: 0, batches: 0, hasMore: false, status: "failed" },
+        { provider: "geonames", matched: 1, deleted: 1, batches: 1, hasMore: false, status: "complete" },
+      ]),
+    });
+    expect((await pool.query('SELECT "id" FROM "SearchReservation"')).rows).toEqual([{ id: "failed-provider" }]);
+    expect(readFileSync(summaryFile, "utf8")).toContain("| geoapify | failed | 0 | 0 | 0 |");
+    expect(readFileSync(summaryFile, "utf8")).toContain("| geonames | complete | 1 | 1 | 1 |");
+  } finally {
+    await pool.query('DROP TRIGGER reject_scheduled_test_deletion ON "SearchReservation"');
+    await pool.query("DROP FUNCTION reject_scheduled_test_deletion()");
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
 
 it("previews obsolete reservations without changing reservations or allowance totals", async () => {
   await pool.query(`INSERT INTO "SearchReservation" ("id", "provider", "requestKey", "createdAt", "blockedUntil")
