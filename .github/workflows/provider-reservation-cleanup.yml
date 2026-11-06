@@ -1,0 +1,64 @@
+name: Provider reservation cleanup
+
+on:
+  schedule:
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Delete obsolete reservations (leave unchecked to preview)
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: provider-reservation-cleanup
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    if: github.ref == 'refs/heads/main'
+    name: Clean obsolete provider reservations
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run bounded cleanup
+        env:
+          DATABASE_URL: ${{ secrets.PROVIDER_MAINTENANCE_DATABASE_URL }}
+          CLEANUP_APPLY: ${{ github.event_name == 'schedule' || inputs.apply }}
+        shell: bash
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::Configure PROVIDER_MAINTENANCE_DATABASE_URL for the intended application database."
+            exit 1
+          fi
+
+          if [ "$CLEANUP_APPLY" = "true" ]; then
+            npm run providers:cleanup:scheduled -- --apply
+          else
+            npm run providers:cleanup:scheduled
+          fi
+
+      - name: Report failure
+        if: failure()
+        run: |
+          echo "::error::Reservation cleanup failed or reached its backlog limit. Inspect the run logs and provider summary."
+          echo "Cleanup needs attention. Inspect the logs and provider summary; completed batches remain applied." >> "$GITHUB_STEP_SUMMARY"
