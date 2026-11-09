@@ -216,6 +216,33 @@ export async function fetchDestinationCandidates(countryCode: CandidateCountry, 
       titleChanges.set(change.from, change.to);
     }
 
+    const eligiblePages: Array<{
+      page: z.infer<typeof wikivoyagePageSchema>;
+      guideStatus: DestinationCandidate["guideStatus"];
+    }> = [];
+
+    for (const sourcePage of Object.values(validatedResponse.query.pages)) {
+      const parsedPage = wikivoyagePageSchema.safeParse(sourcePage);
+
+      if (!parsedPage.success) {
+        skippedCount++;
+        continue;
+      }
+
+      const page = parsedPage.data;
+      const categories = new Set(page.categories.map((category) => category.title));
+      const guideStatus = getGuideStatus(categories);
+      const isCityArticle = categories.has("Category:City articles");
+
+      if (!guideStatus || !isCityArticle) {
+        skippedCount++;
+        continue;
+      }
+
+      eligiblePages.push({ page, guideStatus });
+    }
+
+    const eligibleIdentities = new Map(eligiblePages.map(({ page }) => [page.title, page.pageprops.wikibase_item]));
     const resolvedIdentities = new Map<string, string>();
 
     for (const [requestedTitle, wikidataId] of expectedWikidataIds) {
@@ -230,35 +257,23 @@ export async function fetchDestinationCandidates(countryCode: CandidateCountry, 
         resolvedTitle = titleChanges.get(resolvedTitle)!;
       }
 
+      // Skip regional guides and redirects to another place; never replace the requested identity.
+      if (eligibleIdentities.get(resolvedTitle) !== wikidataId) {
+        continue;
+      }
+
       if (resolvedIdentities.has(resolvedTitle)) {
         throw new CatalogueImportError("Ambiguous destination identities share a redirect target. No records imported.");
       }
       resolvedIdentities.set(resolvedTitle, wikidataId);
     }
 
-    for (const sourcePage of Object.values(validatedResponse.query.pages)) {
-      const parsedPage = wikivoyagePageSchema.safeParse(sourcePage);
-
-      if (!parsedPage.success) {
-        skippedCount++;
-        continue;
-      }
-
-      const page = parsedPage.data;
-      const categories = new Set(page.categories.map((category) => category.title));
-      const guideStatus = getGuideStatus(categories);
-      const isCityArticle = categories.has("Category:City articles");
+    for (const { page, guideStatus } of eligiblePages) {
       const expectedWikidataId = resolvedIdentities.get(page.title);
       const wikidataId = page.pageprops.wikibase_item;
       const hasMatchingIdentity = expectedWikidataId === wikidataId;
 
-      if (expectedWikidataId && !hasMatchingIdentity) {
-        throw new CatalogueImportError(
-          `Destination identity changed from ${expectedWikidataId} to ${wikidataId}. Review the source; no records imported.`,
-        );
-      }
-
-      if (!guideStatus || !isCityArticle || !hasMatchingIdentity) {
+      if (!hasMatchingIdentity) {
         skippedCount++;
         continue;
       }

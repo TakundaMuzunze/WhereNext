@@ -169,14 +169,23 @@ it("follows normalized titles and redirects only when the destination identity s
   expect(new URL(String(sourceFetch.mock.calls[1][0])).searchParams.get("redirects")).toBe("1");
 });
 
-it("stops on a changed Wikidata identity instead of silently skipping it", async () => {
+it("reports a changed Wikidata identity as skipped without replacing the requested destination", async () => {
   mockSourceResponses([createWikivoyagePage("Q597")]);
-  await expect(fetchDestinationCandidates("PT", 50, "test")).rejects.toThrow("identity changed");
+  expect(await fetchDestinationCandidates("PT", 50, "test")).toMatchObject({
+    candidates: [],
+    scanned: 1,
+    skipped: 1,
+    nextCursor: null,
+  });
 });
 
-it("rejects ambiguous redirect targets and circular redirects rather than merging distinct places", async () => {
+it("keeps the matching city while skipping other destinations redirected to its guide", async () => {
   sourceFetch.mockResolvedValueOnce(
-    Response.json({ results: { bindings: [createWikidataResult("Q10", "First"), createWikidataResult("Q20", "Second")] } }),
+    Response.json({
+      results: {
+        bindings: [createWikidataResult("Q10", "First"), createWikidataResult("Q159457", "Faro"), createWikidataResult("Q20", "Second")],
+      },
+    }),
   );
   sourceFetch.mockResolvedValueOnce(
     Response.json({
@@ -189,8 +198,15 @@ it("rejects ambiguous redirect targets and circular redirects rather than mergin
       },
     }),
   );
-  await expect(fetchDestinationCandidates("PT", 50, "test")).rejects.toThrow("share a redirect target");
+  expect(await fetchDestinationCandidates("PT", 50, "test")).toMatchObject({
+    candidates: [expect.objectContaining({ id: "wikidata:Q159457", name: "Faro" })],
+    scanned: 3,
+    skipped: 2,
+    nextCursor: null,
+  });
+});
 
+it("rejects circular redirects rather than guessing a destination identity", async () => {
   sourceFetch.mockResolvedValueOnce(Response.json({ results: { bindings: [createWikidataResult("Q10", "First")] } }));
   sourceFetch.mockResolvedValueOnce(
     Response.json({
@@ -204,6 +220,51 @@ it("rejects ambiguous redirect targets and circular redirects rather than mergin
     }),
   );
   await expect(fetchDestinationCandidates("PT", 50, "test")).rejects.toThrow("Circular");
+});
+
+it("skips regional redirects without blocking eligible cities or losing the resume cursor", async () => {
+  sourceFetch.mockResolvedValueOnce(
+    Response.json({
+      results: {
+        bindings: [
+          createWikidataResult("Q14208833", "South_Central_Portugal"),
+          createWikidataResult("Q1501301", "Lezíria_do_Tejo"),
+          createWikidataResult("Q159457", "Faro"),
+          createWikidataResult("Q597", "Lisbon"),
+        ],
+      },
+    }),
+  );
+  sourceFetch.mockResolvedValueOnce(
+    Response.json({
+      query: {
+        redirects: [
+          { from: "South Central Portugal", to: "Ribatejo" },
+          { from: "Lezíria do Tejo", to: "Ribatejo" },
+        ],
+        pages: {
+          "29590": {
+            pageid: 29590,
+            title: "Ribatejo",
+            pageprops: { wikibase_item: "Q841323" },
+            coordinates: [{ lat: 39.23, lon: -8.68, primary: "", globe: "earth" }],
+            revisions: [{ revid: 5252444 }],
+          },
+          "11446": createWikivoyagePage(),
+        },
+      },
+    }),
+  );
+
+  const result = await fetchDestinationCandidates("PT", 3, "test");
+
+  expect(result).toMatchObject({
+    candidates: [expect.objectContaining({ id: "wikidata:Q159457", name: "Faro" })],
+    scanned: 3,
+    skipped: 2,
+    truncated: true,
+    nextCursor: "PT:Q159457",
+  });
 });
 
 it("reports source records omitted from the detail response as skipped coverage", async () => {
