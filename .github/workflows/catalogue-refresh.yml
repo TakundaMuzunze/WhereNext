@@ -1,0 +1,74 @@
+name: Destination catalogue refresh
+
+on:
+  schedule:
+    # Check daily; completed countries are left alone until the next UTC month.
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Save catalogue updates and checkpoints (unchecked previews only)
+        type: boolean
+        required: true
+        default: false
+      country:
+        description: Country to refresh
+        type: choice
+        default: ALL
+        options: [ALL, PT, ES, FR, IT, GR, MT]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: destination-catalogue-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: github.ref == 'refs/heads/main'
+    name: Refresh bounded catalogue pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run bounded catalogue refresh
+        env:
+          # Session locks require a direct connection to the application database.
+          DATABASE_URL: ${{ secrets.DIRECT_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          REFRESH_APPLY: ${{ github.event_name == 'schedule' || inputs.apply }}
+          REFRESH_COUNTRY: ${{ inputs.country || 'ALL' }}
+          DESTINATION_IMPORT_USER_AGENT: WhereNext/0.1 (https://github.com/TakundaMuzunze/WhereNext)
+        shell: bash
+        run: |
+          if [ -z "$DIRECT_URL" ]; then
+            echo "::error::Configure DIRECT_URL for the intended application database and deploy the catalogue refresh migration first."
+            exit 1
+          fi
+
+          if [ "$REFRESH_APPLY" = "true" ]; then
+            npm run destinations:refresh -- "$REFRESH_COUNTRY" --apply
+          else
+            npm run destinations:refresh -- "$REFRESH_COUNTRY"
+          fi
+
+      - name: Report failure
+        if: failure()
+        run: |
+          echo "::error::Catalogue refresh needs attention. Inspect the country summary and source/identity error; committed pages and checkpoints are retained."
+          echo "Catalogue refresh failed. Inspect the logs and country summary. Do not reset destination identities or delete saved places to retry." >> "$GITHUB_STEP_SUMMARY"

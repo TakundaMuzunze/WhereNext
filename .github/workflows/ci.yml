@@ -78,6 +78,10 @@ jobs:
         if: steps.changes.outputs.code_changed == 'true'
         run: npm run test:coverage
 
+      - name: Test catalogue persistence and refresh
+        if: steps.changes.outputs.code_changed == 'true'
+        run: npm run test:catalogue:db
+
       - name: Build
         if: steps.changes.outputs.code_changed == 'true'
         run: npm run build
