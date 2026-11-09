@@ -1,3 +1,4 @@
+import { catalogueDatabaseUrl, withCatalogueImportLock } from "../src/features/destination-catalogue/server/catalogueImportLock.ts";
 import "dotenv/config";
 import { Pool } from "pg";
 
@@ -59,17 +60,25 @@ if (shouldSaveDestinations && !process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is required for --apply.");
 }
 
-const importResult = await fetchDestinationCandidates(countryCode, sourceRecordLimit, userAgent, cursor);
+let importResult;
 
 if (shouldSaveDestinations) {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const pool = new Pool({ connectionString: catalogueDatabaseUrl(), connectionTimeoutMillis: 10000, query_timeout: 15000, max: 1 });
 
   try {
-    await persistCandidates(pool, importResult.candidates);
+    importResult = await withCatalogueImportLock(pool, async (client) => {
+      const result = await fetchDestinationCandidates(countryCode, sourceRecordLimit, userAgent, cursor);
+      await persistCandidates(client, result.candidates);
+      return result;
+    });
     console.log(`Imported/refreshed ${importResult.candidates.length} destinations. Existing unreturned records were retained.`);
   } finally {
     await pool.end();
   }
+}
+
+if (!shouldSaveDestinations) {
+  importResult = await fetchDestinationCandidates(countryCode, sourceRecordLimit, userAgent, cursor);
 }
 
 // In apply mode, publish a resume cursor only once this batch has been saved.

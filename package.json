@@ -21,6 +21,7 @@
     "test:catalogue:db": "node scripts/test-destination-catalogue.mjs",
     "destinations:images": "node --experimental-strip-types scripts/enrich-destination-images.mjs",
     "destinations:climate": "node --experimental-strip-types scripts/enrich-destination-climate.mjs",
+    "destinations:refresh": "node --experimental-strip-types scripts/refresh-destination-catalogue.mjs",
     "destinations:import": "node --experimental-strip-types scripts/import-destinations.mjs"
   },
   "dependencies": {

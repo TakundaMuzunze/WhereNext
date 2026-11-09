@@ -1,3 +1,4 @@
+import { CatalogueImportError } from "./catalogueImportLock.ts";
 import { z } from "zod";
 
 export const candidateCountries = {
@@ -63,9 +64,13 @@ const wikivoyagePageSchema = z.object({
   revisions: z.array(z.object({ revid: z.number().int().positive() })).length(1),
 });
 
+const titleChangeSchema = z.object({ from: z.string().min(1), to: z.string().min(1) });
+
 const wikivoyageResponseSchema = z.object({
   query: z.object({
     pages: z.record(z.string(), z.unknown()),
+    normalized: z.array(titleChangeSchema).optional(),
+    redirects: z.array(titleChangeSchema).optional(),
   }),
   continue: z.unknown().optional(),
 });
@@ -78,7 +83,7 @@ async function fetchSourceJson(url: URL, userAgent: string): Promise<unknown> {
   });
 
   if (!response.ok) {
-    throw new Error(`Destination source unavailable (HTTP ${response.status}). No records imported.`);
+    throw new CatalogueImportError(`Destination source unavailable (HTTP ${response.status}). No records imported.`);
   }
 
   return response.json();
@@ -107,7 +112,7 @@ export async function fetchDestinationCandidates(countryCode: CandidateCountry, 
   const hasUserAgent = userAgent.trim().length > 0;
 
   if (!isSupportedCountry || !isValidLimit || !hasUserAgent) {
-    throw new Error("Choose a supported country, a limit from 1 to 200, and an identifying User-Agent.");
+    throw new CatalogueImportError("Choose a supported country, a limit from 1 to 200, and an identifying User-Agent.");
   }
 
   let cursorFilter = "";
@@ -118,7 +123,7 @@ export async function fetchDestinationCandidates(countryCode: CandidateCountry, 
     const hasValidWikidataId = /^Q[1-9]\d*$/.test(lastWikidataId ?? "");
 
     if (cursorCountryCode !== countryCode || !hasValidWikidataId || extraParts.length > 0) {
-      throw new Error("Use a valid resume cursor for the selected country.");
+      throw new CatalogueImportError("Use a valid resume cursor for the selected country.");
     }
 
     previousPlaceUrl = `http://www.wikidata.org/entity/${lastWikidataId}`;
@@ -143,7 +148,7 @@ export async function fetchDestinationCandidates(countryCode: CandidateCountry, 
     const placeUrl = destination.place.value;
 
     if (placeUrl <= previousPlaceUrl) {
-      throw new Error("Destination source did not advance in the requested order. No records imported.");
+      throw new CatalogueImportError("Destination source did not advance in the requested order. No records imported.");
     }
 
     previousPlaceUrl = placeUrl;
@@ -169,6 +174,10 @@ export async function fetchDestinationCandidates(countryCode: CandidateCountry, 
       const pageTitle = decodeURIComponent(encodedTitle).replaceAll("_", " ");
       const wikidataId = destination.place.value.replace("http://www.wikidata.org/entity/", "");
 
+      if (expectedWikidataIds.has(pageTitle)) {
+        throw new CatalogueImportError("Ambiguous destination identities share a source title. No records imported.");
+      }
+
       expectedWikidataIds.set(pageTitle, wikidataId);
     }
 
@@ -178,6 +187,7 @@ export async function fetchDestinationCandidates(countryCode: CandidateCountry, 
     wikivoyageUrl.search = new URLSearchParams({
       action: "query",
       format: "json",
+      redirects: "1",
       titles: pageTitles.join("|"),
       prop: "pageprops|coordinates|categories|revisions",
       ppprop: "wikibase_item",
@@ -193,7 +203,37 @@ export async function fetchDestinationCandidates(countryCode: CandidateCountry, 
     const validatedResponse = wikivoyageResponseSchema.parse(wikivoyageResponse);
 
     if (validatedResponse.continue) {
-      throw new Error("Incomplete destination source response. No records imported.");
+      throw new CatalogueImportError("Incomplete destination source response. No records imported.");
+    }
+
+    const titleChanges = new Map<string, string>();
+    const changes = [...(validatedResponse.query.normalized ?? []), ...(validatedResponse.query.redirects ?? [])];
+
+    for (const change of changes) {
+      if (titleChanges.has(change.from)) {
+        throw new CatalogueImportError("Ambiguous destination title changes. No records imported.");
+      }
+      titleChanges.set(change.from, change.to);
+    }
+
+    const resolvedIdentities = new Map<string, string>();
+
+    for (const [requestedTitle, wikidataId] of expectedWikidataIds) {
+      let resolvedTitle = requestedTitle;
+      const visitedTitles = new Set<string>();
+
+      while (titleChanges.has(resolvedTitle)) {
+        if (visitedTitles.has(resolvedTitle)) {
+          throw new CatalogueImportError("Circular destination redirect. No records imported.");
+        }
+        visitedTitles.add(resolvedTitle);
+        resolvedTitle = titleChanges.get(resolvedTitle)!;
+      }
+
+      if (resolvedIdentities.has(resolvedTitle)) {
+        throw new CatalogueImportError("Ambiguous destination identities share a redirect target. No records imported.");
+      }
+      resolvedIdentities.set(resolvedTitle, wikidataId);
     }
 
     for (const sourcePage of Object.values(validatedResponse.query.pages)) {
@@ -208,9 +248,15 @@ export async function fetchDestinationCandidates(countryCode: CandidateCountry, 
       const categories = new Set(page.categories.map((category) => category.title));
       const guideStatus = getGuideStatus(categories);
       const isCityArticle = categories.has("Category:City articles");
-      const expectedWikidataId = expectedWikidataIds.get(page.title);
+      const expectedWikidataId = resolvedIdentities.get(page.title);
       const wikidataId = page.pageprops.wikibase_item;
       const hasMatchingIdentity = expectedWikidataId === wikidataId;
+
+      if (expectedWikidataId && !hasMatchingIdentity) {
+        throw new CatalogueImportError(
+          `Destination identity changed from ${expectedWikidataId} to ${wikidataId}. Review the source; no records imported.`,
+        );
+      }
 
       if (!guideStatus || !isCityArticle || !hasMatchingIdentity) {
         skippedCount++;
@@ -240,7 +286,7 @@ export async function fetchDestinationCandidates(countryCode: CandidateCountry, 
   const uniqueDestinationIds = new Set(candidates.map((candidate) => candidate.id));
 
   if (uniqueDestinationIds.size !== candidates.length) {
-    throw new Error("Ambiguous destination identities. No records imported.");
+    throw new CatalogueImportError("Ambiguous destination identities. No records imported.");
   }
 
   const truncated = sourceDestinations.length > limit;
@@ -257,7 +303,7 @@ export async function fetchDestinationCandidates(countryCode: CandidateCountry, 
   return {
     candidates,
     scanned: selectedDestinations.length,
-    skipped: skippedCount,
+    skipped: Math.max(skippedCount, selectedDestinations.length - candidates.length),
     truncated,
     nextCursor,
   };

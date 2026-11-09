@@ -1,4 +1,5 @@
 /** @jest-environment node */
+import lisboaRedirect from "../testing/lisboa-redirect.json";
 import { fetchDestinationCandidates } from "./fetchCandidates";
 
 const originalFetch = global.fetch;
@@ -56,8 +57,11 @@ it("joins country-scoped Wikidata identities to usable travel destinations witho
   expect(sourceFetch).toHaveBeenCalledTimes(2);
 });
 
-it("does not turn countries, incomplete guides or mismatched identities into candidates", async () => {
-  mockSourceResponses([{ ...createWikivoyagePage(), categories: [{ title: "Category:Usable countries" }] }, createWikivoyagePage("Q1")]);
+it("does not turn countries or incomplete guides into candidates", async () => {
+  mockSourceResponses([
+    { ...createWikivoyagePage(), categories: [{ title: "Category:Usable countries" }] },
+    { ...createWikivoyagePage(), categories: [{ title: "Category:City articles" }] },
+  ]);
   expect(await fetchDestinationCandidates("PT", 50, "test")).toMatchObject({ candidates: [], skipped: 2 });
 });
 
@@ -144,4 +148,74 @@ it("finishes on an exactly full final page without inventing another cursor", as
   const finalPage = await fetchDestinationCandidates("PT", 1, "test", "PT:Q20");
 
   expect(finalPage).toMatchObject({ scanned: 1, truncated: false, nextCursor: null });
+});
+
+it("follows normalized titles and redirects only when the destination identity still matches", async () => {
+  sourceFetch.mockResolvedValueOnce(Response.json({ results: { bindings: [createWikidataResult("Q159457", "old_faro")] } }));
+  sourceFetch.mockResolvedValueOnce(
+    Response.json({
+      query: {
+        normalized: [{ from: "old faro", to: "Old faro" }],
+        redirects: [{ from: "Old faro", to: "Faro" }],
+        pages: { "11446": createWikivoyagePage() },
+      },
+    }),
+  );
+
+  const result = await fetchDestinationCandidates("PT", 50, "test");
+  expect(result.candidates).toEqual([
+    expect.objectContaining({ id: "wikidata:Q159457", name: "Faro", sourceUrl: "https://en.wikivoyage.org/wiki/Faro" }),
+  ]);
+  expect(new URL(String(sourceFetch.mock.calls[1][0])).searchParams.get("redirects")).toBe("1");
+});
+
+it("stops on a changed Wikidata identity instead of silently skipping it", async () => {
+  mockSourceResponses([createWikivoyagePage("Q597")]);
+  await expect(fetchDestinationCandidates("PT", 50, "test")).rejects.toThrow("identity changed");
+});
+
+it("rejects ambiguous redirect targets and circular redirects rather than merging distinct places", async () => {
+  sourceFetch.mockResolvedValueOnce(
+    Response.json({ results: { bindings: [createWikidataResult("Q10", "First"), createWikidataResult("Q20", "Second")] } }),
+  );
+  sourceFetch.mockResolvedValueOnce(
+    Response.json({
+      query: {
+        redirects: [
+          { from: "First", to: "Faro" },
+          { from: "Second", to: "Faro" },
+        ],
+        pages: { "1": createWikivoyagePage() },
+      },
+    }),
+  );
+  await expect(fetchDestinationCandidates("PT", 50, "test")).rejects.toThrow("share a redirect target");
+
+  sourceFetch.mockResolvedValueOnce(Response.json({ results: { bindings: [createWikidataResult("Q10", "First")] } }));
+  sourceFetch.mockResolvedValueOnce(
+    Response.json({
+      query: {
+        redirects: [
+          { from: "First", to: "Second" },
+          { from: "Second", to: "First" },
+        ],
+        pages: {},
+      },
+    }),
+  );
+  await expect(fetchDestinationCandidates("PT", 50, "test")).rejects.toThrow("Circular");
+});
+
+it("reports source records omitted from the detail response as skipped coverage", async () => {
+  mockSourceResponses([], [createWikidataResult("Q159457", "Faro")]);
+  expect(await fetchDestinationCandidates("PT", 50, "test")).toMatchObject({ scanned: 1, skipped: 1, candidates: [] });
+});
+
+it("uses an actual Wikivoyage redirect response without changing the destination identity", async () => {
+  sourceFetch.mockResolvedValueOnce(Response.json({ results: { bindings: [createWikidataResult("Q597", "Lisboa")] } }));
+  sourceFetch.mockResolvedValueOnce(Response.json(lisboaRedirect));
+  const result = await fetchDestinationCandidates("PT", 50, "test");
+  expect(result.candidates).toEqual([
+    expect.objectContaining({ id: "wikidata:Q597", name: "Lisbon", wikivoyagePageId: 19798, sourceRevisionId: 5409287 }),
+  ]);
 });

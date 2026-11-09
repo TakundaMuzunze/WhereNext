@@ -1,0 +1,21 @@
+{
+  "batchcomplete": "",
+  "query": {
+    "redirects": [{ "from": "Lisboa", "to": "Lisbon" }],
+    "pages": {
+      "19798": {
+        "pageid": 19798,
+        "ns": 0,
+        "title": "Lisbon",
+        "pageprops": { "wikibase_item": "Q597" },
+        "coordinates": [{ "lat": 38.7071, "lon": -9.1353, "primary": "", "globe": "earth" }],
+        "categories": [
+          { "ns": 14, "title": "Category:City articles" },
+          { "ns": 14, "title": "Category:Guide cities" }
+        ],
+        "revisions": [{ "revid": 5409287, "parentid": 5390961 }]
+      }
+    }
+  },
+  "limits": { "coordinates": 500 }
+}

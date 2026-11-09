@@ -67,3 +67,32 @@ it("enforces coordinate bounds in the database", async () => {
   await expect(persistCandidates(pool, [{ ...faro, latitude: 91 }])).rejects.toThrow();
   expect((await pool.query('SELECT COUNT(*)::int AS count FROM "DestinationCandidate"')).rows).toEqual([{ count: 0 }]);
 });
+
+it("preserves saved identities through page renames and reports conflicting page ownership", async () => {
+  await persistCandidates(pool, [faro]);
+  await pool.query(
+    `INSERT INTO "User" ("id", "name", "email", "emailVerified", "updatedAt") VALUES ('catalogue-refresh-user', 'Refresh test', 'catalogue-refresh@example.test', false, CURRENT_TIMESTAMP)`,
+  );
+  await pool.query(`INSERT INTO "Shortlist" ("id", "userId", "shortlistName") VALUES ('catalogue-refresh-list', 'catalogue-refresh-user', 'Places')`);
+  await pool.query(
+    `INSERT INTO "ShortlistItem" ("id", "shortlistId", "destinationId") VALUES ('catalogue-refresh-item', 'catalogue-refresh-list', $1)`,
+    [faro.id],
+  );
+  await persistCandidates(pool, [
+    { ...faro, name: "Renamed Faro", wikivoyagePageId: 11447, sourceUrl: "https://en.wikivoyage.org/wiki/Renamed_Faro" },
+  ]);
+
+  await expect(persistCandidates(pool, [{ ...faro, id: "wikidata:Q597", wikidataId: "Q597", wikivoyagePageId: 11447 }])).rejects.toThrow(
+    "identity conflict",
+  );
+  expect((await pool.query('SELECT "id", "name" FROM "DestinationCandidate"')).rows).toEqual([{ id: faro.id, name: "Renamed Faro" }]);
+  expect((await pool.query('SELECT "destinationId" FROM "ShortlistItem" WHERE "id" = $1', ["catalogue-refresh-item"])).rows).toEqual([
+    { destinationId: faro.id },
+  ]);
+});
+
+it("retains the existing country when source country assignments overlap", async () => {
+  await persistCandidates(pool, [faro]);
+  await expect(persistCandidates(pool, [{ ...faro, countryCode: "ES" }])).rejects.toThrow("identity conflict");
+  expect((await pool.query('SELECT "countryCode" FROM "DestinationCandidate"')).rows).toEqual([{ countryCode: "PT" }]);
+});
