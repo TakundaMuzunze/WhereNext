@@ -60,10 +60,11 @@ try {
          "completedAt" AT TIME ZONE 'UTC' AS "completedAt" FROM "CatalogueRefresh" WHERE "countryCode" = $1`,
         [country],
       );
+      const escapedCountry = country.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       const checkpointSchema = z.object({
         cursor: z
           .string()
-          .regex(new RegExp(`^${country}:Q[1-9]\\d*$`))
+          .regex(new RegExp(`^${escapedCountry}:Q[1-9]\\d*$`))
           .nullable(),
         cycleStartedAt: z.date(),
         completedAt: z.date().nullable(),
