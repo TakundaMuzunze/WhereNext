@@ -1,6 +1,8 @@
 # Destination catalogue refresh
 
-Implemented for #38 on 7 November 2026. GitHub owns acceptance/progress; this document records the source contract and rollout. No hosted migration, scheduled run or production catalogue write was performed during implementation.
+Implemented for #38 on 7 November 2026. GitHub owns acceptance/progress; this document records the source contract and rollout. The production migration was applied on 9 November. The first hosted Portugal preview stopped before writes on regional redirects; production apply and checkpoint resumption remain unverified.
+
+The corrected code passed a local production preview on 9 November: 50 records scanned, 29 eligible destinations, 21 skipped, zero saved, next cursor `PT:Q18355583`. This does not verify the hosted workflow until the fix is merged and rerun.
 
 ## Source and identity
 
@@ -13,9 +15,10 @@ Actual checks on 7 November: a two-record Portugal preview returned Castelo de V
 Identity handling follows the [MediaWiki query contract](https://www.mediawiki.org/wiki/API:Query#Resolving_redirects):
 
 - Follow reported title normalization/redirects, then require the same Wikidata identity. Names, URLs and page IDs can update without replacing application IDs or saved references.
-- Reject circular redirects, multiple identities sharing titles/redirect targets, changed Wikidata ownership, stored page collisions and conflicting country assignments. The failed page and checkpoint roll back together, with an identifying error for review.
+- Exclude incomplete and non-city guides before matching identities. If a requested article redirects to another destination's guide, count that source record as skipped coverage. Only the guide's matching Wikidata identity can become a candidate; never use the redirect to replace or merge destinations.
+- Reject circular redirects, conflicting title mappings, duplicate source identities, stored page collisions and conflicting country assignments. The failed page and checkpoint roll back together, with an identifying error for review.
 - Retain existing places after missing, incomplete, empty or failed updates. Never automatically merge Wikidata items, rewrite private shortlist identities, or deduplicate solely by coordinate proximity.
-- An identity conflict needs review/correction of the source association before retrying. Deleting saved places or resetting IDs is not a recovery procedure.
+- A stored identity conflict needs review/correction of the source association before retrying. Skipped source records leave existing destinations and saved references untouched. Deleting saved places or resetting IDs is not a recovery procedure.
 
 ## Monthly cycles and bounded work
 
@@ -49,4 +52,4 @@ Catalogue refresh does not fetch photos, nearby activities or climate cells. New
 
 ## Verification
 
-Source tests cover normalization/redirects, changed identities, ambiguous targets, cycles, malformed metadata, bounds and cursors. Disposable PostgreSQL command tests cover preview/apply, checkpoint resumption, monthly cycles, source/identity failure rollback, and shared manual/scheduled locking. Saved identities survive page updates. Guarded fixtures replace external responses and the fixed pacing delay; CI makes no Wikimedia requests. Workflow validation does not trigger hosted execution.
+Source tests cover normalization/redirects, skipped regional guides and mismatched identities, retained matching cities, cycles, malformed metadata, bounds and cursors. Disposable PostgreSQL command tests cover preview/apply, checkpoint resumption, monthly cycles, source/identity failure rollback, and shared manual/scheduled locking. Saved identities survive page updates. Guarded fixtures replace external responses and the fixed pacing delay; CI makes no Wikimedia requests. Workflow validation does not trigger hosted execution.
