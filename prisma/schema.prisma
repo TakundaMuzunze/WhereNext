@@ -173,3 +173,12 @@ model SeasonalClimate {
   observation Json
   retrievedAt DateTime
 }
+
+// One resumable monthly catalogue cycle per supported country.
+model CatalogueRefresh {
+  countryCode    String    @id @db.VarChar(2)
+  cursor         String?
+  cycleStartedAt DateTime
+  completedAt    DateTime?
+  updatedAt      DateTime  @updatedAt
+}
