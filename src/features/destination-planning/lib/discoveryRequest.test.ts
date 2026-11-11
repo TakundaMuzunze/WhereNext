@@ -69,3 +69,11 @@ it("round-trips an optional airport and rejects unsupported or repeated airport 
   expect(parseDiscoveryRequest({ ...query, departureAirportCode: "XXX" })).toBeNull();
   expect(parseDiscoveryRequest({ ...query, departureAirportCode: ["MAN", "LHR"] })).toBeNull();
 });
+
+it("round-trips discovery with no budget rather than inventing a planning amount", () => {
+  const withoutBudget = { ...query, budget: undefined };
+  const request = parseDiscoveryRequest(withoutBudget);
+  expect(request).not.toBeNull();
+  expect(request).not.toHaveProperty("groupBudgetPence");
+  expect(new URLSearchParams(serializeDiscoveryRequest(request!)).has("budget")).toBe(false);
+});

@@ -61,14 +61,18 @@ export function DiscoveryPlannerSummary({ draft }: { draft: DiscoveryPlannerDraf
           <dt className="text-muted">Your people</dt>
           <dd>{Number.isInteger(adults) && adults >= 1 && adults <= 9 ? `${adults} ${adults === 1 ? "adult" : "adults"}` : "1–9 adults"}</dd>
         </div>
-        <div className="flex justify-between gap-4">
-          <dt className="text-muted">Group budget</dt>
-          <dd>{budget !== undefined && budget >= 100 && budget <= 10_000_000 ? formatTripMoney(budget) : "Your call"}</dd>
-        </div>
-        <div className="flex justify-between gap-4">
-          <dt className="text-muted">Flying from</dt>
-          <dd className="text-right">{departureAirportLabel(draft.departureAirportCode || undefined)}</dd>
-        </div>
+        {budget !== undefined && (
+          <div className="flex justify-between gap-4">
+            <dt className="text-muted">Saved budget</dt>
+            <dd>{formatTripMoney(budget)}</dd>
+          </div>
+        )}
+        {draft.departureAirportCode && (
+          <div className="flex justify-between gap-4">
+            <dt className="text-muted">Saved airport</dt>
+            <dd>{departureAirportLabel(draft.departureAirportCode)}</dd>
+          </div>
+        )}
       </dl>
       <p className="mt-6 border-t border-border pt-5 text-xs leading-6 text-muted">
         Your destination is still open. That’s what we’re here to help with.

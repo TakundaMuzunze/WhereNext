@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 const request = "kind=discovery&timing=month&nights=7&adults=2&budget=200050&month=2027-07&activity=Beaches&activity=Rooftop+drinks";
 
-test("guides a new discovery through interests, timing and budget with keyboard focus", async ({ page }) => {
+test("guides a new discovery through assessable interests and timing with keyboard focus", async ({ page }) => {
   await page.goto("/planner");
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(page.getByRole("form", { name: "Plan your discovery" }).getByRole("alert")).toBeFocused();
@@ -13,18 +13,17 @@ test("guides a new discovery through interests, timing and budget with keyboard 
   await page.getByLabel("Timing", { exact: true }).selectOption("month");
   await page.getByLabel("Preferred month").fill("2027-07");
   await page.getByLabel("Approximate nights").fill("7");
-  await page.getByLabel("Departure airport").selectOption("MAN");
-  await page.getByRole("button", { name: "Continue", exact: true }).click();
-  await page.getByLabel("Group budget (GBP)").fill("2000.50");
+  await expect(page.getByLabel("Departure airport")).toHaveCount(0);
+  await expect(page.getByLabel("Group budget (GBP)")).toHaveCount(0);
   // Isolate navigation from catalogue/DB availability.
   await page.route("**/results?**", (route) => route.fulfill({ contentType: "text/html", body: "<h1>Discovery results</h1>" }));
   await page.getByRole("button", { name: "Discover places", exact: true }).click();
   await expect(page).toHaveURL(
     (url) =>
       url.pathname === "/results" &&
-      url.searchParams.get("budget") === "200050" &&
+      !url.searchParams.has("budget") &&
       url.searchParams.get("activity") === "Museums" &&
-      url.searchParams.get("departureAirportCode") === "MAN",
+      !url.searchParams.has("departureAirportCode"),
   );
 });
 
@@ -37,8 +36,7 @@ test("preserves an edited trip and derives cross-year nights on mobile", async (
   await page.getByLabel("Timing", { exact: true }).selectOption("exact");
   await page.getByLabel("Departure date").fill("2027-12-28");
   await page.getByLabel("Return date").fill("2028-01-04");
-  await page.getByRole("button", { name: "Continue", exact: true }).click();
-  await expect(page.getByLabel("Group budget (GBP)")).toHaveValue("2000.50");
+  await expect(page.getByLabel("Group budget (GBP)")).toHaveCount(0);
   await page.getByText("Your trip taking shape", { exact: false }).click();
   const summary = page.getByRole("complementary", { name: "Your holiday taking shape" });
   await expect(summary).toContainText("7 nights");
@@ -58,7 +56,7 @@ test("shows a live desktop brief and keeps invalid dates on their step", async (
   await page.getByLabel("Timing", { exact: true }).selectOption("exact");
   await page.getByLabel("Departure date").fill("2027-07-20");
   await page.getByLabel("Return date").fill("2027-07-19");
-  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByRole("button", { name: "Discover places", exact: true }).click();
   await expect(page.getByRole("form", { name: "Plan your discovery" }).getByRole("alert")).toContainText("Exact dates must be 1–28 nights apart");
   await expect(page.getByLabel("Departure date")).toBeVisible();
 });
