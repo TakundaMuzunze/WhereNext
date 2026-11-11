@@ -28,6 +28,8 @@ A failed database batch rolls back and exits nonzero. Verify the error before re
 
 ## Operational status
 
+Hosted operation verified on 9 November 2026: scheduled runs on 7–9 November succeeded using the configured maintenance connection. The [latest checked run](https://github.com/TakundaMuzunze/WhereNext/actions/runs/42612238458) applied all four provider checks with zero eligible rows and no backlog. A production read also found zero reservations. Disposable tests verify actual deletions and unchanged allowances; no artificial production deletion was needed. The implementation-time statements below describe what had not yet been run when the runner was introduced.
+
 The single-provider command remains manual. `.github/workflows/provider-reservation-cleanup.yml` adds a daily scheduled run at 03:23 UTC and a manual Actions run that previews by default. The workflow only runs from `main`; it does not run on pull requests or pushes. Once merged and configured, scheduled runs apply cleanup automatically. No hosted workflow or production cleanup was run during implementation.
 
 The scheduled runner processes Geoapify, GeoNames, Travelpayouts and dormant SerpApi records sequentially. Each provider gets at most ten batches of 1,000 records. It stops early when no eligible records remain. Preview only inspects one batch per provider. A database failure stops that provider while other providers are still checked. A remaining backlog after ten batches also makes the run fail, rather than silently reporting completion. Previously committed batches remain applied; rerunning requires no cursor.

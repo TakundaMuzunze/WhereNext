@@ -4,7 +4,7 @@ The activity evidence POST endpoint is public. Shared provider ceilings protect 
 
 ## Policy
 
-- Applies to POST requests matching `/api/destinations/*/activities`, across destination IDs on the same domain.
+- Applies to POST paths ending in `/activities` (`/*/activities`), across destination IDs on the same domain. The broader prefix covers repeated-slash aliases that Netlify can route without a canonical redirect; authentication and saving paths do not match.
 - Starts at 10 requests per 60 seconds, aggregated by client IP and domain.
 - Netlify blocks excess requests with HTTP 429. The activity panel explains that the visitor should wait a minute before trying again, preserves previous evidence and retrieval times, and leaves saving available.
 - Allowed requests continue to Next.js without the edge handler reading the body or changing the response. There is no local counter, database write, additional API key or SDK dependency.
@@ -15,7 +15,7 @@ This is a deployment policy, not a new provider quota. It counts activity reques
 
 The starting threshold is an operational choice, not a measured capacity benchmark. Users sharing a network share the IP limit, and a visitor changing IPs or domains may get separate allowances. Netlify documents an enforcement delay of up to ten seconds after crossing the threshold, so some additional requests can reach the app. This cannot guarantee fair access against distributed abuse or replace provider quotas. No claim of exact per-user accounting is made.
 
-The rule targets activity checks. The preserved legacy `/api/discovery` endpoint is outside this rule and retains its separate origin and shared provider safeguards. Before a broader public release, review whether that legacy endpoint should be retired or receive its own deployment policy. Catalogue reads and saving do not call activity providers.
+The rule targets activity checks, including nonexistent routes with the same suffix. The legacy `/api/discovery` endpoint is retired with HTTP 410 and cannot contact providers. Catalogue reads and saving do not call activity providers.
 
 Netlify currently supports code-based rules on all plans; free projects have a limited rule allowance. This uses one rule. Edge execution and normal site traffic remain subject to the existing hosting plan limits; no paid service or upgrade was enabled. See [Netlify rate limiting](https://docs.netlify.com/manage/security/secure-access-to-sites/rate-limiting/) and [edge request-chain behaviour](https://docs.netlify.com/build/edge-functions/api/#modify-a-response).
 
@@ -29,4 +29,4 @@ Local verification covers the exported policy and the browser response to a plai
 4. Confirm the UI's message, previous evidence, saving and trip context remain usable, then verify checks recover after the restriction clears. Confirm normal destination navigation is unaffected.
 5. Verify a separate network is independently counted if available. Review route aliases/trailing-slash canonicalisation and any adapter-exposed internal routes; do not declare hosted protection complete if a public alternate entry bypasses the intended path rule.
 
-No production deployment, hosted enforcement test or provider-capacity benchmark was performed during implementation. #43 remains open for hosted verification, the legacy-entry decision and free-capacity assessment.
+The earlier narrow rule was observed on production and returned 429 for canonical, encoded and trailing-slash requests on 9 November. A repeated-slash alias still reached validation, motivating the broader prefix in this branch. Verify the updated deployment rule and that alias after merge. [The resilience audit](discovery-resilience.md) records the hosted checks, cleanup evidence and free-capacity assessment; this is not a load benchmark.

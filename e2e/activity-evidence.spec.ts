@@ -159,6 +159,50 @@ test("retains previous evidence after a failed retry and replaces it on recovery
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
+test("keeps mobile saving independent while activity evidence loads and returns partial coverage", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const shortlists = await mockShortlists(page, []);
+  let releaseEvidence = () => {};
+  const evidencePending = new Promise<void>((resolve) => {
+    releaseEvidence = resolve;
+  });
+
+  await page.route("**/api/destinations/*/activities", async (route) => {
+    await evidencePending;
+    return route.fulfill({
+      json: {
+        destinationId: "wikidata:Q159457",
+        assessments: [
+          { activity: "Museums", status: "supported", reason: "named_places", places: museumObservation.places, observation: museumObservation },
+          { activity: "Swimming", status: "unknown", reason: "unsupported_interest", places: [], observation: null },
+        ],
+      },
+    });
+  });
+
+  try {
+    await page.goto(`/destinations/wikidata:Q159457?${plannerQuery}`);
+    await page.getByRole("button", { name: "Check nearby activity evidence" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Checking the requested interests" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Checking activity evidence…" })).toBeDisabled();
+
+    await page.getByRole("button", { name: "Save destination", exact: true }).click();
+    await page.getByLabel("Shortlist name").fill("Museum ideas");
+    await page.getByRole("button", { name: "Save changes", exact: true }).click();
+    await expect(page.getByRole("button", { name: "Saved", exact: true })).toBeVisible();
+    expect(shortlists.writes).toBeGreaterThan(0);
+
+    releaseEvidence();
+    await expect(page.getByRole("heading", { name: "Museums: evidence found nearby" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Swimming: unknown" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Saved", exact: true })).toBeEnabled();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    await page.screenshot({ path: test.info().outputPath("activity-partial-saving-mobile.png"), fullPage: true });
+  } finally {
+    releaseEvidence();
+  }
+});
+
 test("preserves a legacy guide when activity geography is unknown", async ({ page }) => {
   await mockShortlists(page);
   await page.route("**/api/destinations/*/activities", (route) =>

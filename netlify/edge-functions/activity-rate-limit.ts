@@ -4,7 +4,8 @@ export default function activityRateLimit(): void {
 }
 
 export const config = {
-  path: "/api/destinations/*/activities",
+  // Netlify may route repeated-slash aliases without redirecting to the canonical API path.
+  path: "/*/activities",
   method: "POST",
   rateLimit: {
     action: "rate_limit",

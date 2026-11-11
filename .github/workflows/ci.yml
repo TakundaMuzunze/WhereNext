@@ -10,7 +10,7 @@ on:
 jobs:
   quality:
     name: Quality checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -88,7 +88,7 @@ jobs:
 
       - name: Install Playwright browser
         if: steps.changes.outputs.code_changed == 'true'
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: Run end-to-end tests
         if: steps.changes.outputs.code_changed == 'true'

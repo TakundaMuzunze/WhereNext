@@ -100,6 +100,33 @@ test("dated planner and review fit a mobile screen", async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
+test("continues dated requests through destination-first discovery without the retired search", async ({ page, request }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockShortlists(page);
+  await page.goto("/planner?kind=dated");
+  const date = await complete(page);
+  await showStep(page, "Your style");
+  await page.getByRole("button", { name: "Review trip request" }).click();
+
+  await expect(page.getByRole("button", { name: "Find destinations", exact: true })).toHaveCount(0);
+  await expect(page.getByLabel("Your dated trip request")).toContainText("MAN");
+  await page.getByRole("link", { name: "Explore destinations for these dates", exact: true }).click();
+
+  await expect(page.getByRole("heading", { name: "Places to explore" })).toBeVisible();
+  const query = new URL(page.url()).searchParams;
+  expect(query.get("kind")).toBe("discovery");
+  expect(query.get("outbound")).toBe(date.outbound);
+  expect(query.get("return")).toBe(date.returning);
+  expect(query.get("adults")).toBe("2");
+  expect(query.get("budget")).toBe("200050");
+  expect(query.getAll("activity")).toEqual(["Museums"]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+
+  const retired = await request.post("/api/discovery", { data: { kind: "dated" } });
+  expect(retired.status()).toBe(410);
+  await page.screenshot({ path: test.info().outputPath("dated-discovery-mobile.png"), fullPage: true });
+});
+
 test("dated sign-in continuation restores context and opens the picker without saving", async ({ page }) => {
   const state = await mockShortlists(page, []);
   state.signedIn = false;
