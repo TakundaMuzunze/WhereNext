@@ -34,7 +34,7 @@ async function complete(page: Page) {
 
 test("dated request survives review, edits, guide navigation and sign-in cancellation", async ({ page }) => {
   await page.goto("/planner");
-  await page.getByRole("link", { name: "Open the existing dated travel planner" }).click();
+  await page.getByRole("link", { name: "Plan with an airport and dates" }).click();
   const date = await complete(page);
   await showStep(page, "Your style");
   await page.getByRole("button", { name: "Review trip request" }).click();

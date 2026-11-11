@@ -116,7 +116,7 @@ export async function DiscoveryResults({
     result = await getDiscoveryResults(request);
   } catch {
     return (
-      <main className="mx-auto min-h-screen max-w-5xl px-6 pt-28 pb-20 text-text">
+      <main className="mx-auto min-h-screen max-w-6xl px-6 pt-28 pb-20 text-text">
         <h1 className="font-serif text-4xl">Destinations are temporarily unavailable</h1>
         <div className="mt-6">
           <DiscoveryRequestSummary request={request} />
@@ -155,7 +155,7 @@ export async function DiscoveryResults({
   const visibleCandidates = selectedCandidates.slice(firstIndex, firstIndex + pageSize);
 
   return (
-    <main className="mx-auto min-h-screen max-w-5xl px-6 pt-28 pb-20 text-text">
+    <main className="mx-auto min-h-screen max-w-6xl px-6 pt-28 pb-20 text-text">
       <h1 className="font-serif text-4xl">Places to explore</h1>
       <div className="mt-6">
         <DiscoveryRequestSummary request={request} />
@@ -264,7 +264,7 @@ export async function DiscoveryResults({
           )}
         </section>
       )}
-      <div className="mt-4 grid gap-5 md:grid-cols-2">
+      <div className="mt-4 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         {visibleCandidates.map((destination) => (
           <DestinationResult key={destination.id} destination={destination} query={query} />
         ))}
