@@ -1,6 +1,5 @@
 import { DiscoveryResults } from "@/features/destination-planning/ui/DiscoveryResults";
-import { parseDiscoveryRequest } from "@/features/destination-planning/lib/discoveryRequest";
-import { DiscoveryPanel } from "@/features/destination-discovery/ui/DiscoveryPanel";
+import { parseDiscoveryRequest, serializeDiscoveryRequest } from "@/features/destination-planning/lib/discoveryRequest";
 import { formatTripDate } from "@/features/trip-planner/ui/DatedTripSummary";
 import { DatedTripReview } from "@/features/trip-planner/ui/DatedTripReview";
 import { parseDatedTripRequest, serializeDatedTripRequest, tripNights } from "@/features/trip-planner/lib/datedPlannerSearchParams";
@@ -59,6 +58,14 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
       );
     const requestQuery = serializeDatedTripRequest(request);
     const nights = tripNights(request);
+    const discoveryQuery = serializeDiscoveryRequest({
+      kind: "discovery",
+      timing: { kind: "exact", outboundDate: request.outboundDate, returnDate: request.returnDate },
+      approximateNights: nights,
+      adultCount: request.adultCount,
+      groupBudgetPence: request.groupBudgetPence,
+      activities: request.preferences.activities,
+    });
     const group = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"][request.adultCount];
     return (
       <main className="mx-auto min-h-screen max-w-5xl space-y-8 px-6 py-28 text-text">
@@ -72,7 +79,21 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
           </p>
         </header>
         <DatedTripReview request={request} />
-        <DiscoveryPanel key={requestQuery} request={request} />
+        <section aria-labelledby="destination-first-heading">
+          <h2 id="destination-first-heading" className="font-serif text-3xl">
+            Choose a destination first
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
+            Explore destinations using your dates, group budget and interests. Flight and accommodation prices have not been checked. Your departure
+            airport and spending allowance remain in the dated request above.
+          </p>
+          <Link
+            href={`/results?${discoveryQuery}`}
+            className="mt-5 inline-flex min-h-11 cursor-pointer items-center rounded-xl bg-primary px-5 py-3 text-primary-foreground"
+          >
+            Explore destinations for these dates
+          </Link>
+        </section>
         <section aria-label="Destination guides">
           <h2 className="font-serif text-3xl tracking-tight">A little inspiration for what comes next</h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
