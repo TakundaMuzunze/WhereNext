@@ -60,3 +60,12 @@ it("preserves interests through edits and sign-in metadata without accepting dup
   const request = parseDiscoveryRequest({ ...query, resumeSave: "journey", activity: ["Museums", "Museums", "Swimming"] });
   expect(request?.activities).toEqual(["Museums", "Swimming"]);
 });
+
+it("round-trips an optional airport and rejects unsupported or repeated airport fields", () => {
+  const request = parseDiscoveryRequest({ ...query, departureAirportCode: "MAN" });
+  expect(request?.departureAirportCode).toBe("MAN");
+  const params = new URLSearchParams(serializeDiscoveryRequest(request!));
+  expect(parseDiscoveryRequest({ ...Object.fromEntries(params), activity: params.getAll("activity") })).toEqual(request);
+  expect(parseDiscoveryRequest({ ...query, departureAirportCode: "XXX" })).toBeNull();
+  expect(parseDiscoveryRequest({ ...query, departureAirportCode: ["MAN", "LHR"] })).toBeNull();
+});

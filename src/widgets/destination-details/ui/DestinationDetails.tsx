@@ -1,3 +1,5 @@
+import { DestinationTravelPanel } from "@/features/destination-planning/ui/DestinationTravelPanel";
+import { serializeDiscoveryRequest } from "@/features/destination-planning/lib/discoveryRequest";
 import type { Destination, DestinationRecommendation } from "@/entities/destination";
 import type { PlannerAnswers } from "@/entities/trip/model/types";
 import { DestinationActivityEvidence } from "@/features/destination-activities/ui/DestinationActivityEvidence";
@@ -119,6 +121,10 @@ export function DestinationDetails({
 
       {discoveryRequest && (
         <SeasonalEvidence guidance={seasonalGuidance ?? assessSeason(null, discoveryRequest?.timing ?? { kind: "flexible" }, activities ?? [])} />
+      )}
+
+      {discoveryRequest && (
+        <DestinationTravelPanel key={serializeDiscoveryRequest(discoveryRequest)} destinationName={destination.name} request={discoveryRequest} />
       )}
 
       <div className="mt-10 grid gap-10 md:grid-cols-[1.2fr_0.8fr]">

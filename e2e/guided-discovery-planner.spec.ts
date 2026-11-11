@@ -13,13 +13,18 @@ test("guides a new discovery through interests, timing and budget with keyboard 
   await page.getByLabel("Timing", { exact: true }).selectOption("month");
   await page.getByLabel("Preferred month").fill("2027-07");
   await page.getByLabel("Approximate nights").fill("7");
+  await page.getByLabel("Departure airport").selectOption("MAN");
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page.getByLabel("Group budget (GBP)").fill("2000.50");
   // Isolate navigation from catalogue/DB availability.
   await page.route("**/results?**", (route) => route.fulfill({ contentType: "text/html", body: "<h1>Discovery results</h1>" }));
   await page.getByRole("button", { name: "Discover places", exact: true }).click();
   await expect(page).toHaveURL(
-    (url) => url.pathname === "/results" && url.searchParams.get("budget") === "200050" && url.searchParams.get("activity") === "Museums",
+    (url) =>
+      url.pathname === "/results" &&
+      url.searchParams.get("budget") === "200050" &&
+      url.searchParams.get("activity") === "Museums" &&
+      url.searchParams.get("departureAirportCode") === "MAN",
   );
 });
 

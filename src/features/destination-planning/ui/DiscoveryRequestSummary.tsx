@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { departureAirportLabel } from "@/entities/trip/model/departureAirport";
 import type { DiscoveryRequest } from "../model/discoveryRequest";
 import { serializeDiscoveryRequest } from "../lib/discoveryRequest";
 import { formatTripDate, formatTripMoney } from "@/features/trip-planner/ui/DatedTripSummary";
@@ -32,6 +33,7 @@ export function DiscoveryRequestSummary({ request }: { request: DiscoveryRequest
             {" "}
             · {formatTripMoney(request.groupBudgetPence)} group budget · {timingLabel}
           </span>
+          <span className="mt-1 block text-xs text-muted">Flying from: {departureAirportLabel(request.departureAirportCode)}</span>
         </p>
         <Link href={editHref} className="inline-flex min-h-11 cursor-pointer items-center text-sm text-primary underline">
           Edit request

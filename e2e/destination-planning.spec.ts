@@ -4,7 +4,7 @@ import { discoveryInterests } from "../src/features/destination-planning/model/d
 
 test.skip(process.env.IMPORTED_DESTINATION_TESTS !== "disposable", "Run npm run test:shortlists:db -- --browser.");
 
-async function enterDiscovery(page: import("@playwright/test").Page) {
+async function enterDiscovery(page: import("@playwright/test").Page, airport?: string) {
   await page.goto("/planner");
   await page.getByRole("checkbox", { name: "Museums", exact: true }).check();
   await page.getByText("Beaches & water", { exact: true }).click();
@@ -12,6 +12,7 @@ async function enterDiscovery(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page.getByLabel("Approximate nights").fill("5");
   await page.getByLabel("Adults", { exact: true }).fill("2");
+  if (airport) await page.getByLabel("Departure airport").selectOption(airport);
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page.getByLabel("Group budget (GBP)").fill("2000.50");
 }
@@ -23,7 +24,7 @@ test("discovers without dates or fares and preserves context through details, ed
   page.on("request", (request) => {
     if (/\/api\/(discovery|flights)|\/activities$/.test(request.url())) providerCalls++;
   });
-  await enterDiscovery(page);
+  await enterDiscovery(page, "MAN");
   await page.getByRole("button", { name: "Discover places", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Places to explore" })).toBeVisible();
   await expect(page.getByText("Budget fit: unknown", { exact: true }).first()).toBeVisible();
@@ -37,6 +38,7 @@ test("discovers without dates or fares and preserves context through details, ed
   const returnTo = new URL(page.url()).searchParams.get("returnTo");
   expect(returnTo).toContain("kind=discovery");
   expect(returnTo).toContain("activity=Swimming");
+  expect(returnTo).toContain("departureAirportCode=MAN");
   await page.goto(returnTo!);
   await page.getByRole("link", { name: "Edit request", exact: true }).click();
   await page.getByRole("button", { name: /03 · Your budget/ }).click();
@@ -175,4 +177,42 @@ test("groups interests, keeps multiple groups open and removes selections withou
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await interests.scrollIntoViewIfNeeded();
   await page.screenshot({ path: test.info().outputPath("grouped-interests-mobile.png"), fullPage: true });
+});
+
+test("keeps airport and exact dates on the chosen destination through reload and editing without live travel checks", async ({ page }) => {
+  await mockShortlists(page);
+  let providerCalls = 0;
+  page.on("request", (request) => {
+    if (/\/api\/(discovery|flights)/.test(request.url())) providerCalls++;
+  });
+  await enterDiscovery(page, "MAN");
+  await page.getByRole("button", { name: "Discover places", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Your trip request" })).toContainText("Manchester (MAN)");
+  await page.getByRole("link", { name: "Explore Faro", exact: true }).click();
+  const travel = page.getByRole("region", { name: "Let’s look at getting there." });
+  await expect(travel.getByLabel("Departure airport")).toHaveValue("MAN");
+  await expect(travel.getByRole("button", { name: "Check travel options" })).toBeDisabled();
+  await travel.getByLabel("Departure airport").selectOption("LHR");
+  const outbound = new Date();
+  outbound.setUTCDate(outbound.getUTCDate() + 10);
+  const returning = new Date(outbound);
+  returning.setUTCDate(returning.getUTCDate() + 4);
+  await travel.getByLabel("Outbound date").fill(outbound.toISOString().slice(0, 10));
+  await travel.getByLabel("Return date").fill(returning.toISOString().slice(0, 10));
+  await travel.getByRole("button", { name: "Save travel details" }).click();
+  await expect(page).toHaveURL(
+    (url) =>
+      url.pathname.includes("Q159457") &&
+      url.searchParams.get("departureAirportCode") === "LHR" &&
+      url.searchParams.get("timing") === "exact" &&
+      url.searchParams.get("nights") === "4",
+  );
+  await page.reload();
+  await expect(travel.getByLabel("Departure airport")).toHaveValue("LHR");
+  await expect(travel.getByLabel("Outbound date")).toHaveValue(outbound.toISOString().slice(0, 10));
+  await page.getByRole("link", { name: "Edit request", exact: true }).click();
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(page.getByLabel("Departure airport")).toHaveValue("LHR");
+  await expect(page.getByLabel("Departure date")).toHaveValue(outbound.toISOString().slice(0, 10));
+  expect(providerCalls).toBe(0);
 });

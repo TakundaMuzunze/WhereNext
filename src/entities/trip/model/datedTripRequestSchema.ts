@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { departureAirportSchema } from "./departureAirport";
 import { tripTypes } from "@/shared/data/tripTypes";
 
 const millisecondsPerDay = 86_400_000;
@@ -39,7 +40,7 @@ const preferencesSchema = z
 
 const datedTripRequestFieldsSchema = z.strictObject({
   kind: z.literal("dated"),
-  departureAirportCode: z.enum(["LHR", "MAN"]),
+  departureAirportCode: departureAirportSchema,
   currency: z.literal("GBP"),
   adultCount: z.number().int().min(1).max(9),
   groupBudgetPence: z.number().int().min(100).max(10_000_000),

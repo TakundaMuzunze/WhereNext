@@ -1,3 +1,5 @@
+import { DestinationTravelPanel } from "@/features/destination-planning/ui/DestinationTravelPanel";
+import { serializeDiscoveryRequest } from "@/features/destination-planning/lib/discoveryRequest";
 import type { ImportedDestination } from "@/entities/destination/model/importedDestination";
 import { DestinationPhoto } from "@/entities/destination/ui/DestinationPhoto";
 import { DestinationActivityEvidence } from "@/features/destination-activities/ui/DestinationActivityEvidence";
@@ -73,6 +75,10 @@ export function ImportedDestinationDetails({
           ))}
         </dl>
       </section>
+
+      {discoveryRequest && (
+        <DestinationTravelPanel key={serializeDiscoveryRequest(discoveryRequest)} destinationName={destination.name} request={discoveryRequest} />
+      )}
 
       <section className="mt-8 rounded-3xl border border-border p-8" aria-labelledby="destination-source-title">
         <h2 id="destination-source-title" className="text-2xl font-semibold">

@@ -1,8 +1,10 @@
+import { departureAirportLabel, type DepartureAirportCode } from "@/entities/trip/model/departureAirport";
 import { formatTripDate, formatTripMoney } from "@/features/trip-planner/ui/DatedTripSummary";
 import { poundsToPence } from "@/features/trip-planner/lib/datedPlannerSearchParams";
 import { nightsBetween, type DiscoveryRequest } from "../model/discoveryRequest";
 
 export type DiscoveryPlannerDraft = {
+  departureAirportCode?: DepartureAirportCode | "";
   timing: DiscoveryRequest["timing"]["kind"];
   month: string;
   outboundDate: string;
@@ -62,6 +64,10 @@ export function DiscoveryPlannerSummary({ draft }: { draft: DiscoveryPlannerDraf
         <div className="flex justify-between gap-4">
           <dt className="text-muted">Group budget</dt>
           <dd>{budget !== undefined && budget >= 100 && budget <= 10_000_000 ? formatTripMoney(budget) : "Your call"}</dd>
+        </div>
+        <div className="flex justify-between gap-4">
+          <dt className="text-muted">Flying from</dt>
+          <dd className="text-right">{departureAirportLabel(draft.departureAirportCode || undefined)}</dd>
         </div>
       </dl>
       <p className="mt-6 border-t border-border pt-5 text-xs leading-6 text-muted">

@@ -1,17 +1,18 @@
 "use client";
 
 import { poundsToPence } from "@/features/trip-planner/lib/datedPlannerSearchParams";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 import { serializeDiscoveryRequest } from "../lib/discoveryRequest";
 import { discoveryRequestSchema, nightsBetween, type DiscoveryRequest } from "../model/discoveryRequest";
 import { DiscoveryInterests } from "./DiscoveryInterests";
 import { DiscoveryPlannerSummary } from "./DiscoveryPlannerSummary";
+import { DepartureAirportSelect } from "./DepartureAirportSelect";
+import { departureAirportSchema, type DepartureAirportCode } from "@/entities/trip/model/departureAirport";
 import { ArrowRight } from "lucide-react";
 
 const steps = ["Your kind of trip", "When & who", "Your budget"];
-const stepFields = [["activities"], ["timing", "approximateNights", "adultCount"], ["groupBudgetPence"]];
+const stepFields = [["activities"], ["timing", "approximateNights", "adultCount", "departureAirportCode"], ["groupBudgetPence"]];
 const stepErrors = [
   "Choose 1–10 interests to start discovering.",
   "Choose a valid month or dates, 1–28 nights and 1–9 adults. Exact dates must be 1–28 nights apart.",
@@ -30,6 +31,7 @@ export function DiscoveryPlanner({ initialRequest, invalidLink = false }: Discov
   const [step, setStep] = useState(0);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const errorRef = useRef<HTMLParagraphElement>(null);
+  const [departureAirportCode, setDepartureAirportCode] = useState<DepartureAirportCode | "">(initialRequest?.departureAirportCode ?? "");
   const [timing, setTiming] = useState(initialRequest?.timing.kind ?? "flexible");
   const [month, setMonth] = useState(initialRequest?.timing.kind === "month" ? initialRequest.timing.month : "");
   const [outboundDate, setOutboundDate] = useState(initialRequest?.timing.kind === "exact" ? initialRequest.timing.outboundDate : "");
@@ -51,11 +53,12 @@ export function DiscoveryPlanner({ initialRequest, invalidLink = false }: Discov
     }
   }
 
-  const draft = { timing, month, outboundDate, returnDate, nights, adults, budget, activities };
+  const draft = { departureAirportCode, timing, month, outboundDate, returnDate, nights, adults, budget, activities };
 
   function validateDraft() {
     return discoveryRequestSchema.safeParse({
       kind: "discovery",
+      ...(departureAirportCode ? { departureAirportCode } : {}),
       timing: timing === "exact" ? { kind: timing, outboundDate, returnDate } : timing === "month" ? { kind: timing, month } : { kind: timing },
       approximateNights: timing === "exact" ? nightsBetween(outboundDate, returnDate) : Number(nights),
       adultCount: Number(adults),
@@ -243,7 +246,25 @@ export function DiscoveryPlanner({ initialRequest, invalidLink = false }: Discov
                 />
               </label>
             </div>
-            <p className="mt-5 text-xs leading-6 text-muted">No departure airport needed yet. Start by finding somewhere you’d love to go.</p>
+            <div className="mt-6 border-t border-border pt-5">
+              <h3 className="font-serif text-2xl">
+                Where would you fly from? <span className="ml-2 align-middle font-sans text-xs text-muted">Optional</span>
+              </h3>
+              <p className="mt-3 mb-4 text-sm leading-6 text-muted">
+                Have an airport in mind? Keep it with your trip for when you’re ready to check travel.
+              </p>
+              <DepartureAirportSelect
+                value={departureAirportCode}
+                onChange={(value) => {
+                  const parsed = departureAirportSchema.safeParse(value);
+                  if (value === "") setDepartureAirportCode("");
+                  else if (parsed.success) setDepartureAirportCode(parsed.data);
+                }}
+              />
+              <p className="mt-3 text-xs leading-6 text-muted">
+                This won’t change your destination matches yet. You can decide later; routes and costs have not been checked.
+              </p>
+            </div>
           </fieldset>
           <fieldset hidden={step !== 2} className="mt-6">
             <legend className="sr-only">Your budget</legend>
@@ -291,12 +312,7 @@ export function DiscoveryPlanner({ initialRequest, invalidLink = false }: Discov
           </div>
         </form>
       </div>
-      <p className="mt-8 text-sm text-muted">
-        Ready to check travel options?{" "}
-        <Link href="/planner?kind=dated" className="inline-flex min-h-11 cursor-pointer items-center text-primary underline">
-          Plan with an airport and dates
-        </Link>
-      </p>
+      <p className="mt-8 text-sm text-muted">Find a place you like first. You can add an airport and exact dates on its destination page.</p>
     </main>
   );
 }

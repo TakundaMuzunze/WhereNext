@@ -84,7 +84,7 @@ it("keeps flexible discovery independent of airports and preserves invalid-link 
   expect(screen.getByRole("alert")).toHaveTextContent("request link is invalid");
   continueStep();
   expect(screen.queryByLabelText("Preferred month")).not.toBeInTheDocument();
-  expect(screen.queryByLabelText("Departure airport")).not.toBeInTheDocument();
+  expect(screen.getByLabelText("Departure airport")).toHaveValue("");
   continueStep();
   fireEvent.click(screen.getByRole("button", { name: "Discover places" }));
   expect(push).toHaveBeenCalledWith(expect.stringContaining("timing=flexible"));
@@ -101,4 +101,14 @@ it("returns final submission to an invalid earlier step instead of losing its va
   expect(screen.getByLabelText("Preferred month")).toBeVisible();
   expect(screen.getByLabelText("Preferred month")).toHaveValue("");
   expect(push).not.toHaveBeenCalled();
+});
+
+it("keeps the optional departure airport through editing and discovery submission", () => {
+  render(<DiscoveryPlanner initialRequest={{ ...initialRequest, departureAirportCode: "MAN" }} />);
+  continueStep();
+  expect(screen.getByLabelText("Departure airport")).toHaveValue("MAN");
+  fireEvent.change(screen.getByLabelText("Departure airport"), { target: { value: "LHR" } });
+  continueStep();
+  fireEvent.click(screen.getByRole("button", { name: "Discover places" }));
+  expect(push).toHaveBeenCalledWith(expect.stringContaining("departureAirportCode=LHR"));
 });
