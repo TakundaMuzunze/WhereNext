@@ -13,11 +13,12 @@ test("shows the selected month's historical conditions in results and imported d
 
   await page.goto(`/results?${request}&timing=month&month=2027-07`);
   const faro = page.getByRole("article", { name: "Faro, Portugal" });
-  await expect(faro).toContainText("July · 21.0°C mean air");
-  await expect(faro).toContainText("Beach climate: matches our climate preferences");
+  await expect(faro).toContainText("Seasonal guidance available");
   await faro.getByRole("link", { name: "Explore Faro" }).click();
   const season = page.getByRole("region", { name: "Seasonal guidance", exact: true });
   await expect(season).toContainText("1991–2020");
+  await expect(season).toContainText("21.0°C");
+  await expect(season).toContainText("Beach climate: matches our climate preferences");
   await expect(season).toContainText("0.50");
   await expect(season).toContainText("mm/day");
   await expect(season).toContainText("not a forecast for your dates");
@@ -47,7 +48,7 @@ test("keeps unpopulated places discoverable with explicit seasonal unknowns", as
   await page.goto(`/results?${request}&timing=month&month=2027-07`);
   await page.getByRole("link", { name: /Unverified/ }).click();
   const place = page.getByRole("article", { name: "Alcoutim, Portugal" });
-  await expect(place).toContainText("Seasonal guidance: unknown");
+  await expect(place).toContainText("Seasonal guidance unavailable");
   await expect(place.getByRole("link", { name: "Explore Alcoutim" })).toBeVisible();
 });
 

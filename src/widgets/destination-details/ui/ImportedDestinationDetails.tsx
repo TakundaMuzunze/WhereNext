@@ -1,3 +1,4 @@
+import type { ActivityResult } from "@/features/destination-activities/model/activityEvidence";
 import { DestinationTravelPanel } from "@/features/destination-planning/ui/DestinationTravelPanel";
 import { serializeDiscoveryRequest } from "@/features/destination-planning/lib/discoveryRequest";
 import type { ImportedDestination } from "@/entities/destination/model/importedDestination";
@@ -15,6 +16,7 @@ type ImportedDestinationDetailsProps = {
   backHref?: string;
   editHref?: string;
   activities?: string[];
+  initialActivityResult?: ActivityResult | null;
   discoveryRequest?: DiscoveryRequest;
   seasonalGuidance?: SeasonalGuidance;
 };
@@ -26,6 +28,7 @@ export function ImportedDestinationDetails({
   activities,
   discoveryRequest,
   seasonalGuidance,
+  initialActivityResult,
 }: ImportedDestinationDetailsProps) {
   const importedDate = new Date(destination.importedAt).toLocaleDateString("en-GB", { timeZone: "UTC" });
 
@@ -64,7 +67,12 @@ export function ImportedDestinationDetails({
         <h2 id="destination-evidence-title" className="text-2xl font-semibold">
           What we know so far
         </h2>
-        <DestinationActivityEvidence key={destination.id + JSON.stringify(activities)} destinationId={destination.id} activities={activities} />
+        <DestinationActivityEvidence
+          key={destination.id + JSON.stringify(activities)}
+          destinationId={destination.id}
+          activities={activities}
+          initialResult={initialActivityResult}
+        />
         <SeasonalEvidence guidance={seasonalGuidance ?? assessSeason(null, discoveryRequest?.timing ?? { kind: "flexible" }, activities ?? [])} />
         <dl className="mt-6 grid gap-6 sm:grid-cols-3">
           {[["Budget fit", "Unknown - a complete trip estimate is not available."]].map(([label, explanation]) => (

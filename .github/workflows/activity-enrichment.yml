@@ -1,0 +1,51 @@
+name: Destination activity enrichment
+
+on:
+  schedule:
+    - cron: "17 0,8,16 * * *"
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Query and save activity evidence (unchecked previews only)
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: destination-activity-enrichment
+  cancel-in-progress: false
+
+jobs:
+  enrich:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run bounded activity enrichment
+        env:
+          DATABASE_URL: ${{ secrets.DIRECT_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          GEOAPIFY_API_KEY: ${{ secrets.GEOAPIFY_API_KEY }}
+          ACTIVITY_EVIDENCE_ENABLED: ${{ vars.ACTIVITY_EVIDENCE_ENABLED }}
+          APPLY: ${{ github.event_name == 'schedule' || inputs.apply }}
+        run: |
+          if [ "$APPLY" = "true" ]; then
+            npm run destinations:activities -- --apply
+          else
+            npm run destinations:activities
+          fi
+      - name: Report failure
+        if: failure()
+        run: |
+          echo "::error::Activity enrichment needs attention. Review the summary, database migration, enablement and provider configuration. Earlier observations and charged attempts are retained."

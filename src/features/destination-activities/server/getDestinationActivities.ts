@@ -6,7 +6,7 @@ import type { ActivityAssessment, ActivityResult } from "../model/activityEviden
 import { resolveActivityLocation } from "./resolveActivityLocation";
 import { readActivityObservation } from "./readActivityObservation";
 
-export async function getDestinationActivities(destinationId: string, activities: string[]): Promise<ActivityResult | null> {
+export async function getDestinationActivities(destinationId: string, activities: string[], storedOnly = false): Promise<ActivityResult | null> {
   const resolvedDestination = await resolveActivityLocation(destinationId);
 
   if (!resolvedDestination) {
@@ -31,7 +31,7 @@ export async function getDestinationActivities(destinationId: string, activities
       continue;
     }
 
-    const observationResult = await readActivityObservation(location, category);
+    const observationResult = await readActivityObservation(location, category, storedOnly);
     const observation = observationResult.observation;
 
     if (!observation) {

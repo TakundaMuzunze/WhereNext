@@ -1,33 +1,18 @@
-// Display groups only: interests keep their existing values and equal ranking weight.
+import { initialActivities } from "@/features/destination-activities/lib/activityCategories";
+import { sightseeingInterests } from "@/features/destination-seasons/lib/assessSeason";
+
+// Offer only preferences with an existing activity or climate assessment rule.
 export const interestGroups = [
   {
-    name: "Culture & history",
-    description: "Museums, historic places and exploring city life.",
-    interests: ["Museums", "Architecture", "Historic sites", "Walking tours", "Old towns", "Local culture", "Shopping"],
+    name: "Nearby activities",
+    description:
+      "Look for named museums, beaches, bars, nightclubs and markets nearby. Listings do not verify quality, opening or access. Beaches also inform climate preferences.",
+    interests: initialActivities,
   },
   {
-    name: "Food & drink",
-    description: "Local flavours, markets and experiences around food.",
-    interests: ["Food markets", "Street food", "Local restaurants", "Food tours", "Markets", "Cooking classes"],
-  },
-  {
-    name: "Beaches & water",
-    description: "Days by the water and trips out on it.",
-    interests: ["Beaches", "Boat trips", "Swimming", "Island hopping"],
-  },
-  {
-    name: "Nature & adventure",
-    description: "Fresh air, active days and places off the beaten track.",
-    interests: ["Hiking", "Waterfalls", "Road trips", "Nature parks", "Hidden gems"],
-  },
-  {
-    name: "Nightlife & entertainment",
-    description: "Evening drinks, music and late nights.",
-    interests: ["Bars", "Clubs", "Cocktail bars", "Beach clubs", "Beach parties", "Live music", "Rooftop drinks"],
-  },
-  {
-    name: "Relaxation & romance",
-    description: "Slow days, time together and a little comfort.",
-    interests: ["Romantic dinners", "Sunset views", "Spa days", "Luxury stays", "Quiet beaches", "Resorts", "Scenic views", "Pool days"],
+    name: "Sightseeing climate",
+    description:
+      "Compare historical temperature and rainfall for outdoor sightseeing. These preferences assess climate only; they do not verify tours, buildings or historic attractions.",
+    interests: [...sightseeingInterests],
   },
 ];

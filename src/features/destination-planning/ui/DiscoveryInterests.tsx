@@ -15,7 +15,7 @@ export function DiscoveryInterests({ selectedInterests, onToggle }: DiscoveryInt
     <fieldset className="min-w-0">
       <legend className="sr-only">What would you like to do?</legend>
       <p className="text-sm leading-6 text-muted">
-        Browse the groups and mix interests freely. Each has equal importance. Some interests do not yet have verified evidence.
+        Choose nearby activities or sightseeing climate preferences. Each option has a defined assessment; evidence coverage can still be incomplete.
       </p>
 
       <div className="mt-5 rounded-xl bg-secondary p-4">
@@ -42,6 +42,12 @@ export function DiscoveryInterests({ selectedInterests, onToggle }: DiscoveryInt
         )}
         {hasReachedLimit && <p className="mt-3 text-sm text-muted">You’ve selected 10 interests. Remove one to choose another.</p>}
       </div>
+
+      {selectedInterests.some((interest) => !interestGroups.some((group) => group.interests.includes(interest))) && (
+        <p className="mt-4 text-sm text-muted">
+          This saved request includes interests we cannot assess yet. They remain unknown; you can remove them above.
+        </p>
+      )}
 
       <div className="mt-5 space-y-3">
         {interestGroups.map((group, index) => {

@@ -1,42 +1,11 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { prisma } from "@/shared/lib/db/prisma";
-import type { SearchAllowance } from "@/generated/prisma/client";
+import { reserveProvider, type Provider } from "./reserveProvider";
 
-type Provider = "travelpayouts" | "geonames" | "geoapify";
-const budgets: Record<Provider, { daily: number; hourly: number }> = {
-  travelpayouts: { daily: 5000, hourly: 300 },
-  geonames: { daily: 8000, hourly: 800 },
-  geoapify: { daily: 2500, hourly: 200 },
-};
-
-// Shared database ceilings cover all app instances. No credit is refunded on failure.
 async function reserve(provider: Provider, key: string): Promise<void> {
-  const budget = budgets[provider];
   await prisma.$transaction(async (tx) => {
-    await tx.searchAllowance.upsert({
-      where: { provider },
-      create: { provider, limit: budget.daily, hourlyLimit: budget.hourly, expiresAt: new Date(0) },
-      update: {},
-    });
-    const [row] = await tx.$queryRaw<SearchAllowance[]>`SELECT * FROM "SearchAllowance" WHERE "provider" = ${provider} FOR UPDATE`;
-    const [{ now }] = await tx.$queryRaw<{ now: Date }[]>`SELECT clock_timestamp() AS now`;
-    if (!row) throw new Error("Provider allowance unavailable");
-    const reset = row.expiresAt <= now;
-    const used = reset ? 0 : row.used;
-    const hourly = await tx.searchReservation.count({ where: { provider, createdAt: { gt: new Date(now.getTime() - 3_600_000) } } });
-    const duplicate = await tx.searchReservation.findFirst({ where: { provider, requestKey: key, blockedUntil: { gt: now } } });
-    if (used >= row.limit || hourly >= row.hourlyLimit || duplicate) throw new Error("Provider allowance exhausted");
-    if (provider === "geoapify") {
-      const recentRequests = await tx.searchReservation.count({
-        where: { provider, createdAt: { gt: new Date(now.getTime() - 1000) } },
-      });
-      if (recentRequests >= 4) throw new Error("Provider request rate exhausted");
-    }
-
-    const expiresAt = reset ? new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)) : row.expiresAt;
-    await tx.searchAllowance.update({ where: { provider }, data: { used: used + 1, expiresAt } });
-    await tx.searchReservation.create({ data: { provider, requestKey: key, createdAt: now, blockedUntil: new Date(now.getTime() + 60_000) } });
+    await reserveProvider((sql, values) => tx.$queryRawUnsafe<unknown[]>(sql, ...values), provider, key);
   });
 }
 

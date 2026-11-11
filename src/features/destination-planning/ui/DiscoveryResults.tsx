@@ -1,4 +1,7 @@
-import { assessSeason, seasonalFit, type SeasonalFit } from "@/features/destination-seasons/lib/assessSeason";
+import { Check, Info, CircleDashed } from "lucide-react";
+import { activityEvidenceLabel } from "@/features/destination-activities/lib/evidencePresentation";
+import { activityCategory } from "@/features/destination-activities/lib/activityCategories";
+import { assessSeason, seasonalFit, sightseeingInterests, type SeasonalFit } from "@/features/destination-seasons/lib/assessSeason";
 import { DestinationPhoto } from "@/entities/destination/ui/DestinationPhoto";
 import Link from "next/link";
 import { SaveDestinationButton } from "@/features/saved-destinations";
@@ -9,23 +12,18 @@ import { DiscoveryRequestSummary, discoveryTimingLabel } from "./DiscoveryReques
 import { getDiscoveryResults } from "../server/getDiscoveryResults";
 import { SeasonalSummary } from "@/features/destination-seasons/ui/SeasonalGuidance";
 
-const statusLabels = {
-  supported: "evidence found nearby",
-  contradicted: "conflicting evidence",
-  unknown: "unknown",
+const activityExplanation = {
+  named_places: "Named listings nearby.",
+  no_places: "No usable examples in this sample.",
+  incomplete_evidence: "The source sample is incomplete.",
+  stale_evidence: "Earlier examples need a fresh check.",
+  unavailable: "No stored evidence yet.",
+  unsupported_interest: "We do not yet have a reliable evidence rule for this interest.",
+  location_unknown: "A single destination location is not available for this check.",
 };
 
 function DestinationResult({ destination, query }: { destination: DiscoveryCandidate; query: string }) {
   const detailsHref = `/destinations/${encodeURIComponent(destination.id)}?${query}`;
-
-  const unverified = destination.assessments.filter(
-    (assessment) =>
-      assessment.status === "unknown" &&
-      ["unsupported_interest", "unavailable", "location_unknown"].includes(assessment.reason) &&
-      assessment.places.length === 0 &&
-      !assessment.observation,
-  );
-  const evidence = destination.assessments.filter((assessment) => !unverified.includes(assessment));
 
   return (
     <article
@@ -38,50 +36,39 @@ function DestinationResult({ destination, query }: { destination: DiscoveryCandi
       <div className="flex flex-1 flex-col p-5">
         <p className="text-sm text-muted">{destination.country}</p>
         <h2 className="mt-2 font-serif text-3xl">{destination.name}</h2>
-        <div className="mt-4">
-          <SeasonalSummary guidance={destination.seasonalGuidance} />
-        </div>
-        <ul className={evidence.length > 0 ? "mt-4 space-y-3" : undefined}>
-          {evidence.map((assessment) => (
-            <li key={assessment.activity}>
-              <p className="font-medium">
-                {assessment.activity}: {statusLabels[assessment.status]}
-              </p>
-              {assessment.places.length > 0 && (
-                <ul className="mt-2 space-y-1 text-sm">
-                  {assessment.places.slice(0, 2).map((place) => (
-                    <li key={place.sourceId}>
-                      <a href={place.sourceUrl} target="_blank" rel="noreferrer" className="cursor-pointer text-primary underline">
-                        {place.name}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {assessment.observation && (
-                <p className="mt-2 text-xs leading-5 text-muted">
-                  Nearby sample within 4 km, retrieved {formatEvidenceDate(assessment.observation.retrievedAt)}. Opening on your dates is unverified.
+        <ul className="mt-4 space-y-3" aria-label="Activity evidence">
+          {destination.assessments
+            .filter((assessment) => assessment.reason !== "unsupported_interest")
+            .map((assessment) => (
+              <li
+                key={assessment.activity}
+                className={`rounded-xl p-4 ${assessment.status === "supported" ? "bg-evidence-supported" : "bg-background"}`}
+              >
+                <p
+                  className={`flex items-start gap-2 text-sm font-medium ${assessment.status === "supported" ? "text-evidence-supported-foreground" : "text-text"}`}
+                >
+                  {assessment.status === "supported" ? (
+                    <Check className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                  ) : assessment.observation ? (
+                    <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                  ) : (
+                    <CircleDashed className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                  )}
+                  <span>
+                    {assessment.activity}: {activityEvidenceLabel(assessment)}
+                  </span>
                 </p>
-              )}
-              {assessment.reason === "stale_evidence" && (
-                <p className="mt-1 text-sm text-muted">Earlier evidence has expired; examples do not establish a current match.</p>
-              )}
-              {assessment.reason === "incomplete_evidence" && (
-                <p className="mt-1 text-sm text-muted">Evidence is incomplete; examples do not establish a confirmed match.</p>
-              )}
-              {["unsupported_interest", "unavailable", "location_unknown"].includes(assessment.reason) && (
-                <p className="mt-1 text-sm text-muted">We do not yet have verified evidence for this interest.</p>
-              )}
-            </li>
-          ))}
+                <p className="mt-1 text-sm leading-6 text-muted">{activityExplanation[assessment.reason]}</p>
+                {assessment.observation && (
+                  <p className="mt-2 text-xs leading-5 text-muted">Checked {formatEvidenceDate(assessment.observation.retrievedAt)} · within 4 km</p>
+                )}
+              </li>
+            ))}
         </ul>
-        {unverified.length > 0 && (
-          <p className="mt-3 text-sm leading-6 text-muted">
-            <span className="font-medium text-text">Activities unverified: </span>
-            {unverified.map((assessment) => assessment.activity).join(" · ")}
-          </p>
-        )}
-        <p className="mt-3 text-xs leading-5 text-muted">Budget fit: unknown</p>
+        <div className="mt-4 text-sm text-muted">
+          <SeasonalSummary guidance={destination.seasonalGuidance} compact />
+        </div>
+        <p className="mt-3 text-xs leading-5 text-muted">Trip costs not checked</p>
         <div className="mt-auto flex flex-wrap items-center gap-3 pt-4">
           <Link
             href={detailsHref}
@@ -97,7 +84,7 @@ function DestinationResult({ destination, query }: { destination: DiscoveryCandi
 }
 
 function formatEvidenceDate(date: string): string {
-  return new Date(date).toLocaleDateString("en-GB", { timeZone: "UTC" });
+  return new Date(date).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
 }
 
 export async function DiscoveryResults({
@@ -110,6 +97,8 @@ export async function DiscoveryResults({
   seasonalView?: SeasonalFit;
 }) {
   const query = serializeDiscoveryRequest(request);
+  const unsupportedActivities = request.activities.filter((activity) => !activityCategory(activity) && !sightseeingInterests.has(activity));
+  const climateOnlyActivities = request.activities.filter((activity) => sightseeingInterests.has(activity));
   let result;
 
   try {
@@ -162,6 +151,16 @@ export async function DiscoveryResults({
       </div>
       <div className="mt-5 text-sm text-muted">
         <p>Based on your selected interests. Prices haven&apos;t been checked.</p>
+        {climateOnlyActivities.length > 0 && (
+          <p className="mt-2">
+            Climate preferences: {climateOnlyActivities.join(" · ")}. These compare historical conditions, not the presence of attractions or tours.
+          </p>
+        )}
+        {unsupportedActivities.length > 0 && (
+          <p className="mt-2">
+            Not assessed yet: {unsupportedActivities.join(" · ")}. These interests remain unknown and do not affect activity ranking.
+          </p>
+        )}
         <details className="mt-1">
           <summary className="min-h-11 cursor-pointer py-3 text-primary">How these results work</summary>
           <div className="max-w-3xl space-y-2 pb-2 leading-6">
@@ -172,7 +171,7 @@ export async function DiscoveryResults({
             </p>
             <p>
               Current imported catalogue coverage is limited. These results use stored evidence; browsing does not trigger live checks. Open a
-              destination to check nearby activities. No flight search has been made.
+              destination for named examples or an optional activity check. No flight search has been made.
             </p>
             <p>
               Matches meet every selected climate preference for your month or dates. Flexible trips need at least one matching month. Climate

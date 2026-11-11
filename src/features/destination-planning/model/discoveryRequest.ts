@@ -26,7 +26,7 @@ export const discoveryRequestSchema = z
     timing: timingSchema,
     approximateNights: z.number().int().min(1).max(28),
     adultCount: z.number().int().min(1).max(9),
-    groupBudgetPence: z.number().int().min(100).max(10_000_000),
+    groupBudgetPence: z.number().int().min(100).max(10_000_000).optional(),
     activities: z
       .array(interestSchema)
       .min(1)

@@ -1,6 +1,6 @@
-import type { ActivityAssessment, ActivityObservation, ActivityPlace } from "../model/activityEvidence";
-import { distanceMetres } from "./distanceMetres";
-import { activityCategory } from "./activityCategories";
+import type { ActivityAssessment, ActivityObservation, ActivityPlace } from "../model/activityEvidence.ts";
+import { distanceMetres } from "./distanceMetres.ts";
+import { activityCategory } from "./activityCategories.ts";
 
 function eligiblePlaces(observation: ActivityObservation): ActivityPlace[] {
   const examples: ActivityPlace[] = [];

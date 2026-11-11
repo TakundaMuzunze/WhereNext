@@ -74,6 +74,7 @@ try {
       "src/features/destination-catalogue/server/resolveDestinationGuide.integration.test.ts",
       "src/features/destination-images/server/images.integration.test.ts",
       "src/features/destination-seasons/server/climate.integration.test.ts",
+      "src/features/destination-activities/server/enrichActivities.integration.test.ts",
       "--testPathIgnorePatterns=/e2e/",
     ],
     {

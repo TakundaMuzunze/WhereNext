@@ -31,9 +31,12 @@ export function DiscoveryRequestSummary({ request }: { request: DiscoveryRequest
           </span>
           <span className="text-muted">
             {" "}
-            · {formatTripMoney(request.groupBudgetPence)} group budget · {timingLabel}
+            · {timingLabel}
+            {request.groupBudgetPence !== undefined && <> · {formatTripMoney(request.groupBudgetPence)} saved budget</>}
           </span>
-          <span className="mt-1 block text-xs text-muted">Flying from: {departureAirportLabel(request.departureAirportCode)}</span>
+          {request.departureAirportCode && (
+            <span className="mt-1 block text-xs text-muted">Saved airport: {departureAirportLabel(request.departureAirportCode)}</span>
+          )}
         </p>
         <Link href={editHref} className="inline-flex min-h-11 cursor-pointer items-center text-sm text-primary underline">
           Edit request
@@ -43,8 +46,8 @@ export function DiscoveryRequestSummary({ request }: { request: DiscoveryRequest
         <summary className="min-h-11 cursor-pointer py-3 text-primary">View request details</summary>
         <p className="mt-2 leading-6">{request.activities.join(", ")}</p>
         <p className="mt-3 leading-6 text-muted">
-          Interests are equally important. Duration is your plan, not a recommended stay length. Budget fit and seasonal suitability remain unknown
-          without sufficient evidence.
+          Nearby activities use named listing evidence. Sightseeing preferences assess historical climate only. Nights, adults and any saved budget or
+          airport are planning context; prices have not been checked.
         </p>
       </details>
     </section>

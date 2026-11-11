@@ -1,22 +1,18 @@
 "use client";
 
-import { poundsToPence } from "@/features/trip-planner/lib/datedPlannerSearchParams";
 import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 import { serializeDiscoveryRequest } from "../lib/discoveryRequest";
 import { discoveryRequestSchema, nightsBetween, type DiscoveryRequest } from "../model/discoveryRequest";
 import { DiscoveryInterests } from "./DiscoveryInterests";
 import { DiscoveryPlannerSummary } from "./DiscoveryPlannerSummary";
-import { DepartureAirportSelect } from "./DepartureAirportSelect";
-import { departureAirportSchema, type DepartureAirportCode } from "@/entities/trip/model/departureAirport";
 import { ArrowRight } from "lucide-react";
 
-const steps = ["Your kind of trip", "When & who", "Your budget"];
-const stepFields = [["activities"], ["timing", "approximateNights", "adultCount", "departureAirportCode"], ["groupBudgetPence"]];
+const steps = ["Your kind of trip", "When & who"];
+const stepFields = [["activities"], ["timing", "approximateNights", "adultCount"]];
 const stepErrors = [
   "Choose 1–10 interests to start discovering.",
   "Choose a valid month or dates, 1–28 nights and 1–9 adults. Exact dates must be 1–28 nights apart.",
-  "Enter a total group budget from £1 to £100,000, with up to two decimal places.",
 ];
 
 const inputClassName = "mt-2 block min-h-11 w-full rounded-xl border border-border bg-surface px-3 py-2 text-text";
@@ -31,14 +27,14 @@ export function DiscoveryPlanner({ initialRequest, invalidLink = false }: Discov
   const [step, setStep] = useState(0);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const errorRef = useRef<HTMLParagraphElement>(null);
-  const [departureAirportCode, setDepartureAirportCode] = useState<DepartureAirportCode | "">(initialRequest?.departureAirportCode ?? "");
+  const departureAirportCode = initialRequest?.departureAirportCode;
   const [timing, setTiming] = useState(initialRequest?.timing.kind ?? "flexible");
   const [month, setMonth] = useState(initialRequest?.timing.kind === "month" ? initialRequest.timing.month : "");
   const [outboundDate, setOutboundDate] = useState(initialRequest?.timing.kind === "exact" ? initialRequest.timing.outboundDate : "");
   const [returnDate, setReturnDate] = useState(initialRequest?.timing.kind === "exact" ? initialRequest.timing.returnDate : "");
   const [nights, setNights] = useState(String(initialRequest?.approximateNights ?? 5));
   const [adults, setAdults] = useState(String(initialRequest?.adultCount ?? 2));
-  const [budget, setBudget] = useState(initialRequest ? (initialRequest.groupBudgetPence / 100).toFixed(2) : "");
+  const budget = initialRequest?.groupBudgetPence !== undefined ? (initialRequest.groupBudgetPence / 100).toFixed(2) : "";
   const [activities, setActivities] = useState(initialRequest?.activities ?? []);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -62,7 +58,7 @@ export function DiscoveryPlanner({ initialRequest, invalidLink = false }: Discov
       timing: timing === "exact" ? { kind: timing, outboundDate, returnDate } : timing === "month" ? { kind: timing, month } : { kind: timing },
       approximateNights: timing === "exact" ? nightsBetween(outboundDate, returnDate) : Number(nights),
       adultCount: Number(adults),
-      groupBudgetPence: poundsToPence(budget),
+      ...(initialRequest?.groupBudgetPence !== undefined ? { groupBudgetPence: initialRequest.groupBudgetPence } : {}),
       activities,
     });
   }
@@ -86,7 +82,7 @@ export function DiscoveryPlanner({ initialRequest, invalidLink = false }: Discov
 
   function submitRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (step < 2) {
+    if (step < 1) {
       changeStep(step + 1);
       return;
     }
@@ -155,18 +151,12 @@ export function DiscoveryPlanner({ initialRequest, invalidLink = false }: Discov
               </button>
             ))}
           </nav>
-          <p className="mt-7 text-xs tracking-[0.12em] text-primary uppercase">Step {step + 1} of 3</p>
+          <p className="mt-7 text-xs tracking-[0.12em] text-primary uppercase">Step {step + 1} of 2</p>
           <h2 ref={headingRef} tabIndex={-1} className="mt-3 scroll-mt-28 font-serif text-3xl leading-tight outline-none">
-            {["What makes a good trip?", "A little shape to your escape.", "What feels comfortable?"][step]}
+            {["What makes a good trip?", "A little shape to your escape."][step]}
           </h2>
           <p className="mt-3 text-sm leading-6 text-muted">
-            {
-              [
-                "Mix a few interests. There’s no need to fit one holiday type.",
-                "A month, exact dates, or room to be spontaneous.",
-                "One budget for everyone, from leaving home to coming back.",
-              ][step]
-            }
+            {["Mix a few interests. There’s no need to fit one holiday type.", "A month, exact dates, or room to be spontaneous."][step]}
           </p>
           <div hidden={step !== 0} className="mt-6">
             <DiscoveryInterests selectedInterests={activities} onToggle={toggleInterest} />
@@ -246,45 +236,9 @@ export function DiscoveryPlanner({ initialRequest, invalidLink = false }: Discov
                 />
               </label>
             </div>
-            <div className="mt-6 border-t border-border pt-5">
-              <h3 className="font-serif text-2xl">
-                Where would you fly from? <span className="ml-2 align-middle font-sans text-xs text-muted">Optional</span>
-              </h3>
-              <p className="mt-3 mb-4 text-sm leading-6 text-muted">
-                Have an airport in mind? Keep it with your trip for when you’re ready to check travel.
-              </p>
-              <DepartureAirportSelect
-                value={departureAirportCode}
-                onChange={(value) => {
-                  const parsed = departureAirportSchema.safeParse(value);
-                  if (value === "") setDepartureAirportCode("");
-                  else if (parsed.success) setDepartureAirportCode(parsed.data);
-                }}
-              />
-              <p className="mt-3 text-xs leading-6 text-muted">
-                This won’t change your destination matches yet. You can decide later; routes and costs have not been checked.
-              </p>
-            </div>
-          </fieldset>
-          <fieldset hidden={step !== 2} className="mt-6">
-            <legend className="sr-only">Your budget</legend>
-            <label>
-              Group budget (GBP)
-              <input
-                required
-                type="number"
-                min="1"
-                max="100000"
-                step="0.01"
-                className={inputClassName}
-                value={budget}
-                onChange={(event) => setBudget(event.target.value)}
-              />
-            </label>
-
-            <p className="mt-5 rounded-xl bg-secondary p-4 text-sm leading-6 text-muted">
-              Your budget travels with your trip. It covers travel, accommodation and spending for everyone. We’ll check travel costs once you’ve
-              found a place you like. Discovery doesn’t establish affordability yet.
+            <p className="mt-5 text-sm leading-6 text-muted">
+              Timing helps compare historical climate where a climate preference applies. Nights and adults keep your trip context; they do not change
+              nearby activity evidence.
             </p>
           </fieldset>
 
@@ -305,7 +259,7 @@ export function DiscoveryPlanner({ initialRequest, invalidLink = false }: Discov
                 type="submit"
                 className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
               >
-                {step < 2 ? "Continue" : "Discover places"}
+                {step < 1 ? "Continue" : "Discover places"}
                 <ArrowRight aria-hidden="true" className="size-4" />
               </button>
             </div>

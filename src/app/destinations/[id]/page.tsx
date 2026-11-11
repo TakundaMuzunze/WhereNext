@@ -1,13 +1,15 @@
-import { getDestinationSeason } from "@/features/destination-seasons/server/getDestinationSeason";
-import { parseDiscoveryRequest, serializeDiscoveryRequest } from "@/features/destination-planning/lib/discoveryRequest";
+import { initialActivities } from "@/features/destination-activities/lib/activityCategories";
+import { getDestinationActivities } from "@/features/destination-activities/server/getDestinationActivities";
 import { resolveDestination } from "@/features/destination-catalogue/server/resolveDestination";
-import { ImportedDestinationDetails } from "@/widgets/destination-details/ui/ImportedDestinationDetails";
-import { DatedTripReview } from "@/features/trip-planner/ui/DatedTripReview";
-import { parseDatedTripRequest, serializeDatedTripRequest } from "@/features/trip-planner/lib/datedPlannerSearchParams";
 import { getMatchLabel, getRecommendations } from "@/features/destination-matching";
+import { parseDiscoveryRequest, serializeDiscoveryRequest } from "@/features/destination-planning/lib/discoveryRequest";
+import { getDestinationSeason } from "@/features/destination-seasons/server/getDestinationSeason";
 import { parsePlannerAnswers, serializePlannerAnswers, type PlannerSearchParams } from "@/features/trip-planner";
+import { parseDatedTripRequest, serializeDatedTripRequest } from "@/features/trip-planner/lib/datedPlannerSearchParams";
+import { DatedTripReview } from "@/features/trip-planner/ui/DatedTripReview";
 import { destinations } from "@/shared/data/destinations";
 import { DestinationDetails } from "@/widgets/destination-details";
+import { ImportedDestinationDetails } from "@/widgets/destination-details/ui/ImportedDestinationDetails";
 import { notFound } from "next/navigation";
 
 type DestinationPageProps = {
@@ -34,6 +36,12 @@ export default async function DestinationPage({ params, searchParams }: Destinat
   if (!resolved) notFound();
 
   const queryParams = await searchParams;
+  const selectedActivities =
+    queryParams.kind === "discovery"
+      ? parseDiscoveryRequest(queryParams)?.activities
+      : (parseDatedTripRequest(queryParams)?.preferences.activities ?? parsePlannerAnswers(queryParams)?.activities);
+  // Opening details reads stored evidence only. Explicit checks own live retrieval.
+  const initialActivityResult = await getDestinationActivities(id, selectedActivities ?? initialActivities, true).catch(() => null);
   if (queryParams.kind === "discovery") {
     const request = parseDiscoveryRequest(queryParams);
 
@@ -52,6 +60,7 @@ export default async function DestinationPage({ params, searchParams }: Destinat
     if (resolved.kind === "imported") {
       return (
         <ImportedDestinationDetails
+          initialActivityResult={initialActivityResult}
           destination={resolved.destination}
           backHref={`/results?${query}`}
           activities={request.activities}
@@ -63,6 +72,7 @@ export default async function DestinationPage({ params, searchParams }: Destinat
 
     return (
       <DestinationDetails
+        initialActivityResult={initialActivityResult}
         destination={resolved.destination}
         backHref={`/results?${query}`}
         backLabel="Back to destinations"
@@ -87,6 +97,7 @@ export default async function DestinationPage({ params, searchParams }: Destinat
 
     return (
       <ImportedDestinationDetails
+        initialActivityResult={initialActivityResult}
         destination={resolved.destination}
         seasonalGuidance={seasonalGuidance}
         backHref={query ? `/results?${query}` : undefined}
@@ -100,13 +111,22 @@ export default async function DestinationPage({ params, searchParams }: Destinat
 
   if (queryParams.kind !== undefined) {
     const request = parseDatedTripRequest(queryParams);
-    if (!request) return <DestinationDetails destination={destination} backHref="/planner?kind=dated" backLabel="Start a dated request" />;
+    if (!request)
+      return (
+        <DestinationDetails
+          initialActivityResult={initialActivityResult}
+          destination={destination}
+          backHref="/planner?kind=dated"
+          backLabel="Start a dated request"
+        />
+      );
     return (
       <>
         <div className="mx-auto max-w-5xl px-6 pt-28">
           <DatedTripReview request={request} />
         </div>
         <DestinationDetails
+          initialActivityResult={initialActivityResult}
           destination={destination}
           backHref={`/results?${serializeDatedTripRequest(request)}`}
           backLabel="Back to your trip request"
@@ -117,7 +137,7 @@ export default async function DestinationPage({ params, searchParams }: Destinat
   }
   const answers = parsePlannerAnswers(queryParams);
 
-  if (!answers) return <DestinationDetails destination={destination} />;
+  if (!answers) return <DestinationDetails initialActivityResult={initialActivityResult} destination={destination} />;
 
   const recommendations = getRecommendations(answers, destinations.length);
   const recommendationIndex = recommendations.findIndex((item) => item.destination.id === destination.id);
@@ -130,6 +150,7 @@ export default async function DestinationPage({ params, searchParams }: Destinat
 
   return (
     <DestinationDetails
+      initialActivityResult={initialActivityResult}
       recommendation={recommendation}
       destination={destination}
       answers={answers}

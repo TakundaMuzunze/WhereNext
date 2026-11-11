@@ -27,7 +27,7 @@ export function parseDiscoveryRequest(query: PlannerSearchParams): DiscoveryRequ
     timing,
     approximateNights,
     adultCount: Number(query.adults),
-    groupBudgetPence: Number(query.budget),
+    ...(query.budget !== undefined ? { groupBudgetPence: Number(query.budget) } : {}),
     activities,
   });
 
@@ -44,8 +44,9 @@ export function serializeDiscoveryRequest(request: DiscoveryRequest): string {
     timing: request.timing.kind,
     nights: String(request.approximateNights),
     adults: String(request.adultCount),
-    budget: String(request.groupBudgetPence),
   });
+
+  if (request.groupBudgetPence !== undefined) query.set("budget", String(request.groupBudgetPence));
 
   if (request.departureAirportCode) query.set("departureAirportCode", request.departureAirportCode);
 

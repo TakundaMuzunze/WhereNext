@@ -39,7 +39,11 @@ function preferenceDescription(month: SeasonalMonth): string {
     .join(" · ");
 }
 
-export function SeasonalSummary({ guidance }: { guidance?: Guidance }) {
+export function SeasonalSummary({ guidance, compact = false }: { guidance?: Guidance; compact?: boolean }) {
+  if (compact) {
+    return <p className="text-sm text-muted">Seasonal guidance {guidance?.observation ? "available" : "unavailable"}</p>;
+  }
+
   if (!guidance?.observation) {
     return <p className="text-sm text-muted">Seasonal guidance: unknown — regional climate data unavailable.</p>;
   }

@@ -1,3 +1,4 @@
+import type { ActivityResult } from "@/features/destination-activities/model/activityEvidence";
 import { DestinationTravelPanel } from "@/features/destination-planning/ui/DestinationTravelPanel";
 import { serializeDiscoveryRequest } from "@/features/destination-planning/lib/discoveryRequest";
 import type { Destination, DestinationRecommendation } from "@/entities/destination";
@@ -21,6 +22,7 @@ type DestinationDetailsProps = {
   backLabel?: string;
   editHref?: string;
   activities?: string[];
+  initialActivityResult?: ActivityResult | null;
   discoveryRequest?: DiscoveryRequest;
   seasonalGuidance?: SeasonalGuidance;
 };
@@ -46,6 +48,7 @@ export function DestinationDetails({
   activities,
   discoveryRequest,
   seasonalGuidance,
+  initialActivityResult,
 }: DestinationDetailsProps) {
   const travellerCount = Number(answers?.travellers ?? 0);
   const estimatedTotal = destination.estimatedCostPerPerson * travellerCount;
@@ -231,6 +234,7 @@ export function DestinationDetails({
         key={destination.id + JSON.stringify(activities ?? answers?.activities)}
         destinationId={destination.id}
         activities={activities ?? answers?.activities}
+        initialResult={initialActivityResult}
       />
     </main>
   );

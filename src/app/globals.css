@@ -14,6 +14,8 @@
     --primary-foreground: #ffffff;
     --secondary: #eaf0ee;
     --accent: #194f68;
+    --evidence-supported: #e7f4ec;
+    --evidence-supported-foreground: #276041;
   }
 
   .dark {
@@ -27,6 +29,8 @@
     --primary-foreground: #132e3a;
     --secondary: #243737;
     --accent: #a9d0e2;
+    --evidence-supported: #213d33;
+    --evidence-supported-foreground: #b6dfc4;
   }
 }
 
@@ -40,6 +44,8 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
+  --color-evidence-supported: var(--evidence-supported);
+  --color-evidence-supported-foreground: var(--evidence-supported-foreground);
 }
 
 body {

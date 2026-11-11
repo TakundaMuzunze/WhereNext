@@ -35,3 +35,11 @@ _Avoid_: Preference fit, cheap flights
 **Seasonal suitability**:
 How conditions during a period support the traveller's intended experiences at a destination, with the available evidence and limitations made explicit.
 _Avoid_: Universal best month, forecast
+
+**Activity observation**:
+Source evidence about named places in a bounded area around a destination, with its retrieval time and coverage limitations. An observation may contain no usable examples.
+_Avoid_: Confirmed activity, complete inventory
+
+**Activity assessment**:
+An interpretation of whether activity observations support a traveller's interest. Fresh observations can still leave the interest unknown.
+_Avoid_: Activity observation, destination rating

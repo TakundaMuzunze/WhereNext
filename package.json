@@ -19,6 +19,7 @@
     "test:e2e": "npm run build && playwright test",
     "test:flights:db": "node scripts/test-flight-search.mjs",
     "test:catalogue:db": "node scripts/test-destination-catalogue.mjs",
+    "destinations:activities": "node --experimental-strip-types scripts/enrich-destination-activities.mjs",
     "destinations:images": "node --experimental-strip-types scripts/enrich-destination-images.mjs",
     "destinations:climate": "node --experimental-strip-types scripts/enrich-destination-climate.mjs",
     "destinations:refresh": "node --experimental-strip-types scripts/refresh-destination-catalogue.mjs",
