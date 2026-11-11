@@ -28,11 +28,11 @@ The initial seasonal source and interpretation were reviewed on 6 November 2026:
 
 The catalogue refresh implementation reviewed on 7 November 2026 uses resumable monthly country cycles processed by bounded daily work. Stable identity checks, atomic checkpoints and a shared database lock protect imports and saved references. Ineligible guides and redirects to another destination are skipped without replacing stored places; stored identity conflicts require review rather than automatic merges. [Catalogue refresh and rollout](catalogue-refresh.md) documents source rights, limits, commands and hosted verification; code being merged does not prove a schedule is configured or running.
 
-## Existing implementation — preserved, not the target journey
+## Earlier flight-led experiment — historical
 
-The dated results page currently offers an explicit search using Travelpayouts cached exact-date flight estimates, GeoNames geography and Geoapify activity evidence. It selects up to four cheap fare-backed destinations in France, Spain, Portugal, Italy, Greece and Malta, then gathers limited activity evidence. This reverses the intended destination-first selection order.
+The earlier dated-results experiment searched Travelpayouts cached exact-date flight estimates, GeoNames geography and Geoapify activity evidence. It selected up to four cheap fare-backed destinations before gathering activity evidence, reversing the intended destination-first order. The public `/api/discovery` search is now retired under #43. Dated review instead links into catalogue discovery with dates, group size, budget and interests carried over; its original airport and spending allowance remain on the dated review.
 
-Group flights multiply cached ticket prices by adults and remain estimates. Remaining budget excludes accommodation. External destinations are not yet saveable. Seasonal suitability is not implemented. See [discovery implementation](discovery-implementation.md) for delivered behaviour, limits and previous validation.
+The old adapters multiplied cached ticket prices by adults and excluded accommodation from remaining budget. Those experiments do not establish current prices or a complete trip estimate. Imported saving and seasonal guidance have since shipped; chosen-destination pricing remains #40. See [discovery implementation](discovery-implementation.md) for the historical experiment and [resilience and capacity](discovery-resilience.md) for current public entry points.
 
 Reuse dated input validation, URL context, provider response validation, request reservations and cost arithmetic where appropriate. The existing fare-led orchestration needs adapting for destination-specific travel checks; it cannot be relabelled as the redesigned experience.
 
