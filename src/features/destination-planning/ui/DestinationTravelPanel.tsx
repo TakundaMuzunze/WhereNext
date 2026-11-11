@@ -3,8 +3,6 @@
 import { useRef, useState, type FormEvent } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
-import { createDatedTripDatesSchema } from "@/entities/trip/model/datedTripRequestSchema";
-import { londonToday } from "@/features/trip-planner/lib/datedPlannerSearchParams";
 import { discoveryRequestSchema, nightsBetween, type DiscoveryRequest } from "../model/discoveryRequest";
 import { departureAirportLabel, departureAirportSchema, type DepartureAirportCode } from "@/entities/trip/model/departureAirport";
 import { serializeDiscoveryRequest } from "../lib/discoveryRequest";
@@ -27,10 +25,6 @@ export function DestinationTravelPanel({ destinationName, request }: { destinati
   function saveDetails(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const hasDates = Boolean(outboundDate || returnDate || request.timing.kind === "exact");
-    if (hasDates && !createDatedTripDatesSchema(londonToday()).safeParse({ outboundDate, returnDate }).success) {
-      showError("Choose valid departure and return dates 1–28 nights apart, departing within the next 365 days.");
-      return;
-    }
     const validation = discoveryRequestSchema.safeParse({
       ...request,
       departureAirportCode: airport || undefined,
@@ -42,7 +36,11 @@ export function DestinationTravelPanel({ destinationName, request }: { destinati
         : {}),
     });
     if (!validation.success) {
-      showError("Check your departure airport and trip details before saving.");
+      const hasDateError = validation.error.issues.some((issue) => issue.path[0] === "timing" || issue.path[0] === "approximateNights");
+
+      showError(
+        hasDateError ? "Choose valid departure and return dates 1–28 nights apart." : "Check your departure airport and trip details before saving.",
+      );
       return;
     }
     setError(null);
@@ -132,7 +130,7 @@ export function DestinationTravelPanel({ destinationName, request }: { destinati
         </div>
       </form>
       <p className="mt-4 text-xs leading-6 text-muted">
-        Live travel checks aren’t available yet. No routes, arrival airports, transfers, prices or availability have been verified.
+        Live travel checks aren&apos;t available yet. No routes, arrival airports, transfers, prices or availability have been verified.
       </p>
     </section>
   );

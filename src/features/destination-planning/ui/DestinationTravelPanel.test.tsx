@@ -8,10 +8,6 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace }),
   usePathname: () => "/destinations/wikidata%3AQ159457",
 }));
-jest.mock("@/features/trip-planner/lib/datedPlannerSearchParams", () => ({
-  ...jest.requireActual("@/features/trip-planner/lib/datedPlannerSearchParams"),
-  londonToday: () => "2026-11-11",
-}));
 
 const request: DiscoveryRequest = {
   kind: "discovery",
@@ -64,11 +60,29 @@ it("saves exact dates on the current destination, deriving nights and keeping bu
 });
 
 it.each([
+  ["2027-12-28", "2028-01-04", "LHR"],
+  ["2027-12-28", "2028-01-04", ""],
+  ["2026-01-01", "2026-01-08", "LHR"],
+  ["2026-01-01", "2026-01-08", ""],
+])("preserves accepted discovery dates %s to %s when changing the airport to %s", (outboundDate, returnDate, airport) => {
+  const exactRequest: DiscoveryRequest = {
+    ...request,
+    timing: { kind: "exact", outboundDate, returnDate },
+  };
+  render(<DestinationTravelPanel destinationName="Faro" request={exactRequest} />);
+
+  fireEvent.change(screen.getByLabelText("Departure airport"), { target: { value: airport } });
+  save();
+
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(savedRequest()).toEqual({ ...exactRequest, departureAirportCode: airport || undefined });
+});
+
+it.each([
   ["2027-07-10", ""],
   ["2027-07-10", "2027-07-09"],
+  ["2027-07-10", "2027-07-10"],
   ["2027-07-10", "2027-08-10"],
-  ["2026-01-01", "2026-01-05"],
-  ["2028-01-01", "2028-01-05"],
 ])("does not save incomplete or unsupported travel dates %s to %s", (outbound, returning) => {
   render(<DestinationTravelPanel destinationName="Faro" request={request} />);
   fireEvent.change(screen.getByLabelText("Outbound date"), { target: { value: outbound } });
