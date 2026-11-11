@@ -18,7 +18,7 @@ export const climatePreferences = {
   sightseeing: { minimumTemperature: 12, maximumTemperature: 22, maximumPrecipitation: 2 },
 };
 
-const sightseeingInterests = new Set(["Walking tours", "Architecture", "Historic sites", "Old towns"]);
+export const sightseeingInterests = new Set(["Walking tours", "Architecture", "Historic sites", "Old towns"]);
 
 function requestedMonths(timing: DiscoveryRequest["timing"]): number[] {
   if (timing.kind === "flexible") {
