@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { departureAirportSchema } from "@/entities/trip/model/departureAirport";
 import { tripTypes } from "@/shared/data/tripTypes";
 import type { PlannerSearchParams } from "./plannerSearchParams";
 
@@ -6,7 +7,7 @@ import type { PlannerSearchParams } from "./plannerSearchParams";
 // an empty return date and a fractional adult count must survive navigation.
 const datedTripDraftSchema = z
   .object({
-    departureAirportCode: z.enum(["", "LHR", "MAN"]),
+    departureAirportCode: z.enum(["", ...departureAirportSchema.options]),
     outboundDate: z.string().max(64),
     returnDate: z.string().max(64),
     adultCount: z.string().max(64),

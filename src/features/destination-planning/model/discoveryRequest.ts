@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { departureAirportSchema } from "@/entities/trip/model/departureAirport";
 import { tripTypes } from "@/shared/data/tripTypes";
 
 export const discoveryInterests = [...new Set(tripTypes.flatMap((tripType) => tripType.activities))];
@@ -21,6 +22,7 @@ export function nightsBetween(outboundDate: string, returnDate: string): number 
 export const discoveryRequestSchema = z
   .strictObject({
     kind: z.literal("discovery"),
+    departureAirportCode: departureAirportSchema.optional(),
     timing: timingSchema,
     approximateNights: z.number().int().min(1).max(28),
     adultCount: z.number().int().min(1).max(9),

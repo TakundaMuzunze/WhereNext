@@ -12,8 +12,8 @@ export function DiscoveryInterests({ selectedInterests, onToggle }: DiscoveryInt
   const hasReachedLimit = selectedInterests.length >= maximumInterests;
 
   return (
-    <fieldset className="rounded-2xl border border-border p-5 sm:p-7">
-      <legend className="px-2 text-xl font-medium">What would you like to do?</legend>
+    <fieldset className="min-w-0">
+      <legend className="sr-only">What would you like to do?</legend>
       <p className="text-sm leading-6 text-muted">
         Browse the groups and mix interests freely. Each has equal importance. Some interests do not yet have verified evidence.
       </p>

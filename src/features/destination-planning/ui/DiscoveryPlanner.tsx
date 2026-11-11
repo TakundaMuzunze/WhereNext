@@ -1,12 +1,23 @@
 "use client";
 
 import { poundsToPence } from "@/features/trip-planner/lib/datedPlannerSearchParams";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
-import { parseDiscoveryRequest, serializeDiscoveryRequest } from "../lib/discoveryRequest";
-import { type DiscoveryRequest } from "../model/discoveryRequest";
+import { useRef, useState, type FormEvent } from "react";
+import { serializeDiscoveryRequest } from "../lib/discoveryRequest";
+import { discoveryRequestSchema, nightsBetween, type DiscoveryRequest } from "../model/discoveryRequest";
 import { DiscoveryInterests } from "./DiscoveryInterests";
+import { DiscoveryPlannerSummary } from "./DiscoveryPlannerSummary";
+import { DepartureAirportSelect } from "./DepartureAirportSelect";
+import { departureAirportSchema, type DepartureAirportCode } from "@/entities/trip/model/departureAirport";
+import { ArrowRight } from "lucide-react";
+
+const steps = ["Your kind of trip", "When & who", "Your budget"];
+const stepFields = [["activities"], ["timing", "approximateNights", "adultCount", "departureAirportCode"], ["groupBudgetPence"]];
+const stepErrors = [
+  "Choose 1–10 interests to start discovering.",
+  "Choose a valid month or dates, 1–28 nights and 1–9 adults. Exact dates must be 1–28 nights apart.",
+  "Enter a total group budget from £1 to £100,000, with up to two decimal places.",
+];
 
 const inputClassName = "mt-2 block min-h-11 w-full rounded-xl border border-border bg-surface px-3 py-2 text-text";
 
@@ -17,6 +28,10 @@ type DiscoveryPlannerProps = {
 
 export function DiscoveryPlanner({ initialRequest, invalidLink = false }: DiscoveryPlannerProps) {
   const router = useRouter();
+  const [step, setStep] = useState(0);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const errorRef = useRef<HTMLParagraphElement>(null);
+  const [departureAirportCode, setDepartureAirportCode] = useState<DepartureAirportCode | "">(initialRequest?.departureAirportCode ?? "");
   const [timing, setTiming] = useState(initialRequest?.timing.kind ?? "flexible");
   const [month, setMonth] = useState(initialRequest?.timing.kind === "month" ? initialRequest.timing.month : "");
   const [outboundDate, setOutboundDate] = useState(initialRequest?.timing.kind === "exact" ? initialRequest.timing.outboundDate : "");
@@ -38,123 +53,221 @@ export function DiscoveryPlanner({ initialRequest, invalidLink = false }: Discov
     }
   }
 
+  const draft = { departureAirportCode, timing, month, outboundDate, returnDate, nights, adults, budget, activities };
+
+  function validateDraft() {
+    return discoveryRequestSchema.safeParse({
+      kind: "discovery",
+      ...(departureAirportCode ? { departureAirportCode } : {}),
+      timing: timing === "exact" ? { kind: timing, outboundDate, returnDate } : timing === "month" ? { kind: timing, month } : { kind: timing },
+      approximateNights: timing === "exact" ? nightsBetween(outboundDate, returnDate) : Number(nights),
+      adultCount: Number(adults),
+      groupBudgetPence: poundsToPence(budget),
+      activities,
+    });
+  }
+
+  function goToStep(next: number, error: string | null = null) {
+    setStep(next);
+    setErrorMessage(error);
+    requestAnimationFrame(() => (error ? errorRef.current : headingRef.current)?.focus());
+  }
+
+  function changeStep(next: number) {
+    if (next > step) {
+      const validation = validateDraft();
+      if (!validation.success && validation.error.issues.some((issue) => stepFields[step].includes(String(issue.path[0])))) {
+        goToStep(step, stepErrors[step]);
+        return;
+      }
+    }
+    goToStep(next);
+  }
+
   function submitRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const budgetPence = poundsToPence(budget);
-    const request = parseDiscoveryRequest({
-      kind: "discovery",
-      timing,
-      month,
-      outbound: outboundDate,
-      return: returnDate,
-      nights,
-      adults,
-      budget: String(budgetPence),
-      activity: activities,
-    });
-
-    if (!request) {
-      setErrorMessage(
-        "Choose 1-10 interests, 1-28 nights, 1-9 adults and a group budget from £1 to £100,000. Exact dates must be 1–28 nights apart.",
-      );
+    if (step < 2) {
+      changeStep(step + 1);
       return;
     }
-
-    router.push(`/results?${serializeDiscoveryRequest(request)}`);
+    const validation = validateDraft();
+    if (!validation.success) {
+      const invalidStep = stepFields.findIndex((fields) => validation.error.issues.some((issue) => fields.includes(String(issue.path[0]))));
+      goToStep(invalidStep < 0 ? 0 : invalidStep, stepErrors[invalidStep < 0 ? 0 : invalidStep]);
+      return;
+    }
+    router.push(`/results?${serializeDiscoveryRequest(validation.data)}`);
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-3xl px-6 pt-28 pb-20 text-text">
-      <p className="text-sm text-primary">Your next destination</p>
-      <h1 className="mt-3 font-serif text-4xl">What would make a good trip?</h1>
-      <p className="mt-4 leading-7 text-muted">
-        Start with your interests. You can explore places before choosing an airport or checking travel costs.
-      </p>
+    <main className="mx-auto min-h-screen max-w-6xl px-6 pt-28 pb-20 text-text sm:px-8">
+      <p className="text-xs font-medium tracking-[0.16em] text-primary uppercase">Your next chapter</p>
+      <h1 className="mt-4 max-w-3xl font-serif text-4xl leading-tight tracking-tight sm:text-5xl">
+        Somewhere that feels
+        <br className="hidden sm:block" /> like your kind of escape.
+      </h1>
+      <p className="mt-4 leading-7 text-muted">Start with what you love. We’ll help you find where to go.</p>
+      <ol aria-label="Your discovery journey" className="mt-7 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted">
+        <li className="font-medium text-text">01 · Your trip</li>
+        <li aria-hidden="true">
+          <ArrowRight className="size-3" />
+        </li>
+        <li>02 · Discover places</li>
+        <li aria-hidden="true">
+          <ArrowRight className="size-3" />
+        </li>
+        <li>03 · Explore &amp; plan</li>
+      </ol>
       {invalidLink && (
         <p role="alert" className="mt-6">
           This request link is invalid. Please enter your trip details again.
         </p>
       )}
 
-      <form onSubmit={submitRequest} className="mt-8 space-y-8">
-        <fieldset className="rounded-2xl border border-border p-5 sm:p-7">
-          <legend className="px-2 text-xl font-medium">When and how long?</legend>
-          <div>
-            <label htmlFor="discovery-timing">Timing</label>
-            <select
-              id="discovery-timing"
-              className={inputClassName}
-              value={timing}
-              onChange={(event) => {
-                const value = event.target.value;
-                if (value === "flexible" || value === "month" || value === "exact") {
-                  setTiming(value);
-                }
-              }}
-            >
-              <option value="flexible">I&apos;m flexible</option>
-              <option value="month">I have a preferred month</option>
-              <option value="exact">I know my dates</option>
-            </select>
+      <div className="mt-8 grid items-start gap-8 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-12">
+        <div className="order-2 min-w-0 lg:sticky lg:top-28 lg:order-1">
+          <div className="hidden lg:block">
+            <DiscoveryPlannerSummary draft={draft} />
           </div>
-          {timing === "month" && (
-            <label className="mt-5 block">
-              Preferred month
-              <input required type="month" className={inputClassName} value={month} onChange={(event) => setMonth(event.target.value)} />
-            </label>
-          )}
-          {timing === "exact" && (
-            <div className="mt-5 grid gap-5 sm:grid-cols-2">
-              <label>
-                Departure date
+          <details className="rounded-2xl border border-border p-4 lg:hidden">
+            <summary className="min-h-11 cursor-pointer py-2 text-sm text-primary">Your trip taking shape · {activities.length} interests</summary>
+            <div className="mt-4">
+              <DiscoveryPlannerSummary draft={draft} />
+            </div>
+          </details>
+        </div>
+        <form
+          noValidate
+          onSubmit={submitRequest}
+          aria-label="Plan your discovery"
+          className="order-1 min-w-0 rounded-2xl border border-border bg-surface p-5 sm:p-8 lg:order-2"
+        >
+          <nav aria-label="Discovery planning steps" className="flex gap-3">
+            {steps.map((label, index) => (
+              <button
+                key={label}
+                type="button"
+                aria-current={step === index ? "step" : undefined}
+                onClick={() => changeStep(index)}
+                className={`min-h-11 min-w-0 flex-1 cursor-pointer border-b-2 pb-3 text-left text-xs leading-5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary ${step === index ? "border-primary text-primary" : "border-border text-muted hover:text-text"}`}
+              >
+                <span className="mr-1">0{index + 1} ·</span> {label}
+              </button>
+            ))}
+          </nav>
+          <p className="mt-7 text-xs tracking-[0.12em] text-primary uppercase">Step {step + 1} of 3</p>
+          <h2 ref={headingRef} tabIndex={-1} className="mt-3 scroll-mt-28 font-serif text-3xl leading-tight outline-none">
+            {["What makes a good trip?", "A little shape to your escape.", "What feels comfortable?"][step]}
+          </h2>
+          <p className="mt-3 text-sm leading-6 text-muted">
+            {
+              [
+                "Mix a few interests. There’s no need to fit one holiday type.",
+                "A month, exact dates, or room to be spontaneous.",
+                "One budget for everyone, from leaving home to coming back.",
+              ][step]
+            }
+          </p>
+          <div hidden={step !== 0} className="mt-6">
+            <DiscoveryInterests selectedInterests={activities} onToggle={toggleInterest} />
+          </div>
+          <fieldset hidden={step !== 1} className="mt-6">
+            <legend className="sr-only">When and who?</legend>
+            <div>
+              <label htmlFor="discovery-timing">Timing</label>
+              <select
+                id="discovery-timing"
+                className={inputClassName}
+                value={timing}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  if (value === "flexible" || value === "month" || value === "exact") {
+                    setTiming(value);
+                  }
+                }}
+              >
+                <option value="flexible">I&apos;m flexible</option>
+                <option value="month">I have a preferred month</option>
+                <option value="exact">I know my dates</option>
+              </select>
+            </div>
+            {timing === "month" && (
+              <label className="mt-5 block">
+                Preferred month
+                <input required type="month" className={inputClassName} value={month} onChange={(event) => setMonth(event.target.value)} />
+              </label>
+            )}
+            {timing === "exact" && (
+              <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                <label>
+                  Departure date
+                  <input
+                    required
+                    type="date"
+                    className={inputClassName}
+                    value={outboundDate}
+                    onChange={(event) => setOutboundDate(event.target.value)}
+                  />
+                </label>
+                <label>
+                  Return date
+                  <input required type="date" className={inputClassName} value={returnDate} onChange={(event) => setReturnDate(event.target.value)} />
+                </label>
+              </div>
+            )}
+            {timing !== "exact" && (
+              <label className="mt-5 block">
+                Approximate nights
                 <input
                   required
-                  type="date"
+                  type="number"
+                  min="1"
+                  max="28"
+                  step="1"
                   className={inputClassName}
-                  value={outboundDate}
-                  onChange={(event) => setOutboundDate(event.target.value)}
+                  value={nights}
+                  onChange={(event) => setNights(event.target.value)}
                 />
               </label>
+            )}
+            {timing === "exact" && <p className="mt-4 text-sm text-muted">Your dates determine the number of nights.</p>}
+            <div className="mt-5 max-w-sm">
               <label>
-                Return date
-                <input required type="date" className={inputClassName} value={returnDate} onChange={(event) => setReturnDate(event.target.value)} />
+                Adults
+                <input
+                  required
+                  type="number"
+                  min="1"
+                  max="9"
+                  step="1"
+                  className={inputClassName}
+                  value={adults}
+                  onChange={(event) => setAdults(event.target.value)}
+                />
               </label>
             </div>
-          )}
-          {timing !== "exact" && (
-            <label className="mt-5 block">
-              Approximate nights
-              <input
-                required
-                type="number"
-                min="1"
-                max="28"
-                step="1"
-                className={inputClassName}
-                value={nights}
-                onChange={(event) => setNights(event.target.value)}
+            <div className="mt-6 border-t border-border pt-5">
+              <h3 className="font-serif text-2xl">
+                Where would you fly from? <span className="ml-2 align-middle font-sans text-xs text-muted">Optional</span>
+              </h3>
+              <p className="mt-3 mb-4 text-sm leading-6 text-muted">
+                Have an airport in mind? Keep it with your trip for when you’re ready to check travel.
+              </p>
+              <DepartureAirportSelect
+                value={departureAirportCode}
+                onChange={(value) => {
+                  const parsed = departureAirportSchema.safeParse(value);
+                  if (value === "") setDepartureAirportCode("");
+                  else if (parsed.success) setDepartureAirportCode(parsed.data);
+                }}
               />
-            </label>
-          )}
-          {timing === "exact" && <p className="mt-4 text-sm text-muted">Your dates determine the number of nights.</p>}
-        </fieldset>
-
-        <fieldset className="rounded-2xl border border-border p-5 sm:p-7">
-          <legend className="px-2 text-xl font-medium">Your group and budget</legend>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <label>
-              Adults
-              <input
-                required
-                type="number"
-                min="1"
-                max="9"
-                step="1"
-                className={inputClassName}
-                value={adults}
-                onChange={(event) => setAdults(event.target.value)}
-              />
-            </label>
+              <p className="mt-3 text-xs leading-6 text-muted">
+                This won’t change your destination matches yet. You can decide later; routes and costs have not been checked.
+              </p>
+            </div>
+          </fieldset>
+          <fieldset hidden={step !== 2} className="mt-6">
+            <legend className="sr-only">Your budget</legend>
             <label>
               Group budget (GBP)
               <input
@@ -168,27 +281,38 @@ export function DiscoveryPlanner({ initialRequest, invalidLink = false }: Discov
                 onChange={(event) => setBudget(event.target.value)}
               />
             </label>
+
+            <p className="mt-5 rounded-xl bg-secondary p-4 text-sm leading-6 text-muted">
+              Your budget travels with your trip. It covers travel, accommodation and spending for everyone. We’ll check travel costs once you’ve
+              found a place you like. Discovery doesn’t establish affordability yet.
+            </p>
+          </fieldset>
+
+          {errorMessage && (
+            <p ref={errorRef} role="alert" tabIndex={-1} className="mt-5 rounded-xl border border-border p-4 text-sm outline-none">
+              {errorMessage}
+            </p>
+          )}
+          <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
+            <p className="text-xs text-muted">{step === 0 ? `${activities.length} interests selected` : "You can change this later."}</p>
+            <div className="flex items-center gap-3">
+              {step > 0 && (
+                <button type="button" onClick={() => goToStep(step - 1)} className="min-h-11 cursor-pointer px-3 text-sm text-primary">
+                  Back
+                </button>
+              )}
+              <button
+                type="submit"
+                className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
+                {step < 2 ? "Continue" : "Discover places"}
+                <ArrowRight aria-hidden="true" className="size-4" />
+              </button>
+            </div>
           </div>
-          <p className="mt-4 text-sm leading-6 text-muted">
-            Your total holiday budget for everyone, including travel, accommodation and spending. We cannot establish affordability until there is
-            enough cost evidence.
-          </p>
-        </fieldset>
-
-        <DiscoveryInterests selectedInterests={activities} onToggle={toggleInterest} />
-
-        {errorMessage && (
-          <p role="alert" className="rounded-xl border border-border p-4">
-            {errorMessage}
-          </p>
-        )}
-        <button type="submit" className="min-h-11 cursor-pointer rounded-xl bg-primary px-6 py-3 text-primary-foreground">
-          Explore destinations
-        </button>
-      </form>
-      <Link href="/planner?kind=dated" className="mt-8 inline-flex min-h-11 cursor-pointer items-center text-sm text-primary underline">
-        Open the existing dated travel planner
-      </Link>
+        </form>
+      </div>
+      <p className="mt-8 text-sm text-muted">Find a place you like first. You can add an airport and exact dates on its destination page.</p>
     </main>
   );
 }

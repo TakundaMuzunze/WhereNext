@@ -60,6 +60,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
     const nights = tripNights(request);
     const discoveryQuery = serializeDiscoveryRequest({
       kind: "discovery",
+      departureAirportCode: request.departureAirportCode,
       timing: { kind: "exact", outboundDate: request.outboundDate, returnDate: request.returnDate },
       approximateNights: nights,
       adultCount: request.adultCount,

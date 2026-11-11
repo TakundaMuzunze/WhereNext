@@ -2,7 +2,7 @@ import { discoveryRequestSchema, nightsBetween, type DiscoveryRequest } from "..
 import type { PlannerSearchParams } from "@/features/trip-planner";
 
 export function parseDiscoveryRequest(query: PlannerSearchParams): DiscoveryRequest | null {
-  const scalarFields = ["kind", "timing", "nights", "adults", "budget", "month", "outbound", "return"];
+  const scalarFields = ["kind", "timing", "nights", "adults", "budget", "month", "outbound", "return", "departureAirportCode"];
 
   if (scalarFields.some((field) => Array.isArray(query[field]))) {
     return null;
@@ -23,6 +23,7 @@ export function parseDiscoveryRequest(query: PlannerSearchParams): DiscoveryRequ
   const activities = Array.isArray(query.activity) ? query.activity : [query.activity];
   const validation = discoveryRequestSchema.safeParse({
     kind: query.kind,
+    ...(query.departureAirportCode !== undefined ? { departureAirportCode: query.departureAirportCode } : {}),
     timing,
     approximateNights,
     adultCount: Number(query.adults),
@@ -45,6 +46,8 @@ export function serializeDiscoveryRequest(request: DiscoveryRequest): string {
     adults: String(request.adultCount),
     budget: String(request.groupBudgetPence),
   });
+
+  if (request.departureAirportCode) query.set("departureAirportCode", request.departureAirportCode);
 
   if (request.timing.kind === "month") {
     query.set("month", request.timing.month);
