@@ -34,8 +34,9 @@ it("groups interests without evidence while preserving stale evidence warnings a
     ],
   });
   render(await DiscoveryResults({ request }));
-  expect(screen.getByText(/Activities unverified:/).closest("p")).toHaveTextContent("Local restaurants · Street food");
-  expect(screen.getByText(/earlier evidence has expired/i)).toBeInTheDocument();
+  expect(screen.getByText("Local restaurants: evidence pending")).toBeInTheDocument();
+  expect(screen.getByText(/Not assessed yet:.*Street food/)).toBeInTheDocument();
+  expect(screen.getByText(/Earlier examples need a fresh check/i)).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "Explore Alcoutim" })).toHaveAttribute("href", expect.stringContaining("/destinations/wikidata%3AQ1?"));
   expect(screen.getByText("How these results work").closest("details")).not.toHaveAttribute("open");
   expect(screen.getByRole("link", { name: "Edit request" })).toHaveAttribute("href", expect.stringContaining("/planner?"));

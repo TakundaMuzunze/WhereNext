@@ -1,32 +1,34 @@
 "use client";
 
+import { activityEvidenceLabel } from "../lib/evidencePresentation";
+
 import { useEffect, useRef, useState } from "react";
-import { initialActivities } from "../lib/activityCategories";
+import { sightseeingInterests } from "@/features/destination-seasons/lib/assessSeason";
+import { initialActivities, activityCategory } from "../lib/activityCategories";
 import { activityResultSchema, type ActivityAssessment, type ActivityResult } from "../model/activityEvidence";
 
 const explanations: Record<ActivityAssessment["reason"], string> = {
   named_places: "Named places in the checked area support this interest. Date-specific access and opening are not verified.",
   no_places: "No usable examples were found in this bounded search. This does not mean the activity is absent.",
   incomplete_evidence: "The source sample is capped or incomplete. Available examples are shown, but fit remains unknown.",
-  unavailable: "Evidence could not be checked. You can try again without changing your saved places.",
+  unavailable: "No usable stored evidence is available. You can request a check without changing your saved places.",
   unsupported_interest: "We do not yet have a reliable evidence rule for this interest.",
   location_unknown: "A single catalogue location is not available for this guide. We have not substituted its airport or guessed a centre.",
-  stale_evidence: "The earlier evidence has expired and could not be refreshed. These older examples are context, not current support.",
-};
-
-const statusLabels: Record<ActivityAssessment["status"], string> = {
-  supported: "evidence found nearby",
-  contradicted: "conflicting evidence",
-  unknown: "unknown",
+  stale_evidence: "These earlier listings have expired. They provide context while current support awaits a fresh check.",
 };
 
 type DestinationActivityEvidenceProps = {
   destinationId: string;
   activities?: string[];
+  initialResult?: ActivityResult | null;
 };
 
-export function DestinationActivityEvidence({ destinationId, activities = initialActivities }: DestinationActivityEvidenceProps) {
-  const [activityResult, setActivityResult] = useState<ActivityResult | null>(null);
+export function DestinationActivityEvidence({
+  destinationId,
+  activities = initialActivities,
+  initialResult = null,
+}: DestinationActivityEvidenceProps) {
+  const [activityResult, setActivityResult] = useState<ActivityResult | null>(initialResult);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const requestControllerRef = useRef<AbortController | null>(null);
@@ -96,10 +98,17 @@ export function DestinationActivityEvidence({ destinationId, activities = initia
     }
   }
 
+  const hasActivityRules = activities.some((activity) => activityCategory(activity));
+  const climateOnlyActivities = activities.filter((activity) => sightseeingInterests.has(activity));
+  const unassessedActivities =
+    activityResult?.assessments.filter(
+      (assessment) => assessment.reason === "unsupported_interest" && !sightseeingInterests.has(assessment.activity),
+    ) ?? [];
+
   let checkButtonLabel = "Check nearby activity evidence";
 
-  if (activityResult) {
-    checkButtonLabel = "Check activity evidence again";
+  if (activityResult?.assessments.some((assessment) => assessment.observation)) {
+    checkButtonLabel = "Refresh activity evidence";
   }
 
   if (isLoading) {
@@ -115,17 +124,19 @@ export function DestinationActivityEvidence({ destinationId, activities = initia
       {!activityResult && <p className="mt-3 text-sm text-muted">Unknown - nearby activity evidence has not been checked.</p>}
 
       <p className="mt-3 text-sm leading-6 text-muted">
-        Check named places within 4 km of the recorded destination centre. This is a bounded nearby sample, not a complete guide or a rating. Evidence
-        is reused for up to seven days, independently of travel dates and prices.
+        Named places within 4 km of the recorded destination centre. This is a bounded nearby sample, not a complete guide or a rating. Evidence is
+        reused for up to seven days, independently of travel dates and prices.
       </p>
 
-      <button
-        className="mt-4 min-h-11 rounded-xl border border-border px-4 py-2 text-sm font-medium disabled:opacity-50"
-        disabled={isLoading}
-        onClick={() => void checkActivities()}
-      >
-        {checkButtonLabel}
-      </button>
+      {hasActivityRules && (
+        <button
+          className="mt-4 min-h-11 rounded-xl border border-border px-4 py-2 text-sm font-medium disabled:opacity-50"
+          disabled={isLoading}
+          onClick={() => void checkActivities()}
+        >
+          {checkButtonLabel}
+        </button>
+      )}
 
       {isLoading && (
         <p role="status" className="mt-3 text-sm">
@@ -135,16 +146,30 @@ export function DestinationActivityEvidence({ destinationId, activities = initia
 
       {errorMessage && (
         <p role="alert" className="mt-3 text-sm text-red-600 dark:text-red-400">
-          {activityResult && "The latest check failed. Showing previous evidence with its original retrieval times. "}
+          {activityResult?.assessments.some((assessment) => assessment.observation) &&
+            "The latest check failed. Showing previous evidence with its original retrieval times. "}
           {errorMessage}
         </p>
       )}
 
+      {climateOnlyActivities.length > 0 && (
+        <p className="mt-4 text-sm text-muted">
+          Climate only: {climateOnlyActivities.join(" · ")}. See seasonal guidance for historical conditions; nearby attractions and tours are not
+          verified.
+        </p>
+      )}
+      {unassessedActivities.length > 0 && (
+        <p className="mt-4 text-sm text-muted">
+          Not assessed yet: {unassessedActivities.map((assessment) => assessment.activity).join(" · ")}. These interests remain unknown.
+        </p>
+      )}
       {activityResult && (
         <ul className="mt-6 space-y-5" aria-label="Activity assessments">
-          {activityResult.assessments.map((assessment) => (
-            <ActivityAssessmentItem key={assessment.activity} assessment={assessment} />
-          ))}
+          {activityResult.assessments
+            .filter((assessment) => assessment.reason !== "unsupported_interest")
+            .map((assessment) => (
+              <ActivityAssessmentItem key={assessment.activity} assessment={assessment} />
+            ))}
         </ul>
       )}
 
@@ -171,7 +196,7 @@ function ActivityAssessmentItem({ assessment }: { assessment: ActivityAssessment
     activityLabel = "Nightclubs";
   }
 
-  const statusLabel = statusLabels[assessment.status];
+  const statusLabel = activityEvidenceLabel(assessment);
   const examples = assessment.places.slice(0, 3);
   const observation = assessment.observation;
   let retrievalDescription: string | null = null;

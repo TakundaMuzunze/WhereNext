@@ -27,9 +27,10 @@ test("discovers without dates or fares and preserves context through details, ed
   await enterDiscovery(page, "MAN");
   await page.getByRole("button", { name: "Discover places", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Places to explore" })).toBeVisible();
-  await expect(page.getByText("Budget fit: unknown", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Trip costs not checked", { exact: true }).first()).toBeVisible();
   const card = page.getByRole("article", { name: "Faro, Portugal" });
-  await expect(card.getByText("Activities unverified: Museums · Swimming", { exact: true })).toBeVisible();
+  await expect(card.getByText("Museums: evidence pending", { exact: true })).toBeVisible();
+  await expect(page.getByText(/Not assessed yet: Swimming/)).toBeVisible();
   await expect(page.getByText(/% match/)).toHaveCount(0);
   await card.getByRole("link", { name: "Explore Faro" }).click();
   await expect(page.getByRole("heading", { name: "Faro", level: 1, exact: true })).toBeVisible();
@@ -98,8 +99,8 @@ test("compares stored evidence without fares, paginates after ranking and preser
   const firstResult = page.getByRole("article").first();
   await expect(firstResult).toHaveAccessibleName("Alcoutim, Portugal");
   await expect(firstResult.getByText("Museums: evidence found nearby", { exact: true })).toBeVisible();
-  await expect(firstResult.getByRole("link", { name: "Test museum listing" })).toBeVisible();
-  await expect(firstResult.getByText("Activities unverified: Swimming", { exact: true })).toBeVisible();
+  await expect(firstResult.getByRole("link", { name: "Test museum listing" })).toHaveCount(0);
+  await expect(page.getByText(/Not assessed yet: Swimming/)).toBeVisible();
   await expect(page.getByRole("article")).toHaveCount(12);
   const cards = page.getByRole("article");
   for (const [width, columns] of [

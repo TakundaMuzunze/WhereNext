@@ -27,6 +27,30 @@ const museumObservation: ActivityObservation = {
 };
 const plannerQuery = "departure=London&month=June&duration=5&budget=2000&travellers=2&tripType=city-break&activity=Museums&activity=Swimming";
 
+test("shows stored evidence on results and details without making an activity request", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mockShortlists(page);
+  let calls = 0;
+  await page.route("**/api/destinations/*/activities", (route) => {
+    calls++;
+    return route.abort();
+  });
+  await page.goto("/results?kind=discovery&timing=flexible&nights=5&adults=2&budget=2000&activity=Museums&activity=Swimming");
+  const card = page.getByRole("article", { name: "Alcoutim, Portugal" });
+  await expect(card.getByText("Museums: evidence found nearby", { exact: true })).toBeVisible();
+  await card.screenshot({ path: test.info().outputPath("stored-evidence-card-mobile.png") });
+  await card.getByRole("link", { name: "Explore Alcoutim" }).click();
+  await expect(page).toHaveURL(/\/destinations\/wikidata%3AQ1000041\?/);
+  await expect(page.getByRole("heading", { name: "Museums: evidence found nearby" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Test museum listing", exact: true })).toBeVisible();
+  await expect(page.getByText("Not assessed yet: Swimming. These interests remain unknown.", { exact: true })).toBeVisible();
+  expect(calls).toBe(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page
+    .getByRole("region", { name: "Activity fit", exact: true })
+    .screenshot({ path: test.info().outputPath("stored-evidence-details-mobile.png") });
+});
+
 test("checks requested interests on demand, explains evidence gaps and leaves saving independent", async ({ page }) => {
   const shortlists = await mockShortlists(page);
   let calls = 0;
@@ -47,7 +71,7 @@ test("checks requested interests on demand, explains evidence gaps and leaves sa
   expect(calls).toBe(0);
   await page.getByRole("button", { name: "Check nearby activity evidence" }).click();
   await expect(page.getByRole("heading", { name: "Museums: evidence found nearby" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Swimming: unknown" })).toBeVisible();
+  await expect(page.getByText("Not assessed yet: Swimming. These interests remain unknown.", { exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Museu Municipal de Faro", exact: true })).toHaveAttribute(
     "href",
     museumObservation.places[0].sourceUrl,
@@ -89,8 +113,8 @@ test("retries the same interests and labels expired examples as unknown on mobil
     "Activity evidence could not be loaded. Please try again.",
   );
   await page.getByRole("button", { name: "Check nearby activity evidence" }).click();
-  await expect(page.getByRole("heading", { name: "Museums: unknown" })).toBeVisible();
-  await expect(page.getByText(/earlier evidence has expired/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Museums: refresh needed" })).toBeVisible();
+  await expect(page.getByText(/earlier listings have expired/)).toBeVisible();
   await expect(page.getByRole("link", { name: "Museu Municipal de Faro", exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: test.info().outputPath("activity-evidence-mobile.png"), fullPage: true });
@@ -119,7 +143,7 @@ test("retains previous evidence after a failed retry and replaces it on recovery
   const originalRetrievalTime = await retrievalTime.innerText();
 
   await page.route("**/api/destinations/*/activities", (route) => route.fulfill({ status: 503, json: { error: "Unavailable" } }));
-  await page.getByRole("button", { name: "Check activity evidence again" }).click();
+  await page.getByRole("button", { name: "Refresh activity evidence" }).click();
 
   const activityPanel = page.getByRole("region", { name: "Activity fit", exact: true });
 
@@ -128,14 +152,14 @@ test("retains previous evidence after a failed retry and replaces it on recovery
   );
   await expect(museumLink).toBeVisible();
   await expect(retrievalTime).toHaveText(originalRetrievalTime);
-  await expect(page.getByRole("heading", { name: "Swimming: unknown" })).toBeVisible();
+  await expect(page.getByText("Not assessed yet: Swimming. These interests remain unknown.", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Save destination", exact: true })).toBeEnabled();
   await expect(page.getByRole("link", { name: "Edit your trip" })).toHaveAttribute("href", `/planner?${plannerQuery}`);
 
   await page.route("**/api/destinations/*/activities", (route) =>
     route.fulfill({ status: 429, contentType: "text/plain", body: "Too Many Requests" }),
   );
-  await page.getByRole("button", { name: "Check activity evidence again" }).click();
+  await page.getByRole("button", { name: "Refresh activity evidence" }).click();
 
   await expect(activityPanel.getByRole("alert")).toContainText("Too many activity checks. Please wait a minute before trying again.");
   await expect(museumLink).toBeVisible();
@@ -151,9 +175,9 @@ test("retains previous evidence after a failed retry and replaces it on recovery
   };
 
   await page.route("**/api/destinations/*/activities", (route) => route.fulfill({ json: recoveredResult }));
-  await page.getByRole("button", { name: "Check activity evidence again" }).click();
+  await page.getByRole("button", { name: "Refresh activity evidence" }).click();
 
-  await expect(page.getByRole("heading", { name: "Museums: unknown" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Museums: no examples found" })).toBeVisible();
   await expect(museumLink).toHaveCount(0);
   await expect(activityPanel.getByRole("alert")).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
@@ -194,7 +218,7 @@ test("keeps mobile saving independent while activity evidence loads and returns 
 
     releaseEvidence();
     await expect(page.getByRole("heading", { name: "Museums: evidence found nearby" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Swimming: unknown" })).toBeVisible();
+    await expect(page.getByText("Not assessed yet: Swimming. These interests remain unknown.", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Saved", exact: true })).toBeEnabled();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await page.screenshot({ path: test.info().outputPath("activity-partial-saving-mobile.png"), fullPage: true });
