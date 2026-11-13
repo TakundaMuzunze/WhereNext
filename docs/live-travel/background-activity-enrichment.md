@@ -62,4 +62,16 @@ The user approved applying the additive enrichment migration to production, runn
 - Fourteen fresh observations matched development identities, coordinates, categories, translation version and search geometry, and were copied with their original timestamps. Eleven compatible assessments were supported. Newer development observations were protected from overwrite. No provider requests or allowance copies were needed for this step.
 - A real local Museums result read placed Castelló d'Empúries, Colònia de Sant Jordi and San Sebastián first with supported museum evidence.
 
-This was one manual bounded run, not full catalogue population or proof of a hosted schedule. Production's 1,675 destination/category combinations exceed the ideal 1,050 weekly queries available at 150/day, before failures and visitor competition. Coverage therefore remains partial under the agreed budget and seven-day freshness rule. The timer workflow still requires review, merge and deliberate Actions configuration. Development live retrieval remains disabled so it cannot independently spend against a second reservation store for the same project.
+This initial population was one manual bounded run. Production's 1,675 destination/category combinations already exceeded the ideal 1,050 weekly queries available at 150/day, before failures and visitor competition. Coverage therefore remains partial under the agreed budget and seven-day freshness rule. Development live retrieval remains disabled so it cannot independently spend against a second reservation store for the same project.
+
+## Hosted verification — 13 November 2026
+
+PR #65 is merged. GitHub Actions has the production direct connection, Geoapify secret and deliberate ACTIVITY_EVIDENCE_ENABLED=true repository variable. The [hosted manual apply](https://github.com/TakundaMuzunze/WhereNext/actions/runs/43110465167) stored 50 observations, with 17 supported assessments and zero failures.
+
+Three timer-triggered runs were verified from their scheduled event and job summaries:
+
+- [12 November, 07:08 UTC](https://github.com/TakundaMuzunze/WhereNext/actions/runs/43173096883): 50 attempted, 50 stored, 25 supported, zero failures.
+- [12 November, 16:47 UTC](https://github.com/TakundaMuzunze/WhereNext/actions/runs/43262494437): 50 attempted, 50 stored, 24 supported, zero failures.
+- [13 November, 06:43 UTC](https://github.com/TakundaMuzunze/WhereNext/actions/runs/43380670587): 50 attempted, 50 stored, 24 supported, zero failures. Its starting snapshot had 202 fresh observations and 1,783 missing combinations; 1,733 remained due after the run.
+
+These executions prove hosted scheduling works, not punctual or complete delivery of every requested slot. Catalogue growth increased the snapshot to 397 destinations and 1,985 category combinations. The budget and freshness rule remain unchanged. Production results and details showed stored evidence without an explicit check; live provider requests were not needed for the release smoke checks. Final release verification is recorded in [#44](https://github.com/TakundaMuzunze/WhereNext/issues/44).
